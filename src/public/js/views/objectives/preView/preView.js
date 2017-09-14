@@ -110,25 +110,26 @@ define([
                 });
             });
 
-            this.on('showEditObjectiveDialog', this.showEditObjectiveDialog, this);
-
             var withoutBranches = !this.model.get('branch').length;
+            var form = this.model.get('form');
 
-            dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
-                if (withoutBranches) {
-                    if (response.after.description) {
-                        self.afterPartFilled = true;
-                    }
-                } else {
-                    self.afterPartFilled = true;
-
-                    response.branches.forEach(function (branch) {
-                        if (!branch.after.description) {
-                            self.afterPartFilled = false;
+            if (form && form._id) {
+                dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
+                    if (withoutBranches) {
+                        if (response.after.description) {
+                            self.afterPartFilled = true;
                         }
-                    });
-                }
-            });
+                    } else {
+                        self.afterPartFilled = true;
+
+                        response.branches.forEach(function (branch) {
+                            if (!branch.after.description) {
+                                self.afterPartFilled = false;
+                            }
+                        });
+                    }
+                });
+            }
 
             this.progressChanged = false;
 
@@ -269,13 +270,13 @@ define([
             var self = this;
 
             this.editObjectiveView = new EditObjectiveView({
-                model      : model, duplicate: duplicate,
-                translation: this.translation
+                model: model,
+                duplicate: duplicate,
+                translation: this.translation,
             });
 
             this.editObjectiveView.on('modelSaved', function (model) {
                 self.changeRowInTree(model);
-
             });
         },
 
@@ -402,7 +403,6 @@ define([
         },
 
         openForm: function () {
-            debugger;
             var self = this;
             var modelJSON = this.model.toJSON();
             var form = modelJSON.form;

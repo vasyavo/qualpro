@@ -181,14 +181,18 @@ define([
 
         showUnlinkPopUp: function () {
             var self = this;
+            var okText = {
+                en: 'Ok',
+                ar: 'موافق',
+            };
 
             App.showPopUp({
                 contentType: this.contentType,
                 action     : 'unlinkForm',
-                saveTitle  : 'Ok',
+                saveTitle  : okText[App.currentUser.currentLanguage],
                 saveCb     : function () {
                     self.unlinkForm();
-                    $(this).dialog('close').dialog('destroy').remove();
+                    self.$el.dialog('close').dialog('destroy').remove();
                 }
             });
         },

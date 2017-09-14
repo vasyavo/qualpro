@@ -229,7 +229,7 @@
                 _id : 'yearly',
                 name: {
                     en: 'Yearly',
-                    ar: 'Ar Yearly' //todo translation
+                    ar: '' //todo translation
                 },
 
                 sortKey: 0
@@ -238,7 +238,7 @@
                 _id : 'visibility',
                 name: {
                     en: 'Visibility',
-                    ar: 'Ar Visibility' //todo translation
+                    ar: '' //todo translation
                 },
 
                 sortKey: 1
@@ -250,7 +250,7 @@
                 _id : 'monthlyDisplay',
                 name: {
                     en: 'Monthly Display',
-                    ar: 'Ar Monthly Display'
+                    ar: '' // todo
                 },
 
                 sortKey: 0
@@ -259,7 +259,7 @@
                 _id : 'activityDisplay',
                 name: {
                     en: 'Activity Display',
-                    ar: 'Ar Activity Display'
+                    ar: '' // todo
                 },
 
                 sortKey: 1

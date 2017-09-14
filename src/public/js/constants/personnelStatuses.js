@@ -38,7 +38,7 @@
             _id : 'online',
             name: {
                 en: 'Online',
-                ar: 'على الانترنت' // toDo translate correctly
+                ar: '' // todo translate
             }
         },
 
