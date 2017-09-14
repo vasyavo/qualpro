@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
     const files = req.files;
     const body = extractBody(req.body);
     const objectiveId = req.params.id;
-    const attachments = body.attachments;
+    let attachments = body.attachments;
 
     const queryRun = ($set, callback) => {
         const fullUpdate = {
@@ -100,8 +100,10 @@ module.exports = (req, res, next) => {
                 date: new Date(),
             };
 
-            if (attachments && attachments.length) {
-                $set.attachments = attachments.objectID().concat(setFileId);
+            attachments = attachments && attachments[0] ? attachments.objectID() : [];
+            $set.attachments = attachments.concat(setFileId);
+         /*   if (attachments && attachments.length) {
+                $set.attachments = attachments.concat(setFileId);
             } else {
                 delete $set.attachments;
 
@@ -110,7 +112,7 @@ module.exports = (req, res, next) => {
                         $each: setFileId,
                     },
                 };
-            }
+            }*/
 
             if ($set.title) {
                 $set['title.en'] = _.escape(_.get($set, 'title.en') || '');
