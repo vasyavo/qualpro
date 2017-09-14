@@ -794,12 +794,22 @@ module.exports = (pipeline, queryFilter) => {
             location: {
                 _id: '$branch._id',
                 name: {
-                    en: {
-                        $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en', ' / ', '$retailSegment.name.en', ' / ', '$outlet.name.en', ' -> ', '$branch.name.en'],
-                    },
-                    ar: {
-                        $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$outlet.name.ar', ' -> ', '$branch.name.ar'],
-                    },
+                    en: [
+                        {
+                            $concat: ['$country.name.en', ' / ', '$region.name.en', ' / ', '$subRegion.name.en'],
+                        },
+                        {
+                            $concat: ['$outlet.name.en', ' / ', '$retailSegment.name.en', ' / ', '$branch.name.en'],
+                        },
+                    ],
+                    ar: [
+                        {
+                            $concat: ['$country.name.ar', ' / ', '$region.name.ar', ' / ', '$subRegion.name.ar'],
+                        },
+                        {
+                            $concat: ['$outlet.name.ar', ' / ', '$retailSegment.name.ar', ' / ', '$branch.name.ar'],
+                        },
+                    ],
                 },
             },
         },
