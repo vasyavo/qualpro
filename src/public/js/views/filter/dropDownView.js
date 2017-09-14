@@ -401,9 +401,13 @@ define([
         makePagination: function ($paginationEl, status) {
             var $prevPage;
             var $nextPage;
+            var ofText = {
+                en: 'of',
+                ar: 'من',
+            };
 
             if (status) {
-                $paginationEl.find('.counter').html((this.start + 1) + '-' + this.end + ' of ' + this.filteredCollection.length);
+                $paginationEl.find('.counter').html((this.start + 1) + '-' + this.end + ' ' + ofText[App.currentUser.currentLanguage] + ' ' + this.filteredCollection.length);
                 $paginationEl.show();
             } else {
                 $paginationEl.hide();
@@ -502,9 +506,11 @@ define([
                 contentType : this.contentType,
                 dataProperty: this.dataProperty,
                 showSelectAll : this.showSelectAll,
-                selectAllText: selectAllText[currentLanguage],
-                nextButtonText: next[currentLanguage],
-                prevButtonText: prev[currentLanguage],
+                translation: {
+                    selectAll: selectAllText[currentLanguage],
+                    next: next[currentLanguage],
+                    prev: prev[currentLanguage],
+                },
             }));
 
             if (this.selectedValuesIds.length) {
