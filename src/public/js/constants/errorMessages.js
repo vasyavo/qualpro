@@ -52,13 +52,13 @@
         region : {
             emptyNameInput : {
                 en : 'Please enter name of region.',
-                ar : ''//todo
+                ar : 'الرجاء إدخال اسم المنطقة'
             }
         },
         subRegion : {
             emptyNameInput : {
                 en : 'Please enter name of sub-region.',
-                ar : ''//todo
+                ar : 'الرجاء إدخال اسم المنطقة الفرعية'
             }
         },
         retailSegment : {
@@ -190,7 +190,7 @@
         },
         ajaxPostError: {
             en: 'Ajax post error',
-            ar: '' // todo translation
+            ar: 'خطأ آخر في أجاكس'
         },
         onlyOneDocumentAttach: {
             en: 'Only one document can be attached',
@@ -326,95 +326,95 @@
         },
         statusNotChanged: {
             en: 'Status not changed',
-            ar: '' //todo translation
+            ar: 'لم يتم تغيير الحالة'
         },
         commentNotAdded: {
             en: 'Comment not added',
-            ar: '' //todo
+            ar: 'لم تتم إضافة التعليق'
         },
         fileNotSelected: {
             en: 'The file is not selected',
-            ar: '' //todo
+            ar: 'لم يتم تحديد الملف'
         },
         selectOneFile: {
             en: 'Select only one file',
-            ar: '' //todo
+            ar: 'حدد ملفا واحدا فقط'
         },
         notSaved: {
             en: 'Not saved',
-            ar: '' //todo
+            ar: 'لم يتم الحفظ'
         },
         selectFileOnlyForOneBranch: {
             en: 'You should select file only for one branch',
-            ar: '' // todo
+            ar: 'يجب تحديد ملف فقط لفرع واحد'
         },
         enterDescription: {
             en: 'Description expected',
-            ar: '' //todo
+            ar: 'الوصف المتوقع'
         },
         enterComment: {
             en: 'Comment expected',
-            ar: '' //todo
+            ar: 'يرجى إدخال تعليق'
         },
         answerRequired: {
             en: 'Answer is required',
-            ar: '' // todo
+            ar: 'الإجابة مطلوبة'
         },
         nothingToShow: {
             en: 'Nothing to show',
-            ar: '' //todo
+            ar: 'ا توجد بيانات'
         },
         afterPartNotFilled: {
             en: 'Visibility form after part in not filled',
-            ar: '' //todo
+            ar: 'يجب ملىْ الجزء الخاص (بعد) فى نموذج الرؤية'
         },
         displayTypeRequired: {
             en: 'Display type is required',
-            ar: '' // todo
+            ar: 'يرجى إدخال نوع العرض'
         },
         weightRequired: {
             en: 'Weight is required',
-            ar: '' // todo
+            ar: 'الرجاء إدخال الوزن'
         },
         weightIsNotANumber: {
             en: 'Weight is not a number',
-            ar: '' // todo
+            ar: 'يجب أن يشمل الوزن أرقام فقط'
         },
         priceRequired: {
             en: 'Price is required',
-            ar: '' // todo
+            ar: 'الرجاء إدخال السعر'
         },
         rspRequired: {
             en: 'RSP is required',
-            ar: '' // todo
+            ar: 'الرجاء إدخال سعر البيع للمستهلك'
         },
         rspIsNotANumber: {
             en: 'RSP is not a number',
-            ar: '' // todo
+            ar: 'يجب أن يشمل سعر البيع للمستهلك أرقام فقط'
         },
         distributorRequired: {
             en: 'Distributor is required',
-            ar: '' // todo
+            ar: 'الرجاء إدخال اسم الموزع'
         },
         additionalCommentRequired: {
             en: 'Additional comment is required',
-            ar: '' // todo
+            ar: 'مطلوب تعليق إضافي'
         },
         enterCorrectValue: {
             en: 'Enter correct value',
-            ar: '' // todo
+            ar: 'أدخل القيمة الصحيحة'
         },
         categoryRequired: {
             en: 'Category is required',
-            ar: '', // todo
+            ar: 'الرجاء إدخال اسم المنتج',
         },
         brandRequired: {
             en: 'Brand is required',
-            ar: '', // todo
+            ar: 'الرجاء إدخال اسم المنافس',
         },
         originRequired: {
             en: 'Origin is required',
-            ar: '', // todo
+            ar: 'الرجاء إدخال بلد المنشىْ',
         },
     };
 

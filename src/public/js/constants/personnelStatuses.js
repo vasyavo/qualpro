@@ -38,7 +38,7 @@
             _id : 'online',
             name: {
                 en: 'Online',
-                ar: '' // todo translate
+                ar: 'متاح حاليا'
             }
         },
 
