@@ -17,6 +17,7 @@ define([
         brandingItemsTable : 'جدول العلامات التجارية وتقارير العرض للسلع',
         employee           : 'الموظف',
         comment            : 'التعليق',
+        delete: 'حذف',
         // create
         createTitle        : 'انشاء نشاط تسويقي جديد',
         publishBtn         : 'نشر',
