@@ -78,7 +78,7 @@ const schema = new Schema({
     },
     packingType: {
         type: String,
-        enum: ['GM Net Weight', 'ML', ''],
+        enum: ['gm', 'ml', ''],
         default: '',
     },
     expiry: {
