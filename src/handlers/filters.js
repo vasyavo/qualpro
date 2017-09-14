@@ -207,7 +207,11 @@ const Filters = function () {
 
         const beforeFilter = _.pick(filter, '_id', 'priority', 'objectiveType', 'status', 'country', 'region',
             'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or', 'assignedTo', 'createdBy');
-        const pipeLine = [];
+        const pipeLine = [{
+            $match: {
+                context: 'objectives',
+            },
+        }];
         let personnelFilter;
 
         if (filter && filter.assignedTo) {

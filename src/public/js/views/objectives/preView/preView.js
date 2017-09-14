@@ -110,6 +110,8 @@ define([
                 });
             });
 
+            this.on('showEditObjectiveDialog', this.showEditObjectiveDialog, this);
+
             var withoutBranches = !this.model.get('branch').length;
 
             dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
@@ -266,7 +268,10 @@ define([
         showEditObjectiveDialog: function (model, duplicate) {
             var self = this;
 
-            this.editObjectiveView = new EditObjectiveView({model: model, duplicate: duplicate});
+            this.editObjectiveView = new EditObjectiveView({
+                model      : model, duplicate: duplicate,
+                translation: this.translation
+            });
 
             this.editObjectiveView.on('modelSaved', function (model) {
                 self.changeRowInTree(model);
@@ -403,7 +408,7 @@ define([
             var form = modelJSON.form;
             var branchesForVisibility = _.map(modelJSON.branch, function (branch) {
                 return {
-                    name : branch.name.currentLanguage,
+                    name: branch.name.currentLanguage,
                     _id : branch._id
                 };
             });
@@ -416,7 +421,7 @@ define([
 
             if (form.contentType === 'distribution') {
                 this.distributionForm = new DistributionForm({
-                    id: modelJSON.form._id,
+                    id         : modelJSON.form._id,
                     translation: this.translation
                 });
             } else {
@@ -457,12 +462,12 @@ define([
                     );
 
                     self.visibilityFormPreview = new VisibilityForm({
-                        translation: self.translation,
-                        visibilityFormData: response,
-                        branches: branchesForVisibility,
-                        location: modelJSON.location,
-                        withoutBranches: withoutBranches,
-                        beforeDescription: modelJSON.description[App.currentUser.currentLanguage],
+                        translation             : self.translation,
+                        visibilityFormData      : response,
+                        branches                : branchesForVisibility,
+                        location                : modelJSON.location,
+                        withoutBranches         : withoutBranches,
+                        beforeDescription       : modelJSON.description[App.currentUser.currentLanguage],
                         permittedToEditAfterPart: permittedToEditAfterPart
                     });
                     self.visibilityFormPreview.on('visibility-form-updated', function (vfData) {
@@ -526,7 +531,7 @@ define([
             var defFilter = this.defFilterLogic.getDefFilter('personnel', 'assignToACM');
             var modelJSON = this.model.toJSON();
 
-            if (modelJSON.objectiveType === 'country'){
+            if (modelJSON.objectiveType === 'country') {
                 this.trigger('showSubObjectiveDialog', this.model, false, defFilter);
             } else {
                 this.trigger('showAssignObjectiveDialog', this.model, false, defFilter);
@@ -771,8 +776,8 @@ define([
             if (status === STATUSES.COMPLETED && createdByUserId !== currentUserId) {
                 if (this.model.get('form') && !self.afterPartFilled) {
                     return App.render({
-                        type : 'error',
-                        message : ERROR_MESSAGES.afterPartNotFilled[App.currentUser.currentLanguage]
+                        type   : 'error',
+                        message: ERROR_MESSAGES.afterPartNotFilled[App.currentUser.currentLanguage]
                     });
                 }
             }
@@ -886,9 +891,9 @@ define([
 
             if (!this.dontShowDialog) {
                 formString = this.template({
-                    translation : this.translation,
-                    activiryList: this.activityList,
-                    hiddenActions : self.tabName === 'myCC' ? 'hidden' : ''
+                    translation  : this.translation,
+                    activiryList : this.activityList,
+                    hiddenActions: self.tabName === 'myCC' ? 'hidden' : ''
                 });
             } else {
                 formString = this.$el;

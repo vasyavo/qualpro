@@ -1,22 +1,209 @@
-module.exports = (pipeline) => {
+const _ = require('lodash');
+const CONTENT_TYPES = require('./../../../../../public/js/constants/contentType');
+
+module.exports = (pipeline, queryFilter) => {
     pipeline.push({
-        $group: {
-            _id: '$questionnaryId',
-            region: { $addToSet: '$region' },
+        $project: {
+            _id: false,
+            country: { $ifNull: ['$country', []] },
+            region: {
+                $cond: {
+                    if: { $gt: [{ $size: { $ifNull: ['$region', []] } }, 0] },
+                    then: { selected: '$region' },
+                    else: { all: 'region' },
+                },
+            },
         },
     });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'region.selected',
+            foreignField: '_id',
+            as: 'region.selected',
+        },
+    });
+
+    {
+        const $addFields = {};
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
+            $addFields['region.selected'] = {
+                $let: {
+                    vars: {
+                        filters: {
+                            country: queryFilter[CONTENT_TYPES.COUNTRY],
+                        },
+                    },
+                    in: {
+                        $map: {
+                            input: {
+                                $filter: {
+                                    input: '$region.selected',
+                                    as: 'region',
+                                    cond: {
+                                        $and: [
+                                            { $eq: ['$$region.archived', false] },
+                                            { $setIsSubset: [['$$region.parent'], '$$filters.country'] },
+                                        ],
+                                    },
+                                },
+                            },
+                            as: 'region',
+                            in: '$$region._id',
+                        },
+                    },
+                },
+            };
+        } else {
+            $addFields['region.selected'] = {
+                $map: {
+                    input: {
+                        $filter: {
+                            input: '$region.selected',
+                            as: 'region',
+                            cond: {
+                                $eq: ['$$region.archived', false],
+                            },
+                        },
+                    },
+                    as: 'region',
+                    in: '$$region._id',
+                },
+            };
+        }
+
+        pipeline.push({ $addFields });
+    }
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: 'region.all',
+            foreignField: 'type',
+            as: 'region.all',
+        },
+    });
+
+    {
+        const $addFields = {};
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
+            $addFields.region = {
+                $let: {
+                    vars: {
+                        filters: {
+                            country: queryFilter[CONTENT_TYPES.COUNTRY],
+                        },
+                    },
+                    in: {
+                        $cond: {
+                            if: {
+                                $gt: [{
+                                    $size: {
+                                        $ifNull: ['$region.selected', []],
+                                    },
+                                }, 0],
+                            },
+                            then: '$region.selected',
+                            else: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$region.all',
+                                            as: 'region',
+                                            cond: {
+                                                $and: [
+                                                    { $eq: ['$$region.archived', false] },
+                                                    { $setIsSubset: [['$$region.parent'], '$$filters.country'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'region',
+                                    in: '$$region._id',
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+        } else {
+            $addFields.region = {
+                $map: {
+                    input: {
+                        $filter: {
+                            input: '$region.all',
+                            as: 'region',
+                            cond: {
+                                $eq: ['$$region.archived', false],
+                            },
+                        },
+                    },
+                    as: 'region',
+                    in: '$$region._id',
+                },
+            };
+        }
+
+        pipeline.push({ $addFields });
+    }
 
     pipeline.push({
         $unwind: '$region',
     });
 
+    if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+        pipeline.push({
+            $match: {
+                region: { $in: queryFilter[CONTENT_TYPES.REGION] },
+            },
+        });
+    }
+
     pipeline.push({
         $group: {
-            _id: '$region._id',
-            region: { $first: '$region' },
+            _id: '$region',
             count: { $sum: 1 },
         },
     });
+
+    pipeline.push({
+        $lookup: {
+            from: 'domains',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'region',
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: false,
+            count: 1,
+            region: {
+                $let: {
+                    vars: {
+                        region: { $arrayElemAt: ['$region', 0] },
+                    },
+                    in: {
+                        _id: '$$region._id',
+                        name: '$$region.name',
+                        parent: '$$region.parent',
+                    },
+                },
+            },
+        },
+    });
+
+    if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+        pipeline.push({
+            $match: {
+                'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+            },
+        });
+    }
 
     pipeline.push({
         $lookup: {
@@ -28,9 +215,7 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
-        $project: {
-            count: 1,
-            region: 1,
+        $addFields: {
             country: {
                 $let: {
                     vars: {
@@ -46,98 +231,41 @@ module.exports = (pipeline) => {
     });
 
     pipeline.push({
-        $addFields: {
+        $project: {
+            _id: false,
+            country: 1,
+            count: 1,
             location: {
-                en: {
-                    $concat: ['$country.name.en', ' / ', '$region.name.en'],
-                },
-                ar: {
-                    $concat: ['$country.name.ar', ' / ', '$region.name.ar'],
+                _id: '$region._id',
+                name: {
+                    en: {
+                        $concat: ['$country.name.en', ' / ', '$region.name.en'],
+                    },
+                    ar: {
+                        $concat: ['$country.name.ar', ' / ', '$region.name.ar'],
+                    },
                 },
             },
         },
     });
 
+    pipeline.push({
+        $sort: {
+            'country.name': 1,
+            'location.name': 1,
+        },
+    });
 
     pipeline.push({
         $group: {
             _id: null,
             data: {
-                $addToSet: {
-                    _id: '$region._id',
-                    name: '$region.name',
-                    count: '$count',
+                $push: {
                     country: '$country',
-                    location: '$location',
+                    count: '$count',
                 },
             },
-            labels: {
-                $addToSet: '$location',
-            },
-        },
-    });
-
-    pipeline.push({
-        $unwind: '$data',
-    });
-
-
-    pipeline.push({
-        $sort: {
-            'data.location.en': 1,
-            'data.count': 1,
-        },
-    });
-
-    pipeline.push({
-        $group: {
-            _id: {
-                labels: '$labels',
-            },
-            data: { $push: '$data' },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 0,
-            labels: '$_id.labels',
-            data: 1,
-        },
-    });
-
-    pipeline.push({
-        $unwind: '$labels',
-    });
-
-
-    pipeline.push({
-        $sort: {
-            'labels.en': 1,
-        },
-    });
-
-    pipeline.push({
-        $group: {
-            _id: {
-                data: '$data',
-            },
-            labels: { $push: '$labels' },
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            _id: 0,
-            data: '$_id.data',
-            labels: 1,
-        },
-    });
-
-    pipeline.push({
-        $project: {
-            datasets: [{ data: '$data' }],
-            labels: 1,
+            labels: { $push: '$location' },
         },
     });
 };
