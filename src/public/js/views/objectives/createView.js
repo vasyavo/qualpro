@@ -546,7 +546,6 @@ define([
 
             this.$el.find('#personnelLocation').html(data.location);
             this.$el.find('#personnelLocation').attr('data-location', data.location);
-            this.personnelListForSelectionView && this.personnelListForSelectionView.remove();
         },
 
         showPersonnelView: function () {
