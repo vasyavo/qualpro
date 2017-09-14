@@ -23,7 +23,7 @@ define([
         publishBtn         : 'نشر',
         cancelBtn          : ' إلغاء',
         attachments        : 'الملفات المرفقة',
-        attachTitle        : '', // todo
+        attachTitle        : 'الملفات والتعليقات الخاصة بحملة العلالي التسويقية والدعائية',
         attachFiles        : ' إرفاق ملفات',
         description        : 'الوصف',
         selectTitle        : ' اختر عنوان النص',
