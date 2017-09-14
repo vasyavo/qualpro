@@ -243,10 +243,7 @@ define([
 
                 self.treePreview.on('showSubObjectiveDialog', self.showSubObjectiveDialog, self);
                 self.treePreview.on('showAssignObjectiveDialog', self.showAssignObjectiveDialog, self);
-                self.treePreview.on('showEditObjectiveDialog', function() {
-                    debugger;
-                    self.showEditObjectiveDialog();
-                }, self);
+                self.treePreview.on('showEditObjectiveDialog', self.showEditObjectiveDialog, self);
                 self.treePreview.on('changeProgress', self.changeProgress, self);
 
                 self.treePreview.on('dialogbeforeclose', function () {
@@ -406,7 +403,6 @@ define([
         },
 
         openForm: function () {
-            debugger;
             var self = this;
             var modelJSON = this.model.toJSON();
             var form = modelJSON.form;
