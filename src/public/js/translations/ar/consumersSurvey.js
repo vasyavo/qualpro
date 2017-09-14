@@ -49,6 +49,7 @@ define([
         goToBtn           : 'الذهاب الى',
         questionaryPreview: 'معاينة استطلاع العملاء',
         okBtn             : 'موافق',
+        nps: 'تقييم تصنيف العملاء',
 
         //edit answer
         editAnswerViewTitle: 'تعديل اجابة السؤال',
