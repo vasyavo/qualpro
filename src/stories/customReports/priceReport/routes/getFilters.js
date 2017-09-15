@@ -173,7 +173,7 @@ module.exports = (req, res, next) => {
                 variants: { $addToSet: '$variant' },
                 categories: { $addToSet: '$variant.category' },
                 items: {
-                    $push: {
+                    $addToSet: {
                         _id    : '$_id',
                         name   : '$name',
                         variant: '$variant._id',
