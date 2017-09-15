@@ -158,6 +158,12 @@ define([
                     $('#contentHolder').html(documentsListView.render().$el);
 
                     documentsCollection.getFirstPage();
+
+                    if (!App.filterCollections) {
+                        App.filterCollections = [];
+                    }
+
+                    App.filterCollections['documents'] = documentsCollection;
                 });
             });
         },

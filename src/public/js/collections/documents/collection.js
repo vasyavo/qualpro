@@ -35,6 +35,13 @@ define(function (require) {
             return response.data;
         },
 
+        refresh: function () {
+            this.fetch({
+                reset : true,
+                data : this.state,
+            });
+        },
+
         getFirstPage : function () {
             this.state.page = 1;
 
