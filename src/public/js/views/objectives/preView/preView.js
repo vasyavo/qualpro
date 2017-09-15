@@ -113,7 +113,7 @@ define([
             var withoutBranches = !this.model.get('branch').length;
             var form = this.model.get('form');
 
-            if (form && form._id) {
+            if (form && form._id && form.contentType === 'visibility') {
                 dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
                     if (withoutBranches) {
                         if (response.after.description) {
