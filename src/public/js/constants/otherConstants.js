@@ -33,7 +33,7 @@
                 _id    : 'target',
                 name   : {
                     en: 'Target',
-                    ar: '' // todo
+                    ar: 'المبيعات المستهدفة'
                 },
                 sortKey: 0
             },
@@ -41,7 +41,7 @@
                 _id    : 'salary',
                 name   : {
                     en: 'Salary',
-                    ar: '' // todo
+                    ar: 'الراتب'
                 },
                 sortKey: 1
             },
@@ -49,7 +49,7 @@
                 _id    : 'out_of_stock',
                 name   : {
                     en: 'Out of stock',
-                    ar: '' // todo
+                    ar: 'إنتهى من المخزن'
                 },
                 sortKey: 2
             },
@@ -57,7 +57,7 @@
                 _id    : 'new_arrivals',
                 name   : {
                     en: 'New arrivals',
-                    ar: '' // todo
+                    ar: 'وصول مخزون جديد'
                 },
                 sortKey: 3
             },
@@ -65,7 +65,7 @@
                 _id    : 'annual_leave',
                 name   : {
                     en: 'Annual leave',
-                    ar: '' // todo
+                    ar: 'الاجازة السنوية'
                 },
                 sortKey: 4
             },
@@ -73,7 +73,7 @@
                 _id    : 'near_expiry_products',
                 name   : {
                     en: 'Near expiry products',
-                    ar: '' // todo
+                    ar: 'منتجات قرب انتهاء الصلاحية'
                 },
                 sortKey: 5
             },
@@ -81,7 +81,7 @@
                 _id    : 'other',
                 name   : {
                     en: 'Other',
-                    ar: '' // todo
+                    ar: 'أخرى'
                 },
                 sortKey: 6
             }
@@ -229,7 +229,7 @@
                 _id : 'yearly',
                 name: {
                     en: 'Yearly',
-                    ar: '' //todo translation
+                    ar: 'سنوي'
                 },
 
                 sortKey: 0
@@ -238,7 +238,7 @@
                 _id : 'visibility',
                 name: {
                     en: 'Visibility',
-                    ar: '' //todo translation
+                    ar: 'رؤية'
                 },
 
                 sortKey: 1
@@ -250,7 +250,7 @@
                 _id : 'monthlyDisplay',
                 name: {
                     en: 'Monthly Display',
-                    ar: '' // todo
+                    ar: 'العرض الشهري'
                 },
 
                 sortKey: 0
@@ -259,7 +259,7 @@
                 _id : 'activityDisplay',
                 name: {
                     en: 'Activity Display',
-                    ar: '' // todo
+                    ar: 'نشاط خاص بعرض شهرى'
                 },
 
                 sortKey: 1

@@ -156,12 +156,12 @@ define([
             };
 
             this.visibilityForm = new VisibilityFormEditView({
-                translation : self.translation,
-                description : description[App.currentUser.currentLanguage],
+                translation    : self.translation,
+                description    : description[App.currentUser.currentLanguage],
                 locationString : self.locations.location,
-                outlets: this.outletsForVisibility,
+                outlets        : this.outletsForVisibility,
                 withoutBranches: !this.outletsForVisibility.length,
-                initialData: this.visibilityFormData ? this.visibilityFormData : null
+                initialData    : this.visibilityFormData ? this.visibilityFormData : null
             });
 
             this.visibilityForm.on('save', function (data) {
@@ -238,22 +238,22 @@ define([
                     data.append('data', JSON.stringify(context.body));
 
                     $.ajax({
-                        url: context.model.urlRoot(),
-                        type: 'POST',
-                        data: data,
+                        url        : context.model.urlRoot(),
+                        type       : 'POST',
+                        data       : data,
                         contentType: false,
                         processData: false,
-                        success: function (xhr) {
+                        success    : function (xhr) {
                             var model = new Model(xhr, {parse: true});
 
                             cb(null, model);
                         },
-                        error: function () {
+                        error      : function () {
                             cb(true);
                         }
                     });
                 },
-                
+
                 function (model, cb) {
                     if (context.visibilityFormData && context.visibilityFormData.files.length) {
                         var filesData = new FormData();
@@ -263,15 +263,15 @@ define([
                         });
 
                         $.ajax({
-                            url: '/file',
-                            method: 'POST',
-                            data: filesData,
+                            url        : '/file',
+                            method     : 'POST',
+                            data       : filesData,
                             contentType: false,
                             processData: false,
-                            success: function (response) {
+                            success    : function (response) {
                                 cb(null, model, response);
                             },
-                            error: function () {
+                            error      : function () {
                                 App.renderErrors([
                                     ERROR_MESSAGES.filesNotUploaded[currentLanguage]
                                 ]);
@@ -306,11 +306,11 @@ define([
                                 branches: context.branchesForVisibility.map(function (item) {
                                     return {
                                         branchId: item._id,
-                                        before: {
+                                        before  : {
                                             files: arrayOfUploadedFilesId
                                         },
-                                        after: {
-                                            files: [],
+                                        after   : {
+                                            files      : [],
                                             description: ''
                                         }
                                     };
@@ -335,11 +335,11 @@ define([
 
                                     return {
                                         branchId: item.branchId,
-                                        before: {
+                                        before  : {
                                             files: arrayOfFileIds
                                         },
-                                        after: {
-                                            files: [],
+                                        after   : {
+                                            files      : [],
                                             description: ''
                                         }
                                     };
@@ -359,15 +359,15 @@ define([
                     }
 
                     $.ajax({
-                        url: 'form/visibility/before/' + form._id,
-                        method: 'PUT',
+                        url        : 'form/visibility/before/' + form._id,
+                        method     : 'PUT',
                         contentType: 'application/json',
-                        dataType: 'json',
-                        data: JSON.stringify(visibilityFormRequestData),
-                        success: function () {
+                        dataType   : 'json',
+                        data       : JSON.stringify(visibilityFormRequestData),
+                        success    : function () {
                             cb(null, model);
                         },
-                        error: function () {
+                        error      : function () {
                             cb(null, model);
                         }
                     });
@@ -411,7 +411,7 @@ define([
                 // bandage: AM to AinM choose visibility form and publish objective without open form
                 if (modelJSON._id === 'visibility') {
                     self.visibilityFormAjax = {
-                        model: new Backbone.Model(Object.assign({}, modelJSON, { files: [] }))
+                        model: new Backbone.Model(Object.assign({}, modelJSON, {files: []}))
                     };
                 }
                 // bandage: end
@@ -527,15 +527,15 @@ define([
             });
             this.outletsForVisibility = _.map(this.outletsForVisibility, function (outlet) {
                 let result = {
-                    name : outlet.name.currentLanguage,
-                    _id : outlet._id,
-                    branches : []
+                    name    : outlet.name.currentLanguage,
+                    _id     : outlet._id,
+                    branches: []
                 };
 
                 self.branchesForVisibility.map((branch) => {
                     if (outlet._id === branch.outlet) {
                         result.branches.push({
-                            name : branch.name.currentLanguage,
+                            name: branch.name.currentLanguage,
                             _id : branch._id
                         });
                     }

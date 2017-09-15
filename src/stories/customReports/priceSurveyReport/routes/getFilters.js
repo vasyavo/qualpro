@@ -412,6 +412,13 @@ module.exports = (req, res, next) => {
                 },
                 value: 'brand',
             },
+            {
+                name: {
+                    en: 'Product',
+                    ar: '',
+                },
+                value: 'product',
+            },
         ];
 
         res.status(200).send(response);

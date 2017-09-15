@@ -103,7 +103,7 @@ define([
                 self.collection.bind('reset', _.bind(self.render, self));
 
                 self.on('coverSaved', function () {
-                    self.filterView.removeAll();
+                    self.filterView && self.filterView.removeAll();
                     self.$el.dialog('close').dialog('destroy').remove();
                 }, self);
 
@@ -220,7 +220,6 @@ define([
 
                 if (firstName && lastName && phoneNumber && email) {
                     tempEmployee = new personnelModel();
-
 
                     tempEmployee.setFieldsNames(this.translation);
 

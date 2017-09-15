@@ -1165,7 +1165,7 @@ const QuestionnaryHandler = function () {
                     body.countAll = personnelCount;
                     body.countBranches = branchCount;
                     body.status = 'draft';
-                    body.dueDate = new Date(body.dueDate);
+                    body.dueDate = moment(body.dueDate).endOf('day').toDate();
                     body.personnels = personnelIds;
                     body.createdBy = createdBy;
                     body.editedBy = createdBy;
@@ -1355,7 +1355,7 @@ const QuestionnaryHandler = function () {
                     }
 
                     if (body.dueDate) {
-                        body.dueDate = new Date(body.dueDate);
+                        body.dueDate = moment(body.dueDate).endOf('day').toDate();
                     }
 
                     if (personnelCount) {
