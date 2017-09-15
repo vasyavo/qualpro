@@ -416,6 +416,10 @@
             en: 'Origin is required',
             ar: 'الرجاء إدخال بلد المنشىْ',
         },
+        visibilityFormNotLoaded: {
+            en: 'Visibility form not loaded',
+            ar: '', // todo
+        },
     };
 
     if (typeof window === 'object' && this === window) {

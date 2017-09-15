@@ -26,11 +26,12 @@ define([
     'constants/contentType',
     'helpers/objectivesStatusHelper',
     'constants/errorMessages',
-    'constants/aclRoleIndexes'
+    'constants/aclRoleIndexes',
+    'views/objectives/visibilityForm/editView',
 ], function (Backbone, _, lodash, $, EditTemplate, FormTemplate, FileTemplate, BaseView, FileDialogView, Model,
              populate, LinkFormView, FilterCollection, FileCollection, FileModel, PersonnelListForSelectionView, TreeView,
              implementShowHideArabicInputIn, CONSTANTS, dataService, moment, VisibilityFromEditView,
-             FileDialogPreviewView, async, CONTENT_TYPES, objectivesStatusHelper, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
+             FileDialogPreviewView, async, CONTENT_TYPES, objectivesStatusHelper, ERROR_MESSAGES, ACL_ROLE_INDEXES, VisibilityFormEditView) {
 
     var EditView = BaseView.extend({
         contentType: CONTENT_TYPES.OBJECTIVES,
@@ -58,6 +59,8 @@ define([
         },
 
         fileForVFWithoutBranches: {},
+
+        formWasUnlinked: false,
 
         events: {
             'click #attachFile'          : 'showAttachDialog',
@@ -192,7 +195,7 @@ define([
                 saveTitle  : okText[App.currentUser.currentLanguage],
                 saveCb     : function () {
                     self.unlinkForm();
-                    self.$el.dialog('close').dialog('destroy').remove();
+                    $(this).dialog('close').dialog('destroy').remove();
                 }
             });
         },
@@ -205,6 +208,7 @@ define([
             this.savedVisibilityModel = null;
             this.visibilityFormAjax = null;
             this.model.unset('form');
+            this.formWasUnlinked = true;
             $el.find('#formThumbnail').html('');
             $el.find('.formBlock').hide();
             this.showLinkForm();
@@ -249,7 +253,25 @@ define([
                     });
                 }
 
-                if (this.visibilityFormData) {
+                if (this.formWasUnlinked) {
+                    var description = {
+                        en: _.unescape(this.$el.find('.objectivesTextarea[data-property="en"]').val()),
+                        ar: _.unescape(this.$el.find('.objectivesTextarea[data-property="ar"]').val())
+                    };
+
+                    this.visibilityForm = new VisibilityFormEditView({
+                        translation    : self.translation,
+                        description    : description[App.currentUser.currentLanguage],
+                        locationString : self.locations.location,
+                        outlets        : this.outletsForVisibility,
+                        withoutBranches: !this.outletsForVisibility.length,
+                        initialData    : this.visibilityFormData ? this.visibilityFormData : null
+                    });
+
+                    this.visibilityForm.on('save', function (data) {
+                        self.visibilityFormData = data;
+                    });
+                } else if (this.visibilityFormData) {
                     showVF();
                 } else {
                     dataService.getData('/form/visibility/' + form.formId, {}, function (err, response) {
