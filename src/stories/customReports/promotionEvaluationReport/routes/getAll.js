@@ -264,9 +264,16 @@ module.exports = (req, res, next) => {
         });
 
         if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+
             pipeline.push({
                 $match: {
-                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                    $or: [{
+                        'branch.subRegion': {
+                            $in: queryFilter[CONTENT_TYPES.SUBREGION],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
@@ -335,7 +342,13 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
             pipeline.push({
                 $match: {
-                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                    $or: [{
+                        'subRegion.parent': {
+                            $in: queryFilter[CONTENT_TYPES.REGION],
+                        },
+                    }, {
+                        promotion: null,
+                    }],
                 },
             });
         }
