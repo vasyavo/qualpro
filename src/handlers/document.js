@@ -581,10 +581,14 @@ const Documents = function () {
             if (filter && filter.time) {
                 const fromDate = filter.time.values[0];
                 const toDate = filter.time.values[1];
-                matchObj.$match.createdBy.date = { $gte: fromDate };
-                matchObj.$match.editedBy.date = { $gte: fromDate };
-                matchObj.$match.createdBy.date = { $lte: toDate };
-                matchObj.$match.editedBy.date = { $lte: toDate };
+                matchObj.$match['createdBy.date'] = {
+                    $gte: new Date(fromDate),
+                    $lte: new Date(toDate),
+                };
+                matchObj.$match['editedBy.date'] = {
+                    $gte: new Date(fromDate),
+                    $lte: new Date(toDate),
+                };
             }
             // web should not see deleted items
             matchObj.$match.deleted = false;
