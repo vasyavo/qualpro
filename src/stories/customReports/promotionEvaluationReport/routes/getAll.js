@@ -227,6 +227,7 @@ module.exports = (req, res, next) => {
                     $or: [
                         { 'promotion.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] } },
                         { 'promotion.branch': { $eq: null } },
+                        { promotion: null },
                     ],
                 },
             });
