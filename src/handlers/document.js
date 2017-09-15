@@ -529,7 +529,7 @@ const Documents = function () {
                 return cb(err);
             }
 
-            const result = docs && docs.length ? {data: docs} : null;
+            const result = docs && docs.length ? { data: docs } : null;
 
             if (!result) {
                 return errorSender.badRequest(cb, 'Documents not found');
@@ -553,6 +553,7 @@ const Documents = function () {
             skip = 0,
             count = 20,
             search = '',
+            filter = null,
         } = options;
 
         const matchObj = {
@@ -577,6 +578,14 @@ const Documents = function () {
                 ];
             }
         } else {
+            if (filter && filter.time) {
+                const fromDate = filter.time.values[0];
+                const toDate = filter.time.values[1];
+                matchObj.$match.createdBy.date = { $gte: fromDate };
+                matchObj.$match.editedBy.date = { $gte: fromDate };
+                matchObj.$match.createdBy.date = { $lte: toDate };
+                matchObj.$match.editedBy.date = { $lte: toDate };
+            }
             // web should not see deleted items
             matchObj.$match.deleted = false;
 
@@ -1921,6 +1930,7 @@ const Documents = function () {
                 sortOrder,
                 archived,
                 search,
+                filter,
             } = query;
             const skip = (page - 1) * count;
 
@@ -1945,6 +1955,7 @@ const Documents = function () {
                         sortBy,
                         sortOrder,
                         search,
+                        filter,
                     }, (err, response) => {
                         if (err) {
                             return parallelCb(err);
