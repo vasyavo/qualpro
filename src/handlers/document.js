@@ -1891,20 +1891,24 @@ const Documents = function () {
     this.getByIds = function (req, res, next) {
         function queryRun() {
             let ids = req.body.ids;
-            ids = ids.map((id) => {
-                return ObjectId(id);
-            });
+            if (ids && ids.length) {
+                ids = ids.map((id) => {
+                    return ObjectId(id);
+                });
 
-            getByIds(ids, (err, result) => {
-                if (err) {
-                    return next(err);
-                }
-                if (!result) {
-                    return res.status(404);
-                }
+                getByIds(ids, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    if (!result) {
+                        return res.status(404);
+                    }
 
-                res.status(200).send(result);
-            });
+                    res.status(200).send(result);
+                });
+            } else {
+                res.status(200).send({ data: [] });
+            }
         }
 
         access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
