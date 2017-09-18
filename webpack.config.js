@@ -12,7 +12,7 @@ module.exports = {
         alias: {
             async: path.resolve(__dirname, 'src/public/js/libs/async/lib/async'),
             'js-cookie': path.resolve(__dirname, 'src/public/js/libs/js-cookie/src/js.cookie'),
-            jquery: path.resolve(__dirname, 'src/public/js/libs/jquery/dist/jquery.min'),
+            jquery: path.resolve(__dirname, 'src/public/js/libs/jquery/dist/jquery'),
             imageCrop: path.resolve(__dirname, 'src/public/js/libs/Jcrop/js/jquery.Jcrop.min'),
             jqueryui: path.resolve(__dirname, 'src/public/js/libs/jquery-ui/jquery-ui.min'),
             underscore: path.resolve(__dirname, 'src/public/js/libs/underscore/underscore-min'),
@@ -37,87 +37,91 @@ module.exports = {
             shortId: path.resolve(__dirname, 'src/public/js/libs/js-shortid/dist/js-shortid'),
             lightSlider: path.resolve(__dirname, 'src/public/js/libs/lightslider/dist/js/lightslider'),
         },
-        extensions : ['.js', '.jsx'],
-        modules : ['src', 'node_modules', 'bower_components']
+        extensions: ['.js', '.jsx'],
+        modules: ['src', 'node_modules', 'bower_components'],
     },
 
-    devtool : 'source-map',
+    devtool: 'source-map',
 
-    module : {
-        loaders : [
-            {
-                test: /jquery/,
-                use: [
-                    'expose-loader?jquery',
-                ]
-            },
-            {
-                test: /underscore/,
-                use: [
-                    'expose-loader?underscore',
-                ]
-            },
-            {
-                test: /backbone/,
-                use: [
-                    'expose-loader?backbone',
-                    'imports-loader?this=>window,jquery,underscore'
-                ]
-            },
-            {
-                test: /ckeditor-core/,
-                loader: 'expose-loader?ckeditor-core'
-            },
+    module: {
+        loaders: [
             {
                 test: /jqueryui/,
-                loader: 'imports-loader?this=>window,jquery'
+                use: 'imports-loader?jquery',
             },
             {
                 test: /imageCrop/,
-                loader: 'imports-loader?this=>window,jquery'
+                loader: 'imports-loader?jquery',
             },
             {
-                test: /scrollBar/,
-                loader: 'imports-loader?this=>window,jquery,jquery-mousewheel'
+                test: /backbone/,
+                use: 'imports-loader?underscore,jquery',
             },
             {
-                test: /rater/,
-                loader: 'imports-loader?this=>window,jquery'
-            },
-            {
-                test: /ckeditor-jquery/,
-                loader: 'imports-loader?this=>window,jquery,ckeditor-core'
-            },
-            {
-                test: /jquery-masked-field/,
-                loader: 'imports-loader?this=>window,jquery'
+                test: /app/,
+                use: 'imports-loader?backbone,jqueryui,imageCrop',
             },
             {
                 test: /d3/,
-                loader: 'expose-loader?d3'
+                loader: 'exports-loader?d3',
             },
             {
-                test : /\.html$/,
-                loader : 'html-loader'
+                test: /scrollBar/,
+                loader: 'imports-loader?jquery',
             },
             {
-                test : /\.(png|ico|jpg|gif|svg|ttf|eot|woff|woff2)/,
-                exclude : /\/node_modules\//,
-                loader : 'file-loader?name=[path][name].[ext]'
+                test: /rater/,
+                loader: 'imports-loader?jquery',
             },
             {
-                test : /\.css$/,
-                loader : 'style-loader!css-loader'
+                test: /underscore/,
+                use: 'exports-loader?_',
             },
-        ]
+            {
+                test: /jquery/,
+                loader: 'exports-loader?$',
+            },
+            {
+                test: /ckeditor-core/,
+                loader: 'exports-loader?CKEDITOR',
+            },
+            {
+                test: /ckeditor-jquery/,
+                loader: 'imports-loader?jquery,ckeditor-core',
+            },
+            {
+                test: /jquery-masked-field/,
+                loader: 'imports-loader?jquery',
+            },
+            {
+                test: /\.html$/,
+                loader: 'html-loader',
+            },
+            {
+                test: /\.(png|ico|jpg|gif|svg|ttf|eot|woff|woff2)/,
+                exclude: /\/node_modules\//,
+                loader: 'file-loader?name=[path][name].[ext]',
+            },
+            {
+                test: /\.css$/,
+                loader: 'style-loader!css-loader',
+            },
+        ],
     },
 
     plugins: [
+        new webpack.ProvidePlugin({
+            $: 'jquery',
+            jQuery: 'jquery',
+            'window.jQuery': 'jquery',
+            _: 'underscore',
+            underscore: 'underscore',
+        }),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
-        new webpack.optimize.UglifyJsPlugin({ minimize: true }),
+        //new webpack.optimize.UglifyJsPlugin({ minimize: true }),
         new HtmlWebpackPlugin({
-            template : './src/public/templates/index.html',
-            inject : 'body'
+            template: './src/public/templates/index.html',
+            inject: 'body',
         }),
     ],
 };
