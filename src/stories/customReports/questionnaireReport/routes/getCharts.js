@@ -94,7 +94,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $match: {
-                countAnswered: { $gt: 0 },
                 status: { $ne: 'draft' },
             },
         });

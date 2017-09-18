@@ -96,8 +96,6 @@ module.exports = (req, res, next) => {
                         }),
                     }, {
                         status: { $ne: 'draft' },
-                    }, {
-                        countAnswered: { $gt: 0 },
                     }],
                 },
             },

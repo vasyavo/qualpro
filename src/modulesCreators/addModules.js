@@ -471,7 +471,7 @@ const modules = [
 
     {
         _id     : 42,
-        name    : {en: 'Documents', ar: 'لوثائق'},
+        name    : {en: 'Documents', ar: 'الوثائق'},
         href    : CONSTANTS.DOCUMENTS,
         sequence: 42,
         parrent : null,

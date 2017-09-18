@@ -1,6 +1,9 @@
 module.exports = (pipeline) => {
     pipeline.push({
-        $unwind: '$branch',
+        $unwind: {
+            path: '$branch',
+            preserveNullAndEmptyArrays: true,
+        },
     });
 
     pipeline.push({
@@ -15,6 +18,149 @@ module.exports = (pipeline) => {
                 status: '$status',
             },
             count: { $sum: 1 },
+        },
+    });
+
+    pipeline.push({
+        $group: {
+            _id: null,
+            groups: {
+                $push: {
+                    _id: {
+                        country: '$_id.country',
+                        region: '$_id.region',
+                        subRegion: { $ifNull: ['$_id.subRegion', null] }, // required map sub-region to null
+                        branch: { $ifNull: ['$_id.branch', null] }, // required map branch to null
+                        retailSegment: '$_id.retailSegment',
+                        outlet: '$_id.outlet',
+                        status: '$_id.status',
+                    },
+                    count: '$count',
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            _id: false,
+            groups: 1,
+            add: {
+                $let: {
+                    vars: {
+                        setStatus: { $setUnion: ['$groups._id.status', []] }, // pick available status
+                        groupsNull: {
+                            $filter: {
+                                input: '$groups',
+                                as: 'group',
+                                cond: {
+                                    $eq: ['$$group._id.branch', null],
+                                },
+                            },
+                        },
+                    },
+                    in: {
+                        // evaluate count per status
+                        $map: {
+                            input: '$$setStatus',
+                            as: 'status',
+                            in: {
+                                status: '$$status',
+                                count: {
+                                    $let: {
+                                        vars: {
+                                            // pick groups with same status
+                                            groupsSameStatus: {
+                                                $filter: {
+                                                    input: '$$groupsNull',
+                                                    as: 'group',
+                                                    cond: {
+                                                        $eq: ['$$group._id.status', '$$status'],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        in: {
+                                            $sum: '$$groupsSameStatus.count',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $project: {
+            groups: {
+                $let: {
+                    vars: {
+                        groupsNotNull: {
+                            $filter: {
+                                input: '$groups',
+                                as: 'group',
+                                cond: {
+                                    $ne: ['$$group._id.branch', null],
+                                },
+                            },
+                        },
+                    },
+                    in: {
+                        // add count to groups with same status
+                        $map: {
+                            input: '$$groupsNotNull',
+                            as: 'group',
+                            in: {
+                                _id: {
+                                    country: '$$group._id.country',
+                                    region: '$$group._id.region',
+                                    subRegion: '$$group._id.subRegion',
+                                    branch: '$$group._id.branch',
+                                    retailSegment: '$$group._id.retailSegment',
+                                    outlet: '$$group._id.outlet',
+                                    status: '$$group._id.status',
+                                },
+                                // evaluate new count depends on group's count and matched group with same status
+                                count: {
+                                    $let: {
+                                        vars: {
+                                            matchedGroup: {
+                                                $arrayElemAt: [{
+                                                    $filter: {
+                                                        input: '$add',
+                                                        as: 'addGroup',
+                                                        cond: {
+                                                            $eq: ['$$group._id.status', '$$addGroup.status'],
+                                                        },
+                                                    },
+                                                }, 0],
+                                            },
+                                        },
+                                        in: {
+                                            $sum: ['$$group.count', '$$matchedGroup.count'],
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    pipeline.push({
+        $unwind: {
+            path: '$groups',
+        },
+    });
+
+    pipeline.push({
+        $replaceRoot: {
+            newRoot: '$groups',
         },
     });
 
