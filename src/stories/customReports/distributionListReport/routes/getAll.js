@@ -561,6 +561,7 @@ module.exports = (req, res, next) => {
                     category: '$items.category',
                     item: '$items.item',
                     location: '$location',
+                    publisher : '$publisher',
                 },
                 items: {
                     $push: {
