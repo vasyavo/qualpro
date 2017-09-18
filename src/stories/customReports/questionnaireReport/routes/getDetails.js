@@ -254,10 +254,13 @@ module.exports = (req, res, next) => {
 
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'answer.personnel': {
                         $in: _.union(queryFilter.assignedTo, personnel._id),
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -293,10 +296,13 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'personnel.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -310,7 +316,7 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$records',
+            $unwind: '$records'
         });
 
         pipeline.push({
