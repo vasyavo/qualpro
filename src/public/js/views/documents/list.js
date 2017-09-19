@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var Marionette = require('marionette');
+var Marionette = require('backbone.marionette');
 var ChildView = require('../../views/documents/listItem');
 var Template = require('../../../templates/documents/wrapper.html');
 var BadgeStore = require('../../services/badgeStore');

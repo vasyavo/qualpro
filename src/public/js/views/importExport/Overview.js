@@ -1,4 +1,4 @@
-var Marionette = require('marionette');
+var Marionette = require('backbone.marionette');
 var ImportErrorsView = require('../../views/importExport/ImportErrors');
 var Template = require('../../../templates/importExport/overview.html');
 var MS_EXEL_CONTENT_TYPES = require('../../constants/otherConstants').MS_EXCEL_CONTENT_TYPES;

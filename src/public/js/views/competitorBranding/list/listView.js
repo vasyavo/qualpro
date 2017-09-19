@@ -1,10 +1,10 @@
 var _ = require('underscore');
 var $ = require('jquery');
-var template = require('text!templates/competitorBranding/list/list.html');
-var PreView = require('views/competitorBranding/preView/preView');
-var paginator = require('views/paginator');
-var CONTENT_TYPES = require('constants/contentType');
-var BadgeStore = require('services/badgeStore');
+var template = require('../../../../templates/competitorBranding/list/list.html');
+var PreView = require('../../../views/competitorBranding/preView/preView');
+var paginator = require('../../../views/paginator');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.COMPETITORBRANDING,

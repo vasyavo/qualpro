@@ -3,7 +3,7 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var CONSTANTS = require('../constants/otherConstants');
 
-module.exports = Backbone.View.extend({
+var TopBarView = Backbone.View.extend({
     el    : '#topBarHolder',
     events: {
         'click .itemsNumber'                       : 'switchPageCounter',
@@ -461,3 +461,5 @@ TopBarView.extend = function (childTopBar) {
 
     return view;
 };
+
+module.exports = TopBarView;

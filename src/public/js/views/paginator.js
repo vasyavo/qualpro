@@ -13,7 +13,7 @@ var DefFilters = require('../helpers/defFilterLogic');
 var ERROR_MESSAGES = require('../constants/errorMessages');
 var App = require('../appState');
 
-module.exports = Backbone.View.extend({
+var View = Backbone.View.extend({
     listLength        : null,
     defaultItemsNumber: null,
     newCollection     : null,
@@ -1024,3 +1024,5 @@ View.extend = function (childView) {
 
     return view;
 };
+
+module.exports = View;

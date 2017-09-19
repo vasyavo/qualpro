@@ -35,20 +35,6 @@ var App = require('../../../appState');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var CONTROLS_CONFIG = LEVEL_CONFIG[CONTENT_TYPES.OBJECTIVES];
 
-var viewControls = Object.keys(CONTROLS_CONFIG).map(function (key) {
-    var object = CONTROLS_CONFIG[key];
-
-    object.preview.map(function(item) {
-        var relativePath = '../../../../' + item.template;
-
-        item.template = require(relativePath);
-
-        return item;
-    });
-
-    return object;
-});
-
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,
 
@@ -884,8 +870,8 @@ module.exports = BaseView.extend({
         var assignToIds = _.pluck(jsonModel.assignedTo, '_id');
         var isUserAssignedToAndCover = this.tabName === 'myCover' ? _.intersection(assignToIds, coveredIds) : [];
         var createdByMe = jsonModel.createdBy.user._id === App.currentUser._id && !isUserAssignedToAndCover.length;
-        var configForTemplate = viewControls[App.currentUser.accessRole.level].preview;
-        var onfigForActivityList = viewControls.activityList.preview;
+        var configForTemplate = CONTROLS_CONFIG[App.currentUser.accessRole.level].preview;
+        var onfigForActivityList = CONTROLS_CONFIG.activityList.preview;
         var isCountryObjective = (jsonModel.objectiveType === 'country') && (App.currentUser.accessRole.level === 1);
 
         if (!this.dontShowDialog) {
@@ -966,7 +952,7 @@ module.exports = BaseView.extend({
                     if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                         if (!(individualObjective && config.elementId === 'viewSubObjective')) {
                             var container = self.$el.find(config.selector);
-                            var template = _.template(config.template);
+                            var template = _.template('../../../../' + config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({

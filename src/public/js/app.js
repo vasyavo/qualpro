@@ -1,17 +1,17 @@
 var _ = require('underscore');
 var $ = require('jquery');
 var io = require('socket.io-client');
-var CKEDITOR = require('ckeditor-core');
+var CKEDITOR = require('ckeditor');
 var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');
 
-require('scrollBar');
+require('jquery-mousewheel');
 require('rater');
-require('jquery-rater');
-require('tree');
-require('ckeditor-jquery');
-require('jquery-masked-field');
+require('jquery-bar-rating');
+require('fancytree');
+require('ckEditorJqueryAdapter');
+require('jquery.inputmask');
 
 //require styles for webpack build
 require('../styles');

@@ -1,6 +1,6 @@
 var moment = require('moment');
 var Backbone = require('backbone');
-var Populate = require('populate');
+var Populate = require('../../populate');
 var DisplayTypeCollection = require('../../collections/displayType/collection');
 var CategoryCollection = require('../../collections/category/collection');
 var BrandCollection = require('../../collections/brand/collection');

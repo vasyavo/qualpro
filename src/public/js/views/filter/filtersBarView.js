@@ -1,5 +1,5 @@
-var $ = require('backbone');
-var _ = require('backbone');
+var $ = require('jquery');
+var _ = require('underscore');
 var Backbone = require('backbone');
 var MultiSelectFilterView = require('../../views/filter/multiSelectFilterView');
 var SingleSelectFilterView = require('../../views/filter/singleSelectFilterView');

@@ -1,4 +1,4 @@
-var _ = require('underscore');
+xvar _ = require('underscore');
 var $ = require('jquery');
 var template = require('../../../../templates/competitorPromotion/list/list.html');
 var PreView = require('../../../views/competitorPromotion/preView/preView');

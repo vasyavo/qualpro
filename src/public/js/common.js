@@ -1,6 +1,5 @@
 ﻿var _ = require('underscore');
 var $ = require('jquery');
-var dataService = require('./dataService');
 var CONSTANTS = require('./constants/otherConstants');
 var ERROR_MESSAGES = require('./constants/errorMessages');
 var canvasSize = CONSTANTS.CANVAS_SIZE;

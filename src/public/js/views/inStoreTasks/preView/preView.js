@@ -31,20 +31,6 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
 var CONTROLS_CONFIG = levelConfig[CONTENT_TYPES.INSTORETASKS];
 
-var viewControls = Object.keys(CONTROLS_CONFIG).map(function (key) {
-    var object = CONTROLS_CONFIG[key];
-
-    object.preview.map(function(item) {
-        var relativePath = '../../../../' + item.template;
-
-        item.template = require(relativePath);
-
-        return item;
-    });
-
-    return object;
-});
-
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.INSTORETASKS,
 
@@ -743,8 +729,8 @@ module.exports = BaseView.extend({
         var self = this;
         var jsonFlowModel = this.modelForFlow.toJSON();
         var buttons = {};
-        var configForTemplate = viewControls[App.currentUser.accessRole.level].preview;
-        var configForActivityList = viewControls.activityList.preview;
+        var configForTemplate = CONTROLS_CONFIG[App.currentUser.accessRole.level].preview;
+        var configForActivityList = CONTROLS_CONFIG.activityList.preview;
 
         jsonModel.myCC = self.tabName === 'myCC';
 

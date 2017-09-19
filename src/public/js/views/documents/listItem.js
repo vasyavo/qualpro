@@ -1,5 +1,5 @@
 var Backbone = require('backbone');
-var Marionette = require('marionette');
+var Marionette = require('backbone.marionette');
 var _ = require('underscore');
 var documentPreview = require('../../views/documents/preview');
 var EditDocumentView = require('../../views/documents/edit');

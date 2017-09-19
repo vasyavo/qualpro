@@ -1,4 +1,4 @@
-var Marionette = require('marionette');
+var Marionette = require('backbone.marionette');
 var Template = require('../../../templates/importExport/top-bar.html');
 
 module.exports = Marionette.View.extend({

@@ -9,7 +9,7 @@ var FilterCollection = require('../../collections/filter/filterCollection');
 var TimeView = require('../../views/filter/timeView');
 var App = require('../../appState');
 
-module.exports = Backbone.View.extend({
+var filterValuesView = Backbone.View.extend({
     elementsTemplate  : _.template(filterElements),
     currentPage       : 1,
     currentCheckedPage: 1,
@@ -505,3 +505,5 @@ filterValuesView.extend = function (childTopBar) {
 
     return view;
 };
+
+module.exports = filterValuesView;
