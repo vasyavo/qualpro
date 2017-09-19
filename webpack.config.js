@@ -38,6 +38,14 @@ module.exports = {
                 use: 'imports-loader?jQuery=jquery',
             },
             {
+                test: /lightSlider/,
+                use: 'imports-loader?jQuery=jquery',
+            },
+            {
+                test: /fancytree/,
+                use: 'imports-loader?jQuery=jquery',
+            },
+            {
                 test: /\.html$/,
                 loader: 'html-loader',
             },
@@ -54,9 +62,6 @@ module.exports = {
     },
 
     plugins: [
-        new webpack.ProvidePlugin({
-            jQuery: 'jquery',
-        }),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
         //new webpack.optimize.UglifyJsPlugin({ minimize: true }),
         new HtmlWebpackPlugin({
