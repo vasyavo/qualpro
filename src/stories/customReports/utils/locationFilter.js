@@ -1,14 +1,16 @@
+const ObjectId = require('mongoose').Types.ObjectId;
+const _ = require('lodash');
 const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 
-const locations = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION, CONTENT_TYPES.BRANCH];
+const props = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION, CONTENT_TYPES.BRANCH];
 
 
 /**
  * @function
- * @param {Array} pipeline - current pipeline.
- * @param {Object} personnel - current user .
- * @param {Object} filter - filter from user.
- * @param {Boolean} forFilter - condition is this function used for filter query or get docs query
+ * @param {Array} pipeline Current pipeline.
+ * @param {Object} personnel Current user.
+ * @param {Object} filter Filter from user.
+ * @param {Object|Boolean} scopeFilter
  */
 
 module.exports = (pipeline, personnel, filter, scopeFilter) => {
@@ -16,33 +18,42 @@ module.exports = (pipeline, personnel, filter, scopeFilter) => {
         $and: [],
     };
 
-    locations.forEach((location) => {
-
-        let locationItems;
+    props.forEach(prop => {
+        let items;
 
         if (scopeFilter) {
-            locationItems = personnel[location] && personnel[location].length ? personnel[location] : null;
+            if (personnel[prop] && personnel[prop].length) {
+                items = personnel[prop].map(id => {
+                    return _.isString(id) ? ObjectId(id) : id;
+                });
+            } else {
+                items = null;
+            }
 
-            scopeFilter[location] = locationItems || null; // for filter current scope of this location
-            filter[location] = locationItems || filter[location]; // for filter under scope of this location
+            scopeFilter[prop] = items || null; // for filter current scope of this location
+            filter[prop] = items || filter[prop]; // for filter under scope of this location
+        } else if (personnel[prop] && personnel[prop].length) {
+            items = personnel[prop].map(id => {
+                return _.isString(id) ? ObjectId(id) : id;
+            });
         } else {
-            locationItems = personnel[location] && personnel[location].length ? personnel[location] : filter[location];
+            items = filter[prop];
         }
 
 
-        if (locationItems && locationItems.length) {
+        if (items && items.length) {
             $locationMatch.$and.push({
                 $or: [
                     {
-                        [location]: {
-                            $in: locationItems,
+                        [prop]: {
+                            $in: items,
                         },
                     },
                     {
-                        [location]: { $eq: null },
+                        [prop]: { $eq: null },
                     },
                     {
-                        [location]: { $eq: [] },
+                        [prop]: { $eq: [] },
                     },
                 ],
             });

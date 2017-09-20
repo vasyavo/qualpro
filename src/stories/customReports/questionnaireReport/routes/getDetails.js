@@ -101,24 +101,28 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
             });
         }
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -254,10 +258,13 @@ module.exports = (req, res, next) => {
 
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'answer.personnel': {
                         $in: _.union(queryFilter.assignedTo, personnel._id),
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -293,10 +300,13 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'personnel.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -310,7 +320,7 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$records',
+            $unwind: '$records'
         });
 
         pipeline.push({
