@@ -3534,13 +3534,18 @@ const Filters = function () {
     this.personnelFilters = function (req, res, next) {
         const _ = require('lodash'); // override _
         const STATUSES = require('../public/js/constants/personnelStatuses');
+        const locationFilter = require('./../stories/customReports/utils/locationFilter');
 
         const query = req.query;
-        const queryFilter = {};
+        const user = req.personnelModel;
+        const filterMapper = new FilterMapper();
+        const filter = filterMapper.mapFilter({
+            contentType: CONTENT_TYPES.PERSONNEL,
+            filter: query.filter,
+            personnel: req.personnelModel,
+        });
 
-        if (query.filter.archived) {
-            queryFilter.archived = query.filter.archived.values[0];
-        }
+        const queryFilter = {};
 
         [
             CONTENT_TYPES.COUNTRY,
@@ -3549,18 +3554,21 @@ const Filters = function () {
             CONTENT_TYPES.RETAILSEGMENT,
             CONTENT_TYPES.OUTLET,
             CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
         ].forEach(filterName => {
-            const filter = query.filter[filterName];
-
-            if (filter && filter.values.length) {
-                queryFilter[filterName] = filter.values.map((item) => {
-                    return ObjectId(item);
-                });
+            if (filter[filterName]) {
+                queryFilter[filterName] = filter[filterName].$in;
             }
         });
 
+        if (query.filter.archived) {
+            queryFilter.archived = query.filter.archived.values[0];
+        }
+
         const pipeline = [];
+
+        const scopeFilter = {};
+
+        locationFilter(pipeline, user, queryFilter, scopeFilter);
 
         pipeline.push({
             $project: {
@@ -3868,6 +3876,22 @@ const Filters = function () {
             pipeline.push({ $addFields });
         }
 
+        if (scopeFilter[CONTENT_TYPES.REGION]) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $filter: {
+                            input: '$region',
+                            as: 'region',
+                            cond: {
+                                $setIsSubset: [['$$region'], scopeFilter[CONTENT_TYPES.REGION]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
             pipeline.push(...[
                 {
@@ -4062,6 +4086,22 @@ const Filters = function () {
             pipeline.push({ $addFields });
         }
 
+        if (scopeFilter[CONTENT_TYPES.SUBREGION]) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $filter: {
+                            input: '$subRegion',
+                            as: 'subRegion',
+                            cond: {
+                                $setIsSubset: [['$$subRegion'], scopeFilter[CONTENT_TYPES.SUBREGION]],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
             pipeline.push(...[{
                 $addFields: {
@@ -4111,6 +4151,7 @@ const Filters = function () {
                 as: 'branch.selected',
             },
         });
+
         {
             const $addFields = {};
 
