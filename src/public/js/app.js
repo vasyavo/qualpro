@@ -1,17 +1,17 @@
 var _ = require('underscore');
 var $ = require('jquery');
 var io = require('socket.io-client');
-var CKEDITOR = require('ckeditor');
 var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');
 
+require('ckeditor');
 require('jquery-mousewheel');
-require('rater');
+require('rater-jquery');
 require('jquery-bar-rating');
 require('fancytree');
-require('ckEditorJqueryAdapter');
 require('jquery.inputmask');
+require('malihu-custom-scrollbar-plugin');
 
 //require styles for webpack build
 require('../styles');

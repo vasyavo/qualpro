@@ -12,10 +12,9 @@ module.exports = {
         alias: {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
-            ckEditorJqueryAdapter: 'ckeditor/adapters/jquery',
+            'jqueryui': path.resolve(__dirname, 'src/public/js/libs/jquery-ui/jquery-ui.min'),
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
             imageCrop: 'jquery-jcrop',
-            jqueryui: 'jquery-ui',
         },
         extensions: ['.js', '.jsx'],
         modules: ['node_modules', 'bower_components'],
@@ -30,7 +29,7 @@ module.exports = {
                 use: 'imports-loader?backbone,jqueryui,imageCrop',
             },
             {
-                test: /ckEditorJqueryAdapter/,
+                test: /jquery-ui/,
                 use: 'imports-loader?jQuery=jquery',
             },
             {
@@ -43,6 +42,14 @@ module.exports = {
             },
             {
                 test: /fancytree/,
+                use: 'imports-loader?jQuery=jquery',
+            },
+            {
+                test: /jquery.inputmask/,
+                use: 'imports-loader?jQuery=jquery',
+            },
+            {
+                test: /rater-jquery/,
                 use: 'imports-loader?jQuery=jquery',
             },
             {
