@@ -6,6 +6,8 @@ var app = require('./app');
 var PopUpView = require('./views/popUp');
 var App = require('./appState');
 
+require('./socket.io');
+
 var Store = function () {
     this.save = function (name, data) {
         localStorage.setItem(name, JSON.stringify(data));

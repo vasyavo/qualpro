@@ -1,6 +1,5 @@
 var _ = require('underscore');
 var $ = require('jquery');
-var io = require('socket.io-client');
 var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');
