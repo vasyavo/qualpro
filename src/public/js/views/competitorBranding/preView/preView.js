@@ -1,4 +1,5 @@
 var _ = require('underscore');
+var lodash = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/competitorBranding/preview.html');
@@ -23,6 +24,7 @@ var EditView = require('../../../views/competitorBranding/edit');
 var CompetitorBrandingModel = require('../../../models/competitorBranding');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -463,7 +465,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = require('../../../../' + config.template);
+                var template = lodash.get(modules, config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

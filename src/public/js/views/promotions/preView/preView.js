@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var PreviewTemplate = require('../../../../templates/promotions/preview.html');
 var FileTemplate = require('../../../../templates/file/preView.html');
 var FileCollection = require('../../../collections/file/collection');
@@ -20,6 +21,7 @@ var CommentModel = require('../../../models/comment');
 var CommentCollection = require('../../../collections/comment/collection');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.PROMOTIONS,
@@ -414,7 +416,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess) {
             currentConfig.forEach(function (config) {
-                var template = require('../../../../' + config.template);
+                var template = lodash.get(modules, config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

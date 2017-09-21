@@ -1,14 +1,15 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var PreviewTemplate = require('../../../../templates/notes/preView/preView.html');
 var BaseView = require('../../../views/baseDialog');
-var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var FileCollection = require('../../../collections/file/collection');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTES,
@@ -76,7 +77,7 @@ module.exports = BaseView.extend({
         if (this.activityList && App.currentUser.workAccess) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
 
-            var template = require('../../../../' + currentConfig.template);
+            var template = lodash.get(modules, currentConfig.template);
             var container = self.$el.find(currentConfig.selector);
 
             template = _.template(template);

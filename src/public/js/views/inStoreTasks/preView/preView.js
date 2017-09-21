@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var async = require('async');
 var PreviewTemplate = require('../../../../templates/inStoreTasks/preview.html');
 var FormTemplate = require('../../../../templates/inStoreTasks/form/form.html');
@@ -30,6 +31,7 @@ var objectivesStatusHelper = require('../../../helpers/objectivesStatusHelper');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
 var CONTROLS_CONFIG = levelConfig[CONTENT_TYPES.INSTORETASKS];
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.INSTORETASKS,
@@ -812,7 +814,7 @@ module.exports = BaseView.extend({
                     if (App.currentUser.workAccess) {
                         if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
                             var container = self.$el.find(config.selector);
-                            var template = _.template(config.template);
+                            var template = lodash.get(modules, config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({
@@ -826,7 +828,7 @@ module.exports = BaseView.extend({
             } else {
                 configForActivityList.forEach(function (config) {
                     var container = self.$el.find(config.selector);
-                    var template = _.template(config.template);
+                    var template = lodash.get(modules, config.template);
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({

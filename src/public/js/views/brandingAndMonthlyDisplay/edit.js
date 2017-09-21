@@ -8,7 +8,7 @@ var arabicInput = require('../../helpers/implementShowHideArabicInputIn');
 var Template = require('../../../templates/brandingAndMonthlyDisplay/edit.html');
 var App = require('../../appState');
 
-return Backbone.View.extend({
+module.exports = Backbone.View.extend({
 
     initialize: function (options) {
         this.translation = options.translation;

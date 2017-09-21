@@ -1,19 +1,18 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var PreviewTemplate = require('../../../../templates/marketingCampaign/preview.html');
 var FileTemplate = require('../../../templates/file/preView.html');
 var FileCollection = require('../../../collections/file/collection');
 var BrandingAndDisplayModel = require('../../../models/marketingCampaign');
 var BaseView = require('../../../views/baseDialog');
-var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
-var implementShowHideArabicInputIn = require('../../../helpers/implementShowHideArabicInputIn');
-var dataService = require('../../../dataService');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var brandingAndDisplayItemsView = require('../../../views/marketingCampaign/marketingCampaignItem');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.MARKETING_CAMPAIGN,
@@ -169,7 +168,7 @@ module.exports = BaseView.extend({
 
         if ([1, 2, 3, 4, 8, 9, 10].indexOf(level) !== -1 && App.currentUser.workAccess) {
             currentConfig.forEach(function (config) {
-                var template = require('../../../../' + config.template);
+                var template = lodash.get(modules, config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

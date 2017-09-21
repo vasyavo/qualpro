@@ -21,6 +21,7 @@ var PubNubClient = require('./services/pubnub');
 var App = require('./appState');
 var DocumentCollection = require('./collections/documents/collection');
 var DefFilters = require('./helpers/defFilterLogic');
+var modules = require('./requiredModules');
 
 module.exports = Backbone.Router.extend({
 
@@ -351,21 +352,21 @@ module.exports = Backbone.Router.extend({
 
         var self = context;
         var startTime = new Date();
-        var contentViewUrl = 'views/' + contentType + '/' + viewType + '/' + viewType + 'View';
-        var topBarViewUrl = 'views/' + contentType + '/topBarView';
-        var collectionUrl = 'collections/' + contentType + '/collection';
-        var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = 'translations/' + currentLanguage + '/' + contentType;
+        var contentViewUrl = contentType + '.views.' + viewType + '.' + viewType + 'View';
+        var topBarViewUrl = contentType + '.views.' + '.topBarView';
+        var collectionUrl = contentType + '.collection';
+        var translationUrl = contentType + '.translation.' + App.currentUser.currentLanguage;
 
         if (context.mainView === null) {
             context.main(contentType);
         }
 
         function loadContent() {
-            var ContentView = require(contentViewUrl);
-            var TopBarView = require(topBarViewUrl);
-            var ContentCollection = require(collectionUrl);
-            var translation = require(translationUrl);
+            debugger;
+            var ContentView = lodash.get(modules, contentViewUrl);
+            var TopBarView = lodash.get(modules, topBarViewUrl);
+            var ContentCollection = lodash.get(modules, collectionUrl);
+            var translation = lodash.get(modules, translationUrl);
             var defaultFilters = new DefFilters(App.currentUser._id);
             var defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
             filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;

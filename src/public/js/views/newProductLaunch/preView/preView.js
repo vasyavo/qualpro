@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/newProductLaunch/preview.html');
 var FilePreviewTemplate = require('../../../../templates/file/preView.html');
@@ -12,6 +13,7 @@ var EditView = require('../../../views/newProductLaunch/edit');
 var NewProductLaunchModel = require('../../../models/newProductLaunch');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -196,7 +198,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = require('../../../../' + config.template);
+                var template = lodash.get(modules, config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

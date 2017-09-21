@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BaseView = require('../../../views/baseDialog');
 var FileCollection = require('../../../collections/file/collection');
@@ -8,6 +9,7 @@ var PreviewTemplate = require('../../../../templates/notifications/preview.html'
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var CONSTANTS = require('../../../constants/otherConstants');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NOTIFICATIONS,
@@ -97,7 +99,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && this.activityList) {
             currentConfig.forEach(function (config) {
-                var template = require('../../../../' + config.template);
+                var template = lodash.get(modules, config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

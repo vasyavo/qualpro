@@ -1,5 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
+var lodash = require('lodash');
 var Backbone = require('backbone');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/objectives/preview.html');
@@ -34,6 +35,7 @@ var SubObjectiveView = require('../../../views/objectives/viewSubObjective');
 var App = require('../../../appState');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var CONTROLS_CONFIG = LEVEL_CONFIG[CONTENT_TYPES.OBJECTIVES];
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.OBJECTIVES,
@@ -952,7 +954,7 @@ module.exports = BaseView.extend({
                     if (canDisplay && !assignInIndividual && jsonModel.status !== CONSTANTS.OBJECTIVE_STATUSES.CLOSED && App.currentUser.workAccess) {
                         if (!(individualObjective && config.elementId === 'viewSubObjective')) {
                             var container = self.$el.find(config.selector);
-                            var template = _.template('../../../../' + config.template);
+                            var template = lodash.get(modules, config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({
@@ -966,7 +968,7 @@ module.exports = BaseView.extend({
             } else {
                 onfigForActivityList.forEach(function (config) {
                     var container = self.$el.find(config.selector);
-                    var template = _.template(config.template);
+                    var template = lodash.get(modules, config.template);
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({

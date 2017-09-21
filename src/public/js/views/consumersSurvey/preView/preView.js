@@ -1,7 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
 var lodash = require('lodash');
-var moment = require('moment');
 var d3 = require('d3');
 var PreViewTemplate = require('../../../../templates/consumersSurvey/preview.html');
 var npsQuestionTemplate = require('../../../../templates/consumersSurvey/npmQuestion.html');
@@ -20,6 +19,7 @@ var ACL_ROLES = require('../../../constants/aclRoleIndexes');
 var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
+var modules = require('../../../requiredModules');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.CONSUMER_SURVEY,
@@ -586,7 +586,7 @@ module.exports = BaseView.extend({
 
         if (this.activityList && App.currentUser.workAccess) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
-            var template = require('../../../../' + currentConfig.template);
+            var template = lodash.get(modules, currentConfig.template);
             var container = self.$el.find(currentConfig.selector);
 
             template = _.template(template);

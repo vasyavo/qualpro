@@ -12,6 +12,8 @@ require('fancytree');
 require('jquery.inputmask');
 require('malihu-custom-scrollbar-plugin');
 
+require('./requiredModules');
+
 //require styles for webpack build
 require('../styles');
 

@@ -39,4 +39,4 @@ var newProductLaunch = {
     newProductLaunchEditTitle : '', // todo
 };
 
-return _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);
