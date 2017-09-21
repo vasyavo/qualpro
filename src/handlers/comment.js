@@ -747,14 +747,14 @@ var Comment = function () {
                         return waterfallCb(null, {data: [], total: 0});
                     }
 
-                    pipeLine.push({
+                   /* pipeLine.push({
                         $match: {
                             taskId: {
                                 $in: objectiveId.objectID(),
                             },
                         },
                     });
-
+*/
                     pipeLine.push({
                         $addFields: {
                             lastDate: {
@@ -830,6 +830,24 @@ var Comment = function () {
                     pipeLine.push({
                         $replaceRoot: {
                             newRoot: '$_id',
+                        },
+                    });
+
+                    pipeLine.push({
+                        $addFields: {
+                            createdBy: {
+                                user: {
+                                    $let: {
+                                        vars: {
+                                            user: '$createdBy.user',
+                                        },
+                                        in: {
+                                            _id: '$$user',
+                                        },
+                                    },
+                                },
+                                date: '$createdBy.date',
+                            },
                         },
                     });
 
