@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const ConsumersSurveyAnswersModel = require('./../../../../types/consumersSurveyAnswers/model');
+const ConsumersSurveyModel = require('./../../../../types/consumersSurvey/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const sanitizeHtml = require('./../../utils/sanitizeHtml');
@@ -165,7 +165,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push(...[{
             $unwind: {
-                path                      : '$questions',
+                path: '$questions',
             },
         }, {
             $lookup: {
@@ -499,7 +499,12 @@ module.exports = (req, res, next) => {
                     $ifNull: ['$answers.customer.name', 'N/A'],
                 },
                 nationality        : {
-                    $ifNull: ['$answers.customer.nationality.name', 'N/A'],
+                    $ifNull: [
+                        '$answers.customer.nationality.name', {
+                            en: 'N/A',
+                            ar: 'N/A',
+                        },
+                    ],
                 },
                 gender             : {
                     $ifNull: ['$answers.customer.gender', 'N/A'],
@@ -655,7 +660,7 @@ module.exports = (req, res, next) => {
             },
         });
 
-        ConsumersSurveyAnswersModel.aggregate(pipeline)
+        ConsumersSurveyModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
     };
