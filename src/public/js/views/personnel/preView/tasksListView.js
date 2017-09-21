@@ -400,7 +400,8 @@ module.exports = paginator.extend({
         jsonCollection.forEach(function (model) {
             $holder.append(self.rowsTemplates[model.context || 'objectives']({
                 model      : model,
-                translation: self.translation
+                translation: self.translation,
+                App: App,
             }));
         });
 
@@ -430,7 +431,8 @@ module.exports = paginator.extend({
         jsonCollection.forEach(function (model) {
             $holder.append(self.rowsTemplates[model.context || 'objectives']({
                 model      : model,
-                translation: self.translation
+                translation: self.translation,
+                App: App,
             }));
         });
 

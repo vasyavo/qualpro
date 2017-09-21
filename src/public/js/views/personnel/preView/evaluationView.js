@@ -510,7 +510,8 @@ module.exports = BaseView.extend({
             personnel  : this.personnel,
             contentType: this.contentType,
             daysLeft   : daysLeft,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         $thisEl = this.$el;

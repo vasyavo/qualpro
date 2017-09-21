@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var CONSTANTS = require('../constants/otherConstants');
+var App = require('../appState');
 
 var TopBarView = Backbone.View.extend({
     el    : '#topBarHolder',
@@ -419,7 +420,8 @@ var TopBarView = Backbone.View.extend({
             viewType     : this.viewType,
             contentType  : this.contentType,
             translation  : this.translation,
-            currentUserId: this.sendPassForCurrentUser
+            currentUserId: this.sendPassForCurrentUser,
+            App: App,
         }));
 
         $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');

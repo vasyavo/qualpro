@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var lodash = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/brandingAndMonthlyDisplay/preview.html');
@@ -24,7 +23,7 @@ var EditView = require('../../../views/brandingAndMonthlyDisplay/edit');
 var BrandingAndMonthlyDislpayModel = require('../../../models/brandingAndMonthlyDisplay');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
@@ -435,7 +434,7 @@ module.exports = BaseView.extend({
 
             var formString;
 
-            formString = this.$el.html(this.template({
+            formString = self.$el.html(self.template({
                 jsonModel  : model,
                 translation: self.translation
             }));
@@ -474,7 +473,7 @@ module.exports = BaseView.extend({
 
             if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
                 currentConfig.forEach(function (config) {
-                    var template = lodash.get(modules, config.template);
+                    var template = requireContent(config.template);
                     var container = self.$el.find(config.selector);
 
                     template = _.template(template);

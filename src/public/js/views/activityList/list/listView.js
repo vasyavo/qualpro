@@ -11,6 +11,7 @@ var REGEXP = require('../../../constants/validation');
 var dataService = require('../../../dataService');
 var BadgeStore = require('../../../services/badgeStore');
 var App = require('../../../appState');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = paginator.extend({
     contentType: 'activityList',
@@ -69,9 +70,6 @@ module.exports = paginator.extend({
         var branchNames = [];
         var personnelName = [];
         var href;
-        var translationUrl;
-        var targetModelUrl;
-        var preViewUrl;
         var timeValues;
         var contentType;
         var filter;
@@ -91,18 +89,17 @@ module.exports = paginator.extend({
             if (promotionsOrBrandingItems) {
                 href = promotionItems ? 'promotions' : 'marketingCampaign';
             }
-            href = href ? href : moduleObject.href;
-            translationUrl = '../../../translations/' + self.currentLanguage + '/' + href;
-            if (href === 'inStoreTasks') {
-                targetModelUrl = '../../../models/taskFlow';
-            } else {
-                targetModelUrl = '../../../models/' + href;
-            }
-            preViewUrl = '../../../views/' + href + '/preView/preView';
 
-            TargetModel = require(targetModelUrl);
-            PreView = require(preViewUrl);
-            translation = require(translationUrl);
+            href = href ? href : moduleObject.href;
+
+            if (href === 'inStoreTasks') {
+                TargetModel = requireContent('inStoreTasks.taskFlowModel');
+            } else {
+                TargetModel = requireContent(href + '.model');
+            }
+
+            PreView = requireContent(href + '.views.preview');
+            translation = requireContent(href + '.translation.' + self.currentLanguage);
 
             itemModel = new TargetModel({
                 _id : id
@@ -121,13 +118,10 @@ module.exports = paginator.extend({
         } else if (['region', 'subRegion', 'country', 'retailSegment', 'outlet', 'branch'].indexOf(modelJSON.itemDetails) !== -1) {
             contentType = modelJSON.itemDetails;
             url = model.get('itemType');
-            translationUrl = '../../../translations/' + self.currentLanguage + '/' + contentType;
-            targetModelUrl = '../../../models/' + contentType;
-            preViewUrl = '../../../views/' + url + '/preView/preView';
 
-            TargetModel = require(targetModelUrl);
-            PreView = require(preViewUrl);
-            translation = require(translationUrl);
+            TargetModel = requireContent(contentType + '.model');
+            PreView = requireContent(url + '.views.preview');
+            translation = requireContent(contentType + '.translation.' + self.currentLanguage);
 
             itemModel = new TargetModel({_id: id});
             itemModel.on('sync', function (prettyModel) {
@@ -276,7 +270,7 @@ module.exports = paginator.extend({
         e.stopPropagation();
 
         personModel.on('sync', function (model) {
-            var translation = require('../../../translations/' + self.currentLanguage + '/personnel');
+            var translation = requireContent('personnel.translation.' + self.currentLanguage);
 
             self.personPreView = new personPreView({
                 model      : model,

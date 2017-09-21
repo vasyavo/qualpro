@@ -19,7 +19,7 @@ var ACL_ROLES = require('../../../constants/aclRoleIndexes');
 var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.CONSUMER_SURVEY,
@@ -555,7 +555,8 @@ module.exports = BaseView.extend({
         var formString = this.template({
             model       : jsonModel,
             translation : this.translation,
-            activityList: this.activityList
+            activityList: this.activityList,
+            App: App,
         });
 
         this.$el = $(formString).dialog({
@@ -586,7 +587,7 @@ module.exports = BaseView.extend({
 
         if (this.activityList && App.currentUser.workAccess) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
-            var template = lodash.get(modules, currentConfig.template);
+            var template = requireContent(currentConfig.template);
             var container = self.$el.find(currentConfig.selector);
 
             template = _.template(template);

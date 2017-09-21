@@ -1,19 +1,18 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var lodash = require('lodash');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/newProductLaunch/preview.html');
 var FilePreviewTemplate = require('../../../../templates/file/preView.html');
-var FileCollection = require('../../../../templates/file/preView.html');
+var FileCollection = require('../../../collections/file/collection');
 var BaseView = require('../../../views/baseDialog');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var CONTENT_TYPES = require('../../../constants/contentType');
-var LEVEL_CONFIG = require('../../../constants/contentType');
+var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var EditView = require('../../../views/newProductLaunch/edit');
 var NewProductLaunchModel = require('../../../models/newProductLaunch');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -198,7 +197,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

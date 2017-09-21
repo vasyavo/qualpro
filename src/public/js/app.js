@@ -3,6 +3,7 @@ var $ = require('jquery');
 var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');
+var App = require('./appState');
 
 require('ckeditor');
 require('jquery-mousewheel');

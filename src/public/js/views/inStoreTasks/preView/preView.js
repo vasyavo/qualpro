@@ -1,6 +1,5 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var lodash = require('lodash');
 var async = require('async');
 var PreviewTemplate = require('../../../../templates/inStoreTasks/preview.html');
 var FormTemplate = require('../../../../templates/inStoreTasks/form/form.html');
@@ -31,7 +30,7 @@ var objectivesStatusHelper = require('../../../helpers/objectivesStatusHelper');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
 var CONTROLS_CONFIG = levelConfig[CONTENT_TYPES.INSTORETASKS];
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.INSTORETASKS,
@@ -219,11 +218,16 @@ module.exports = BaseView.extend({
     openForm: function () {
         var modelJSON = this.model.toJSON();
         var form = modelJSON.form;
-        var id = form._id;
         var self = this;
-        var branchesForVisibility = _.map(modelJSON.branch, function (branch) {
-            return branch.name.currentLanguage;
-        });
+        var branchesForVisibility;
+
+        if (this.activityList) {
+            branchesForVisibility = modelJSON.branch;
+        } else {
+            branchesForVisibility = _.map(modelJSON.branch, function (branch) {
+                return branch.name.currentLanguage;
+            });
+        }
 
         dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
             if (err) {
@@ -766,7 +770,8 @@ module.exports = BaseView.extend({
 
         formString.find('#main').html(this.updatedTemplate({
             jsonModel  : jsonModel,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
         this.taskFlowView = formString.find('#taskFlow').html(this.taskFlow({
             model      : jsonFlowModel,
@@ -814,7 +819,7 @@ module.exports = BaseView.extend({
                     if (App.currentUser.workAccess) {
                         if (config.forAll || (createdByMe && !config.forAllWithoutMy) || (!createdByMe && config.forAllWithoutMy) || (historyByMe.length && config.forAllWithoutMy)) {
                             var container = self.$el.find(config.selector);
-                            var template = lodash.get(modules, config.template);
+                            var template = requireContent(config.template);
 
                             if (!container.find('#' + config.elementId).length) {
                                 container[config.insertType](template({
@@ -828,7 +833,7 @@ module.exports = BaseView.extend({
             } else {
                 configForActivityList.forEach(function (config) {
                     var container = self.$el.find(config.selector);
-                    var template = lodash.get(modules, config.template);
+                    var template = requireContent(config.template);
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({

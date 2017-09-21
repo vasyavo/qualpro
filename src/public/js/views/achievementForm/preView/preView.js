@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var lodash = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/achievementForm/preview.html');
@@ -12,7 +11,7 @@ var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var EditView = require('../../../views/achievementForm/edit');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: 'achievementForm',
@@ -183,7 +182,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

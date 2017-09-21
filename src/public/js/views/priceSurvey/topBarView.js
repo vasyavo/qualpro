@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var topBarTemplate = require('../../../templates/newProductLaunch/topBarTemplate.html');
 var pagination = require('../../../templates/pagination/pagination.html');

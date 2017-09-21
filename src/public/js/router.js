@@ -2,7 +2,6 @@ var Backbone = require('backbone');
 var $ = require('jquery');
 var _ = require('Underscore');
 var lodash = require('lodash');
-var moment = require('moment');
 var Cookies = require('js-cookie');
 var mainView = require('./views/main/main');
 var LoginView = require('./views/login/login');
@@ -21,7 +20,7 @@ var PubNubClient = require('./services/pubnub');
 var App = require('./appState');
 var DocumentCollection = require('./collections/documents/collection');
 var DefFilters = require('./helpers/defFilterLogic');
-var modules = require('./requiredModules');
+var requireContent = require('./helpers/requireContent');
 
 module.exports = Backbone.Router.extend({
 
@@ -362,11 +361,10 @@ module.exports = Backbone.Router.extend({
         }
 
         function loadContent() {
-            debugger;
-            var ContentView = lodash.get(modules, contentViewUrl);
-            var TopBarView = lodash.get(modules, topBarViewUrl);
-            var ContentCollection = lodash.get(modules, collectionUrl);
-            var translation = lodash.get(modules, translationUrl);
+            var ContentView = requireContent(contentViewUrl);
+            var TopBarView = requireContent(topBarViewUrl);
+            var ContentCollection = requireContent(collectionUrl);
+            var translation = requireContent(translationUrl);
             var defaultFilters = new DefFilters(App.currentUser._id);
             var defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
             filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;

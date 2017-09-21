@@ -1,6 +1,5 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var lodash = require('lodash');
 var d3 = require('d3');
 var PreViewTemplate = require('../../../../templates/questionnary/preview.html');
 var QuestionListTemplate = require('../../../../templates/questionnary/questionList.html');
@@ -18,7 +17,7 @@ var ACL_ROLES = require('../../../constants/aclRoleIndexes');
 var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -59,7 +58,8 @@ module.exports = BaseView.extend({
 
             this.questionClick({}, $curEl.find('#questionList .questionsContainerItem:first'));
             this.renderFullRespondentsList();
-            this.respondentClick({}, $curEl.find('#respondentsFullList .questionsList:first'));
+            var questionListContainer = $curEl.find('#respondentsFullList .questionsList:first');
+            this.respondentClick({}, questionListContainer);
         }, this);
     },
 
@@ -660,7 +660,7 @@ module.exports = BaseView.extend({
         if (this.activityList && App.currentUser.workAccess) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview[0];
 
-            var template = lodash.get(modules, currentConfig.template);
+            var template = requireContent(currentConfig.template);
             var container = self.$el.find(currentConfig.selector);
 
             template = _.template(template);

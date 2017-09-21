@@ -1,13 +1,11 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var lodash = require('lodash');
 var PreviewTemplate = require('../../../../templates/promotions/preview.html');
 var FileTemplate = require('../../../../templates/file/preView.html');
 var FileCollection = require('../../../collections/file/collection');
 var FileModel = require('../../../models/file');
 var PromotionsModel = require('../../../models/promotions');
 var BaseView = require('../../../views/baseDialog');
-var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
 var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var dataService = require('../../../dataService');
@@ -21,7 +19,7 @@ var CommentModel = require('../../../models/comment');
 var CommentCollection = require('../../../collections/comment/collection');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType          : CONTENT_TYPES.PROMOTIONS,
@@ -370,7 +368,8 @@ module.exports = BaseView.extend({
         formString = this.$el.html(this.template({
             jsonModel   : jsonModel,
             translation : this.translation,
-            activityList: this.activityList
+            activityList: this.activityList,
+            App: App,
         }));
 
         this.$el = formString.dialog({
@@ -416,7 +415,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

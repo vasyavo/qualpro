@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var lodash = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/competitorBranding/preview.html');
@@ -11,7 +10,6 @@ var FileModel = require('../../../models/file');
 var CommentModel = require('../../../models/comment');
 var BaseView = require('../../../views/baseDialog');
 var CommentCollection = require('../../../collections/comment/collection');
-var populate = require('../../../populate');
 var CONSTANTS = require('../../../constants/otherConstants');
 var levelConfig = require('../../../constants/levelConfig');
 var implementShowHideArabicInputIn = require('../../../helpers/implementShowHideArabicInputIn');
@@ -24,7 +22,7 @@ var EditView = require('../../../views/competitorBranding/edit');
 var CompetitorBrandingModel = require('../../../models/competitorBranding');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.COMPETITORBRANDING,
@@ -424,7 +422,8 @@ module.exports = BaseView.extend({
 
         formString = this.$el.html(this.template({
             jsonModel : jsonModel,
-            translation : this.translation
+            translation : this.translation,
+            App: App,
         }));
 
         this.$el = formString.dialog({
@@ -465,7 +464,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

@@ -1,5 +1,4 @@
 var _ = require('underscore');
-var lodash = require('lodash');
 var $ = require('jquery');
 var moment = require('moment');
 var PreviewTemplate = require('../../../../templates/competitorPromotion/preview.html');
@@ -24,7 +23,7 @@ var CompetitorPromotionModel = require('../../../models/competitorPromotion');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var ACL_ROLES = require('../../../constants/aclRoleIndexes');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.COMPETITORPROMOTION,
@@ -454,6 +453,7 @@ module.exports = BaseView.extend({
             translation: self.translation,
             permittedToEdit: currentUserPermittedToEdit,
             currentLanguage: App.currentUser.currentLanguage,
+            App: App,
         }));
 
         this.$el = formString.dialog({
@@ -495,7 +495,7 @@ module.exports = BaseView.extend({
 
         if (App.currentUser.workAccess && currentConfig && currentConfig.length) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);

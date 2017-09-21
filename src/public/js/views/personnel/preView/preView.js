@@ -253,7 +253,8 @@ module.exports = baseDialog.extend({
             translation      : this.translation,
             isEvaluation     : this.isEvaluation,
             canViewEvaluation: this.canViewEvaluationTab,
-            activityList     : this.activityList
+            activityList     : this.activityList,
+            App: App,
         });
         $formString = $(formString);
         $formString.find('#main').html(this.mainTemplate({
@@ -261,7 +262,8 @@ module.exports = baseDialog.extend({
             fromTopMenu : this.fromTopMenu,
             translation : this.translation,
             hideButtons : this.hideButtons,
-            activityList: this.activityList
+            activityList: this.activityList,
+            App: App,
         }));
 
         if (this.isEvaluation && this.canViewEvaluationTab) {

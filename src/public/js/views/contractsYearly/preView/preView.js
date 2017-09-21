@@ -1,6 +1,5 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var lodash = require('lodash');
 var PreviewTemplate = require('../../../../templates/contractsYearly/preView/preView.html');
 var FileTemplate = require('../../../../templates/file/preView.html');
 var FileCollection = require('../../../collections/file/collection');
@@ -12,7 +11,7 @@ var LEVEL_CONFIG = require('../../../constants/levelConfig');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var PreView = require('../../../views/documents/preview');
 var App = require('../../../appState');
-var modules = require('../../../requiredModules');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseView.extend({
     contentType : CONTENT_TYPES.CONTRACTSYEARLY,
@@ -147,7 +146,7 @@ module.exports = BaseView.extend({
 
         if (((level <= 2) || (level >= 8)) && jsonModel.status._id !== 'expired' && App.currentUser.workAccess) {
             currentConfig.forEach(function (config) {
-                var template = lodash.get(modules, config.template);
+                var template = requireContent(config.template);
                 var container = self.$el.find(config.selector);
 
                 template = _.template(template);
