@@ -740,25 +740,134 @@ var Comment = function () {
                 },
                 function (waterfallCb) {
                     var queryObject;
-                    var pipeLine;
+                    let pipeLine = [];
                     var aggregation;
 
                     if (!objectiveId.length) {
                         return waterfallCb(null, {data: [], total: 0});
                     }
 
-                    queryObject = {
-                        taskId: {
-                            $in: objectiveId.objectID()
-                        }
-                    };
+                    pipeLine.push({
+                        $match: {
+                            taskId: {
+                                $in: objectiveId.objectID(),
+                            },
+                        },
+                    });
 
-                    pipeLine = getAllPipeline({
-                        aggregateHelper: aggregateHelper,
-                        queryObject    : queryObject,
-                        isMobile       : isMobile,
-                        skip           : skip,
-                        limit          : limit
+                    pipeLine.push({
+                        $addFields: {
+                            lastDate: {
+                                $ifNull: [
+                                    '$editedBy.date',
+                                    '$createdBy.date',
+                                ],
+                            },
+                        },
+                    });
+
+                    pipeLine.push({
+                        $sort: {
+                            lastDate: -1,
+                        },
+                    });
+
+                    pipeLine.push({
+                        $group: {
+                            _id: null,
+                            root: { $push: '$_id' },
+                            total: { $sum: 1 },
+                        },
+                    });
+
+                    pipeLine.push({
+                        $unwind: '$root',
+                    });
+
+                    pipeLine.push({
+                        $skip: skip,
+                    });
+
+                    pipeLine.push({
+                        $limit: limit,
+                    });
+
+                    pipeLine.push({
+                        $lookup: {
+                            from: 'comments',
+                            localField: 'root',
+                            foreignField: '_id',
+                            as: '_id',
+                        },
+                    });
+
+                    pipeLine.push({
+                        $addFields: {
+                            _id: {
+                                $let: {
+                                    vars: {
+                                        root: {
+                                            $arrayElemAt: [
+                                                '$_id',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$root._id',
+                                        body: '$$root.body',
+                                        attachments: '$$root.attachments',
+                                        taskId: '$$root.taskId',
+                                        isArchived: '$$root.isArchived',
+                                        createdBy: '$$root.createdBy',
+                                        total: '$total',
+                                    },
+                                },
+                            },
+                        },
+                    });
+
+                    pipeLine.push({
+                        $replaceRoot: {
+                            newRoot: '$_id',
+                        },
+                    });
+
+                    pipeLine.push({
+                        $lookup: {
+                            from: 'files',
+                            localField: 'attachments',
+                            foreignField: '_id',
+                            as: 'attachments',
+                        },
+                    });
+
+                    pipeLine.push({
+                        $addFields: {
+                            attachments: {
+                                $map: {
+                                    input: '$attachments',
+                                    as: 'attachment',
+                                    in: {
+                                        _id: '$$attachment._id',
+                                        name: '$$attachment.name',
+                                        contentType: '$$attachment.contentType',
+                                        originalName: '$$attachment.originalName',
+                                        extension: '$$attachment.extension',
+                                        preview: '$$attachment.preview',
+                                    },
+                                },
+                            },
+                        },
+                    });
+
+                    pipeLine.push({
+                        $group: {
+                            _id: '$total',
+                            data: {
+                                $push: '$$ROOT',
+                            },
+                        },
                     });
 
                     aggregation = CommentModel.aggregate(pipeLine);
