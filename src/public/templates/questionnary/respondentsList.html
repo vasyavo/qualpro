@@ -1,7 +1,7 @@
 <% optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex] %>
 <div id="respondent-answer-container-<%- answer._id %>" class="questionsList flexRowStretch noShrink borderBottom">
     <div class="questionsUser">
-        <img src="preview/<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
+        <img src="/preview/<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
     </div>
     <div class="questionsDescription flexGrow">
         <div class="fontBold"><%= answer.personnel.firstName[App.currentUser.currentLanguage] + ' ' +

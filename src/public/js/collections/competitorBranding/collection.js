@@ -1,4 +1,4 @@
-var Parent = require('c..ollections/parrent');
+var Parent = require('../parrent');
 var Model = require('../../models/competitorBranding');
 var CONTENT_TYPES = require('../../constants/contentType');
 

@@ -1,5 +1,5 @@
 <tr data-id="<%=model._id%>" class="listRow">
-    <td class="withImg"><span><%=model.brand.name.en || model.brand.name.ar%></span><img class="floatRight" src="preview/<%= item.brand.imageSrc %>"></td>
+    <td class="withImg"><span><%=model.brand.name.en || model.brand.name.ar%></span><img class="floatRight" src="/preview/<%= item.brand.imageSrc %>"></td>
     <td><%=model.product.name.en || model.product.name.ar%></td>
     <td><%=model.variant.name.en || model.variant.name.ar%></td>
     <td class="competitorTextEllipsis">

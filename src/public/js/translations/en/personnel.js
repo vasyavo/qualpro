@@ -181,4 +181,4 @@ var personnelTranslation = {
     }
 };
 
-module.exports = _.extend({}, paginationTranslation, filterTranslation, objectivesTranslation, inStoreTasksTranslation, personnelTranslation);
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, objectivesTranslation, inStoreTasksTranslation, personnelTranslation);
