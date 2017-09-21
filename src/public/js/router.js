@@ -251,11 +251,7 @@ module.exports = Backbone.Router.extend({
                 self.main(domainType);
             }
 
-            var contentViewUrl = 'views/domain/' + viewType;
-            var topBarViewUrl = 'views/domain/topBarView';
             var startTime = new Date();
-            var collectionUrl = 'collections/' + domainType + '/collection';
-            var translationUrl = 'translations/' + currentLanguage + '/' + domainType;
             var breadcrumb = {
                 type: domainType,
                 ids : {
@@ -290,10 +286,10 @@ module.exports = Backbone.Router.extend({
             loadContent();
 
             function getContentDomain() {
-                var ContentView = require(contentViewUrl);
-                var TopBar = require(topBarViewUrl);
-                var Collection = require(collectionUrl);
-                var translation = require(translationUrl);
+                var ContentView = requireContent('domain.views.' + viewType);
+                var TopBar = requireContent('domain.views.topBarView');
+                var Collection = requireContent(domainType + '.collection');
+                var translation = requireContent(domainType + '.translation.' + currentLanguage);
                 var defaultFilters = new DefFilters(App.currentUser._id);
                 var defCurFilter = defaultFilters.getDefFilter(domainType, tabName);
                 filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
@@ -351,7 +347,7 @@ module.exports = Backbone.Router.extend({
 
         var self = context;
         var startTime = new Date();
-        var contentViewUrl = contentType + '.views.' + viewType + '.' + viewType + 'View';
+        var contentViewUrl = contentType + '.views.' + viewType;
         var topBarViewUrl = contentType + '.views.' + '.topBarView';
         var collectionUrl = contentType + '.collection';
         var translationUrl = contentType + '.translation.' + App.currentUser.currentLanguage;

@@ -2,9 +2,7 @@ module.exports = function () {
     return {
         activityList: {
             views: {
-                list: {
-                    listView: require('./views/activityList/list/listView'),
-                },
+                list: require('./views/activityList/list/listView'),
                 topBarView: require('./views/activityList/topBarView'),
             },
             collection: require('./collections/activityList/collection'),
@@ -16,9 +14,7 @@ module.exports = function () {
         },
         achievementForm: {
             views: {
-                list: {
-                    listView: require('./views/achievementForm/list/listView'),
-                },
+                list: require('./views/achievementForm/list/listView'),
                 preview: require('./views/achievementForm/preView/preView'),
                 topBarView: require('./views/achievementForm/topBarView'),
             },
@@ -31,9 +27,7 @@ module.exports = function () {
         },
         brandingAndMonthlyDisplay: {
             views: {
-                list: {
-                    listView: require('./views/brandingAndMonthlyDisplay/list/listView'),
-                },
+                list: require('./views/brandingAndMonthlyDisplay/list/listView'),
                 preview: require('./views/brandingAndMonthlyDisplay/preView/preView'),
                 topBarView: require('./views/brandingAndMonthlyDisplay/topBarView'),
             },
@@ -46,9 +40,7 @@ module.exports = function () {
         },
         competitorBranding: {
             views: {
-                list: {
-                    listView: require('./views/competitorBranding/list/listView'),
-                },
+                list: require('./views/competitorBranding/list/listView'),
                 preview: require('./views/competitorBranding/preView/preView'),
                 topBarView: require('./views/competitorBranding/topBarView'),
             },
@@ -61,9 +53,7 @@ module.exports = function () {
         },
         competitorPromotion: {
             views: {
-                list: {
-                    listView: require('./views/competitorPromotion/list/listView'),
-                },
+                list: require('./views/competitorPromotion/list/listView'),
                 preview: require('./views/competitorPromotion/preView/preView'),
                 topBarView: require('./views/competitorPromotion/topBarView'),
             },
@@ -76,9 +66,7 @@ module.exports = function () {
         },
         competitorsList: {
             views: {
-                list: {
-                    listView: require('./views/competitorsList/list/listView'),
-                },
+                list: require('./views/competitorsList/list/listView'),
                 topBarView: require('./views/competitorsList/topBarView'),
             },
             collection: require('./collections/competitorsList/collection'),
@@ -90,9 +78,7 @@ module.exports = function () {
         },
         consumersSurvey: {
             views: {
-                list: {
-                    listView: require('./views/consumersSurvey/list/listView'),
-                },
+                list: require('./views/consumersSurvey/list/listView'),
                 preview: require('./views/consumersSurvey/preView/preView'),
                 topBarView: require('./views/consumersSurvey/topBarView'),
             },
@@ -105,9 +91,7 @@ module.exports = function () {
         },
         contactUs: {
             views: {
-                list: {
-                    listView: require('./views/contactUs/list/listView'),
-                },
+                list: require('./views/contactUs/list/listView'),
                 preview: require('./views/contactUs/preView/preView'),
                 topBarView: require('./views/contactUs/topBarView'),
             },
@@ -120,9 +104,7 @@ module.exports = function () {
         },
         contractsSecondary: {
             views: {
-                list: {
-                    listView: require('./views/contractsSecondary/list/listView'),
-                },
+                list: require('./views/contractsSecondary/list/listView'),
                 preview: require('./views/contractsSecondary/preView/preView'),
                 topBarView: require('./views/contractsSecondary/topBarView'),
             },
@@ -135,9 +117,7 @@ module.exports = function () {
         },
         contractsYearly: {
             views: {
-                list: {
-                    listView: require('./views/contractsYearly/list/listView'),
-                },
+                list: require('./views/contractsYearly/list/listView'),
                 preview: require('./views/contractsYearly/preView/preView'),
                 topBarView: require('./views/contractsYearly/topBarView'),
             },
@@ -150,9 +130,7 @@ module.exports = function () {
         },
         inStoreTasks: {
             views: {
-                list: {
-                    listView: require('./views/inStoreTasks/list/listView'),
-                },
+                list: require('./views/inStoreTasks/list/listView'),
                 preview: require('./views/inStoreTasks/preView/preView'),
                 topBarView: require('./views/inStoreTasks/topBarView'),
             },
@@ -166,9 +144,7 @@ module.exports = function () {
         },
         itemsPrices: {
             views: {
-                list: {
-                    listView: require('./views/itemsPrices/list/listView'),
-                },
+                list: require('./views/itemsPrices/list/listView'),
                 topBarView: require('./views/itemsPrices/topBarView'),
             },
             collection: require('./collections/itemsPrices/collection'),
@@ -180,9 +156,7 @@ module.exports = function () {
         },
         marketingCampaign: {
             views: {
-                list: {
-                    listView: require('./views/marketingCampaign/list/listView'),
-                },
+                list: require('./views/marketingCampaign/list/listView'),
                 preview: require('./views/marketingCampaign/preView/preView'),
                 topBarView: require('./views/marketingCampaign/topBarView'),
             },
@@ -195,9 +169,7 @@ module.exports = function () {
         },
         newProductLaunch: {
             views: {
-                list: {
-                    listView: require('./views/newProductLaunch/list/listView'),
-                },
+                list: require('./views/newProductLaunch/list/listView'),
                 preview: require('./views/newProductLaunch/preView/preView'),
                 topBarView: require('./views/newProductLaunch/topBarView'),
             },
@@ -210,9 +182,7 @@ module.exports = function () {
         },
         notes: {
             views: {
-                list: {
-                    listView: require('./views/notes/list/listView'),
-                },
+                list: require('./views/notes/list/listView'),
                 preview: require('./views/notes/preView/preView'),
                 topBarView: require('./views/notes/topBarView'),
             },
@@ -225,9 +195,7 @@ module.exports = function () {
         },
         notifications: {
             views: {
-                list: {
-                    listView: require('./views/notifications/list/listView'),
-                },
+                list: require('./views/notifications/list/listView'),
                 preview: require('./views/notifications/preView/preView'),
                 topBarView: require('./views/notifications/topBarView'),
             },
@@ -240,9 +208,7 @@ module.exports = function () {
         },
         objectives: {
             views: {
-                list: {
-                    listView: require('./views/objectives/list/listView'),
-                },
+                list: require('./views/objectives/list/listView'),
                 preview: require('./views/objectives/preView/preView'),
                 topBarView: require('./views/objectives/topBarView'),
             },
@@ -255,9 +221,7 @@ module.exports = function () {
         },
         personnel: {
             views: {
-                list: {
-                    listView: require('./views/personnel/list/listView'),
-                },
+                list: require('./views/personnel/list/listView'),
                 preview: require('./views/personnel/preView/preView'),
                 topBarView: require('./views/personnel/topBarView'),
             },
@@ -270,9 +234,7 @@ module.exports = function () {
         },
         planogram: {
             views: {
-                list: {
-                    listView: require('./views/planogram/thumbnails/thumbnailsView'),
-                },
+                list: require('./views/planogram/thumbnails/thumbnailsView'),
                 preview: require('./views/planogram/preView/preView'),
                 topBarView: require('./views/planogram/topBarView'),
             },
@@ -285,9 +247,7 @@ module.exports = function () {
         },
         priceSurvey: {
             views: {
-                list: {
-                    listView: require('./views/priceSurvey/list/listView'),
-                },
+                list: require('./views/priceSurvey/list/listView'),
                 topBarView: require('./views/priceSurvey/topBarView'),
             },
             collection: require('./collections/priceSurvey/collection'),
@@ -299,9 +259,7 @@ module.exports = function () {
         },
         promotions: {
             views: {
-                list: {
-                    listView: require('./views/promotions/list/listView'),
-                },
+                list: require('./views/promotions/list/listView'),
                 preview: require('./views/promotions/preView/preView'),
                 topBarView: require('./views/promotions/topBarView'),
             },
@@ -314,9 +272,7 @@ module.exports = function () {
         },
         questionnary: {
             views: {
-                list: {
-                    listView: require('./views/questionnary/list/listView'),
-                },
+                list: require('./views/questionnary/list/listView'),
                 preview: require('./views/questionnary/preView/preView'),
                 topBarView: require('./views/questionnary/topBarView'),
             },
@@ -329,9 +285,7 @@ module.exports = function () {
         },
         shelfShares: {
             views: {
-                list: {
-                    listView: require('./views/shelfShares/list/listView'),
-                },
+                list: require('./views/shelfShares/list/listView'),
                 topBarView: require('./views/shelfShares/topBarView'),
             },
             collection: require('./collections/shelfShares/collection'),
@@ -339,6 +293,91 @@ module.exports = function () {
             translation: {
                 en: require('./translations/en/shelfShares'),
                 ar: require('./translations/ar/shelfShares'),
+            },
+        },
+        domain: {
+            views: {
+                list: require('./views/domain/list'),
+                thumbnails: require('./views/domain/thumbnails'),
+                topBarView: require('./views/domain/topBarView'),
+            },
+        },
+        country: {
+            views: {
+                list: require('./views/country/list/listView'),
+                thumbnails: require('./views/country/thumbnails/thumbnailsView'),
+                topBarView: require('./views/country/topBarView'),
+            },
+            collection: require('./collections/country/collection'),
+            model: require('./models/country'),
+            translation: {
+                en: require('./translations/en/country'),
+                ar: require('./translations/ar/country'),
+            },
+        },
+        region: {
+            views: {
+                list: require('./views/region/list/listView'),
+                thumbnails: require('./views/region/thumbnails/thumbnailsView'),
+                topBarView: require('./views/region/topBarView'),
+            },
+            collection: require('./collections/region/collection'),
+            model: require('./models/region'),
+            translation: {
+                en: require('./translations/en/region'),
+                ar: require('./translations/ar/region'),
+            },
+        },
+        subRegion: {
+            views: {
+                list: require('./views/subRegion/list/listView'),
+                thumbnails: require('./views/subRegion/thumbnails/thumbnailsView'),
+                topBarView: require('./views/subRegion/topBarView'),
+            },
+            collection: require('./collections/subRegion/collection'),
+            model: require('./models/subRegion'),
+            translation: {
+                en: require('./translations/en/subRegion'),
+                ar: require('./translations/ar/subRegion'),
+            },
+        },
+        branch: {
+            views: {
+                list: require('./views/branch/list/listView'),
+                thumbnails: require('./views/branch/thumbnails/thumbnailsView'),
+                topBarView: require('./views/branch/topBarView'),
+            },
+            collection: require('./collections/branch/collection'),
+            model: require('./models/branch'),
+            translation: {
+                en: require('./translations/en/branch'),
+                ar: require('./translations/ar/branch'),
+            },
+        },
+        outlet: {
+            views: {
+                list: require('./views/outlet/list/listView'),
+                thumbnails: require('./views/outlet/thumbnails/thumbnailsView'),
+                topBarView: require('./views/outlet/topBarView'),
+            },
+            collection: require('./collections/outlet/collection'),
+            model: require('./models/outlet'),
+            translation: {
+                en: require('./translations/en/outlet'),
+                ar: require('./translations/ar/outlet'),
+            },
+        },
+        retailSegment: {
+            views: {
+                list: require('./views/retailSegment/list/listView'),
+                thumbnails: require('./views/retailSegment/thumbnails/thumbnailsView'),
+                topBarView: require('./views/retailSegment/topBarView'),
+            },
+            collection: require('./collections/retailSegment/collection'),
+            model: require('./models/retailSegment'),
+            translation: {
+                en: require('./translations/en/retailSegment'),
+                ar: require('./translations/ar/retailSegment'),
             },
         },
         previewButtons: {

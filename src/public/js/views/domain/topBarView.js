@@ -130,7 +130,8 @@ module.exports = baseTopBar.extend({
             viewType    : this.viewType,
             contentType : contentTypes.getDisplayName(this.contentType),
             creationType: contentTypes.getDisplayName(this.creationType),
-            translation : this.translation
+            translation : this.translation,
+            App: App,
         }));
 
         this.$createBtn = this.$createBtn || $thisEl.find('#createBtn');

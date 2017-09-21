@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var thumbnailsTemplate = require('../../../templates/domain/thumbnails.html');
 var thumbnails = require('../../views/thumbnails');

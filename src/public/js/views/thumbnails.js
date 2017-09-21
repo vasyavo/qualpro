@@ -1,6 +1,8 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var paginator = require('../views/paginator');
 var App = require('../appState');
+var requireContent = require('../helpers/requireContent');
 
 module.exports = paginator.extend({
 
@@ -27,11 +29,10 @@ module.exports = paginator.extend({
         var contentType = this.contentType;
         var viewType = this.viewType;
         var parentId = this.parentId;
-        var modelUrl = '../models/' + contentType;
         var self = this;
         var CreateView = this.CreateView;
 
-        var Model = require(modelUrl);
+        var Model = requireContent(contentType + '.model');
 
         var createView = new CreateView({
             Model      : Model,

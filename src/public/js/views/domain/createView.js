@@ -168,7 +168,8 @@ module.exports = BaseView.extend({
             outletId         : this.outletId,
             retailSegmentName: this.retailSegmentName,
             retailSegmentId  : this.retailSegmentId,
-            translation      : this.translation
+            translation      : this.translation,
+            App: App,
         });
         var self = this;
 

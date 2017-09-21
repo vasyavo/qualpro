@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var BaseView = require('../../../views/baseDialog');
 var PreviewTemplate = require('../../../../templates/domain/preview.html');

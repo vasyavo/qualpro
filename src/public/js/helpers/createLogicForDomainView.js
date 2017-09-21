@@ -1,9 +1,11 @@
+var $ = require('jquery');
 var Backbone = require('backbone');
 var contentTypes = require('../helpers/contentTypesHelper');
 var BreadcrumbsNavigator = require('../helpers/breadcrumbsNavigator');
 var BreadcrumbsView = require('../views/breadcrumb/breadcrumbs');
 var CONTENT_TYPES = require('../constants/contentType');
 var App = require('../appState');
+var requireContent = require('../helpers/requireContent');
 
 var types = [
     CONTENT_TYPES.COUNTRY,
@@ -43,12 +45,11 @@ var createLogicForDomainView = function (view) {
     var createNewItem = function (translation) {
         var contentType = view.creationType;
         var parentId = view.parentId;
-        var modelUrl = '../models/' + contentType;
         var CreateView = view.CreateView;
         var ids = view.breadcrumb.ids;
         var currentTranslation = contentType === 'branch' ? translation.branch || translation : translation;
 
-        var Model = require(modelUrl);
+        var Model = requireContent(contentType + '.model');
         var createView = new CreateView({
             Model          : Model,
             contentType    : contentType,
@@ -64,7 +65,7 @@ var createLogicForDomainView = function (view) {
             if (view.contentType === view.creationType) {
                 view.addReplaceRow(model);
             } else {
-                var ObjectDomainModel = require('../models/' + view.contentType);
+                var ObjectDomainModel = requireContent(view.contentType + '.model');
                 var id = view.contentType === contentTypes.outlet ? modelJSON.outlet._id : modelJSON.retailSegment._id;
                 var newModel = new ObjectDomainModel({_id: id});
 
@@ -111,7 +112,6 @@ var createLogicForDomainView = function (view) {
 
         var types = contentTypes.getAllBefore(childContentType);
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = "../translations/" + currentLanguage + "/" + navigationOptions.contentType;
 
         view.breadcrumb.ids = {};
         types.forEach(function (type) {
@@ -122,8 +122,8 @@ var createLogicForDomainView = function (view) {
 
         delete filterOpt.globalSearch;
 
-        var ContentCollection = require('../' + collectionUrl);
-        var translation = require(translationUrl);
+        var ContentCollection = requireContent(navigationOptions.contentType + '.collection');
+        var translation = requireContent(navigationOptions.contentType + '.translation.' + currentLanguage);
 
         var creationOptions = {
             viewType     : view.viewType,

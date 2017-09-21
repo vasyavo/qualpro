@@ -183,7 +183,8 @@ module.exports = BaseView.extend({
         var formString = this.template({
             model      : jsonModel,
             contentType: this.contentType,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
         var self = this;
         var $thisEl;
