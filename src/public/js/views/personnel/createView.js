@@ -79,7 +79,8 @@ module.exports = BaseView.extend({
         var lastNameIdToHide = 'lastName' + anotherLanguage;
         var jsonModel = this.model.toJSON();
         var formString = this.template({
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
         var self = this;
         var $curEl;

@@ -87,7 +87,8 @@ module.exports = Backbone.View.extend({
             personnelCollection: collectionJSON,
             startNumber        : this.startNumber,
             showCheckboxes     : this.showCheckboxes,
-            translation        : this.translation
+            translation        : this.translation,
+            App: App,
         }));
     }
 });

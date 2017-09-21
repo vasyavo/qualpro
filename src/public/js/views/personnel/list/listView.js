@@ -259,14 +259,16 @@ module.exports = paginator.extend({
 
         $currentEl.html('');
         $currentEl.append(this.template({
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         this.$itemsEl = $currentEl.find('.listTable');
         this.listItemsView = new ListItemsView({
             el         : this.$itemsEl,
             collection : this.collection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
 
         $currentEl.append(this.listItemsView.render());

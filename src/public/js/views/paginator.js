@@ -12,6 +12,7 @@ var FILTERS_CONSTANTS = require('../constants/filters');
 var DefFilters = require('../helpers/defFilterLogic');
 var ERROR_MESSAGES = require('../constants/errorMessages');
 var App = require('../appState');
+var requireContent = require('../helpers/requireContent');
 
 var View = Backbone.View.extend({
     listLength        : null,
@@ -657,13 +658,12 @@ var View = Backbone.View.extend({
         var viewType = this.viewType;
         var parentId = this.parentId;
         var translation = this.translation;
-        var modelUrl = '../models/' + contentType;
         var self = this;
         var CreateView = this.CreateView;
 
         options = options || {};
 
-        var Model = require(modelUrl);
+        var Model = requireContent(contentType + '.model');
 
         var createView;
         var creationOptions = {

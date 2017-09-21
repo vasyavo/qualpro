@@ -148,7 +148,8 @@ module.exports = BaseDialog.extend({
         this.$el = $(this.template({
             model               : this.model.toJSON(),
             translation         : this.translation,
-            personnelAccessLevel: this.personnel.accessRole.level
+            personnelAccessLevel: this.personnel.accessRole.level,
+            App: App,
         })).dialog({
             dialogClass  : 'formDialog monthlyEvaluationForm monthlyEvaluationPreview',
             title        : this.translation.monthlyEvaluationPreview,

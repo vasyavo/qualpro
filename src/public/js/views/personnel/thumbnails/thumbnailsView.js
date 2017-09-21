@@ -261,7 +261,8 @@ module.exports = thumbnails.extend({
 
         $holder.append(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         $currentEl.find('.rating').barrating({readonly: true});
@@ -298,7 +299,8 @@ module.exports = thumbnails.extend({
         $holder.empty();
         $holder.html(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         $currentEl.find('.rating').barrating({readonly: true});

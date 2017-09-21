@@ -222,6 +222,7 @@ module.exports = function () {
         personnel: {
             views: {
                 list: require('./views/personnel/list/listView'),
+                thumbnails: require('./views/personnel/thumbnails/thumbnailsView'),
                 preview: require('./views/personnel/preView/preView'),
                 topBarView: require('./views/personnel/topBarView'),
             },

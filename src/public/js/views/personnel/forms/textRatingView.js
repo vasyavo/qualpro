@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var template = require('../../../../templates/personnel/form/ratingTextTemplate.html');

@@ -125,7 +125,8 @@ module.exports = BaseView.extend({
         var formString = this.template({
             currentUser: currentUser,
             model      : model.toJSON(),
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
 
         var $formString = $(formString);

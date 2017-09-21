@@ -11,6 +11,7 @@ var Collection = require('../../collections/personnel/collection');
 var personnelModel = require('../../models/personnel');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var App = require('../../appState');
+var requireContent = require('../../helpers/requireContent');
 
 module.exports = paginator.extend({
     contentType        : 'personnel',
@@ -29,7 +30,6 @@ module.exports = paginator.extend({
         var collectionOptions;
 
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = '../../translations/' + currentLanguage + '/personnel';
 
         this.personnelToOnLeave = options.personnelToOnLeave ? options.personnelToOnLeave.toJSON() : {};
 
@@ -90,7 +90,7 @@ module.exports = paginator.extend({
 
         this.collection = new personnelCollection(collectionOptions);
 
-        var translation = require(translationUrl);
+        var translation = requireContent('personnel.translation.' + currentLanguage);
 
         self.translation = translation;
 
@@ -283,7 +283,8 @@ module.exports = paginator.extend({
         $formString.find('#colleaguesInner').append(this.headerTemplate({
             notCheckAll   : true,
             showCheckboxes: true,
-            translation   : this.translation
+            translation   : this.translation,
+            App: App,
         }));
 
         this.$itemsEl = $formString.find('.listTable');
