@@ -747,14 +747,14 @@ var Comment = function () {
                         return waterfallCb(null, {data: [], total: 0});
                     }
 
-                   /* pipeLine.push({
+                    pipeLine.push({
                         $match: {
                             taskId: {
                                 $in: objectiveId.objectID(),
                             },
                         },
                     });
-*/
+
                     pipeLine.push({
                         $addFields: {
                             lastDate: {
