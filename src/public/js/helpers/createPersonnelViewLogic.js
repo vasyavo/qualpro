@@ -319,7 +319,7 @@ define([
                  * @description Enable the possibility of having multiple regions and subRegions for SM, MC, CV
                  */
 
-                if ([ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 && domainType !== 'country') {
+                if (/*[ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 &&*/ domainType !== 'country') {
                     multiSelect = true;
                 }
 
@@ -430,7 +430,7 @@ define([
                 $currentDomainA.text(text);
                 $currentDomainA.attr('data-id', ids);
 
-                showNextField = this.userHasAccessTo(nextDomainType) && (data.length === 1 || [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 );
+                showNextField = this.userHasAccessTo(nextDomainType) /*&& (data.length === 1 || [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 )*/;
 
                 this.view.$el.find('.' + nextDomainType + 'Field').toggle(showNextField);
             },
