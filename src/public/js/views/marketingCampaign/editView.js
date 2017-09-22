@@ -24,7 +24,6 @@ var CONSTANTS = require('../../constants/otherConstants');
 var dataService = require('../../dataService');
 var DisplayTypeCollection = require('../../collections/displayType/collection');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
-var validation = require('../../validation');
 var FileDialogPreviewView = require('../../views/fileDialog/fileDialog');
 var App = require('../../appState');
 
@@ -702,7 +701,8 @@ module.exports = BaseView.extend({
         jsonModel.duplicate = this.duplicate;
         formString = this.template({
             jsonModel  : jsonModel,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
 
         this.$el = $(formString).dialog({
