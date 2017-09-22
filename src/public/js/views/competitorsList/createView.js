@@ -1,7 +1,5 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var Backbone = require('backbone');
-var async = require('async');
 var CreateTemplate = require('../../../templates/competitorsList/create/main.html');
 var BrandListView = require('../../views/competitorsList/brandListView');
 var NestedContentView = require('../../views/nestedContent/view');
@@ -14,19 +12,19 @@ var types = {
     category: {
         index      : 0,
         editable   : false,
-        templateDir: 'templates/competitorsList/create/category'
+        templateDir: 'competitorsList.templates.create.category'
     },
 
     competitorVariant: {
         index      : 1,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/categoryAndVariant'
+        templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     competitorItem: {
         index      : 2,
         editable   : true,
-        templateDir: 'templates/competitorsList/create/item'
+        templateDir: 'competitorsList.templates.create.item'
     }
 };
 

@@ -1,6 +1,7 @@
 ﻿var _ = require('underscore');
 var Backbone = require('backbone');
 var listTemplate = require('../../../../templates/competitorsList/list/list.html');
+var App = require('../../../appState');
 
 module.exports = Backbone.View.extend({
     template: _.template(listTemplate),
@@ -20,7 +21,8 @@ module.exports = Backbone.View.extend({
             items      : collectionJSON,
             startNumber: this.startNumber,
             archived   : this.archived,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
     }
 });

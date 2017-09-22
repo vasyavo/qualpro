@@ -71,6 +71,20 @@ module.exports = function () {
             },
             collection: require('./collections/competitorsList/collection'),
             model: require('./models/competitorsList'),
+            templates: {
+                create: {
+                    category: {
+                        header: require('../templates/competitorsList/create/category/header.html'),
+                        list: require('../templates/competitorsList/create/category/list.html'),
+                        newRow: require('../templates/competitorsList/create/category/newRow.html'),
+                    },
+                    item: {
+                        header: require('../templates/competitorsList/create/item/header.html'),
+                        list: require('../templates/competitorsList/create/item/list.html'),
+                        newRow: require('../templates/competitorsList/create/item/newRow.html'),
+                    },
+                },
+            },
             translation: {
                 en: require('./translations/en/competitorsList'),
                 ar: require('./translations/ar/competitorsList'),
@@ -398,12 +412,21 @@ module.exports = function () {
         },
         category: {
             collection: require('./collections/category/collection'),
+            model: require('./models/category'),
         },
         variant: {
             collection: require('./collections/variant/collection'),
         },
         item: {
             collection: require('./collections/item/collection'),
+        },
+        competitorVariant: {
+            collection: require('./collections/competitorVariant/collection'),
+            model: require('./models/competitorVariant'),
+        },
+        competitorItem: {
+            collection: require('./collections/competitorItem/collection'),
+            model: require('./models/competitorItem'),
         },
         previewButtons: {
             duplicate: require('../templates/objectives/preview/duplicateButton.html'),
