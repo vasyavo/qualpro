@@ -475,7 +475,11 @@ module.exports = BaseView.extend({
         var anotherLanguage = App.currentUser.currentLanguage === 'en' ? 'Ar' : 'En';
         var idToHide = 'description' + anotherLanguage + 'Container';
         var jsonModel = this.model.toJSON();
-        var formString = this.template({jsonModel: jsonModel, translation: this.translation});
+        var formString = this.template({
+            jsonModel: jsonModel,
+            translation: this.translation,
+            App: App,
+        });
         var self = this;
         var dateStart;
         var dateEnd;

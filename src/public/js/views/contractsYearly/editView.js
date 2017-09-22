@@ -18,6 +18,7 @@ var OutletModel = require('../../models/outlet');
 var BranchModel = require('../../models/branch');
 var implementShowHideArabicInputIn = require('../../helpers/implementShowHideArabicInputIn');
 var DropDownView = require('../../views/filter/dropDownView');
+var NewDocumentView = require('../../views/documents/createFile');
 var CONSTANTS = require('../../constants/otherConstants');
 var dataService = require('../../dataService');
 var CONTENT_TYPES = require('../../constants/contentType');
@@ -746,7 +747,11 @@ module.exports = BaseView.extend({
         }
 
         jsonModel.duplicate = self.duplicate;
-        formString = self.template({jsonModel: jsonModel, translation: self.translation});
+        formString = self.template({
+            jsonModel: jsonModel,
+            translation: self.translation,
+            App: App,
+        });
 
         self.$el = $(formString).dialog({
             dialogClass: 'create-dialog full-height-dialog',
