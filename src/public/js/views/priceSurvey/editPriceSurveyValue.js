@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
