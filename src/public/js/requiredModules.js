@@ -149,6 +149,20 @@ module.exports = function () {
             },
             collection: require('./collections/itemsPrices/collection'),
             model: require('./models/itemsPrices'),
+            templates: {
+                create: {
+                    categoryAndVariant: {
+                        header: require('../templates/itemsPrices/create/categoryAndVariant/header.html'),
+                        list: require('../templates/itemsPrices/create/categoryAndVariant/list.html'),
+                        newRow: require('../templates/itemsPrices/create/categoryAndVariant/newRow.html'),
+                    },
+                    item: {
+                        header: require('../templates/itemsPrices/create/item/header.html'),
+                        list: require('../templates/itemsPrices/create/item/list.html'),
+                        newRow: require('../templates/itemsPrices/create/item/newRow.html'),
+                    },
+                },
+            },
             translation: {
                 en: require('./translations/en/itemsPrices'),
                 ar: require('./translations/ar/itemsPrices'),
@@ -380,6 +394,15 @@ module.exports = function () {
                 en: require('./translations/en/retailSegment'),
                 ar: require('./translations/ar/retailSegment'),
             },
+        },
+        category: {
+            collection: require('./collections/category/collection'),
+        },
+        variant: {
+            collection: require('./collections/variant/collection'),
+        },
+        item: {
+            collection: require('./collections/item/collection'),
         },
         previewButtons: {
             duplicate: require('../templates/objectives/preview/duplicateButton.html'),

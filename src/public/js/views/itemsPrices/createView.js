@@ -12,19 +12,19 @@ var defaultTypes = {
     category: {
         index      : 0,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/categoryAndVariant'
+        templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     variant: {
         index      : 1,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/categoryAndVariant'
+        templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     item: {
         index      : 2,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/item'
+        templateDir: 'itemsPrices.templates.create.item'
     }
 };
 module.exports = BaseView.extend({

@@ -65,7 +65,8 @@ module.exports = paginator.extend({
 
         $currentEl.append(this.template({
             archived   : archived,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         this.$itemsEl = $currentEl.find('.listTable');

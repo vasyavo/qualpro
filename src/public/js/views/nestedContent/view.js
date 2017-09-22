@@ -10,24 +10,25 @@ var dataService = require('../../dataService');
 var ERROR_MESSAGES = require('../../constants/errorMessages');
 var CONTENT_TYPES = require('../../constants/contentType');
 var App = require('../../appState');
+var requireContent = require('../../helpers/requireContent');
 
 var defaultTypes = {
     category: {
         index      : 0,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/categoryAndVariant'
+        templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     variant: {
         index      : 1,
         editable   : true,
-        templateDir: 'templates/itemsPrices/create/categoryAndVariant'
+        templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     item: {
         index      : 2,
         editable   : false,
-        templateDir: 'templates/itemsPrices/create/item'
+        templateDir: 'itemsPrices.templates.create.item'
     }
 };
 
@@ -69,17 +70,17 @@ module.exports = BaseView.extend({
 
             self.tablesArray[index] = key;
 
-            templates[templateIndex] = '../../../' + type.templateDir + '/header.html';
-            templates[templateIndex + 1] = '../../../' + type.templateDir + '/list.html';
-            templates[templateIndex + 2] = '../../../' + type.templateDir + '/newRow.html';
+            templates[templateIndex] = type.templateDir + '.header';
+            templates[templateIndex + 1] = type.templateDir + '.list';
+            templates[templateIndex + 2] = type.templateDir + '.newRow';
         });
 
         models = this.tablesArray.map(function (item) {
-            return '../../models/' + item;
+            return item + '.model';
         });
 
         collections = this.tablesArray.map(function (item) {
-            return 'collections/' + item + '/collection';
+            return item + '.collection';
         });
 
         async.parallel([
@@ -134,7 +135,7 @@ module.exports = BaseView.extend({
         templates.forEach(function (path, index) {
             var constName = constNames[index];
 
-            templateFiles[constName] = require(path);
+            templateFiles[constName] = requireContent(path);
         });
 
         self.templates = {};
@@ -169,7 +170,7 @@ module.exports = BaseView.extend({
         models.forEach(function (path, index) {
             var constName = constNames[index];
 
-            modelFiles[constName] = require(path);
+            modelFiles[constName] = requireContent(path);
         });
 
         var newModels = {};
@@ -194,7 +195,7 @@ module.exports = BaseView.extend({
         collections.forEach(function (path, index) {
             var constName = constNames[index];
 
-            collectionFiles[constName] = require(path);
+            collectionFiles[constName] = requireContent(path);
         });
 
         var collections = {};

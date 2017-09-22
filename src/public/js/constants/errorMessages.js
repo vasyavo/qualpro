@@ -411,4 +411,8 @@ module.exports = {
         en: 'Origin is required',
         ar: '', // todo
     },
+    itemPricesNotSelected: {
+        en: 'Item&Prices not selected',
+        ar: '', // todo
+    }
 };
