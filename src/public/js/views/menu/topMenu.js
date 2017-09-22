@@ -13,6 +13,7 @@ var dataService = require('../../dataService');
 var ACL_ROLE_INDEXES = require('../../constants/aclRoleIndexes');
 var PubNubClient = require('../../services/pubnub');
 var App = require('../../appState');
+var requireContent = require('../../helpers/requireContent');
 
 module.exports = Backbone.View.extend({
     tagName            : 'ul',
@@ -84,9 +85,9 @@ module.exports = Backbone.View.extend({
         var self = this;
         var currentUser = new PersonnelModel(App.currentUser);
         var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-        var translationUrl = '../../translations/' + currentLanguage + '/personnel';
+        var translationUrl = 'personnel.translation.' + currentLanguage;
 
-        var translation = require(translationUrl);
+        var translation = requireContent(translationUrl);
 
         self.translation = translation;
         self.preView = new personnelPreView({
@@ -141,7 +142,7 @@ module.exports = Backbone.View.extend({
         var translationUrl;
 
         if (this.currentCT) {
-            translationUrl = '../../translations/' + anotherLanguage + '/' + this.currentCT;
+            translationUrl = this.currentCT + '.translation.' + anotherLanguage;
         }
 
         App.currentUser.currentLanguage = anotherLanguage;
@@ -175,7 +176,7 @@ module.exports = Backbone.View.extend({
         _.bindAll(this, 'saveCurrentUser');
 
         if (translationUrl) {
-            var translation = require(translationUrl);
+            var translation = requireContent(translationUrl);
 
             currentUser.setFieldsNames(translation);
 
