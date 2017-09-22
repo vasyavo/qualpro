@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var moment = require('moment');
 var _ = require('underscore');
 var Backbone = require('backbone');
