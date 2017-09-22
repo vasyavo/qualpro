@@ -249,7 +249,8 @@ module.exports = function () {
         },
         planogram: {
             views: {
-                list: require('./views/planogram/thumbnails/thumbnailsView'),
+                list: require('./views/planogram/list/listView'),
+                thumbnails: require('./views/planogram/thumbnails/thumbnailsView'),
                 preview: require('./views/planogram/preView/preView'),
                 topBarView: require('./views/planogram/topBarView'),
             },

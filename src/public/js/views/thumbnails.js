@@ -89,7 +89,10 @@ module.exports = paginator.extend({
         var $thumbnails = $thumbnailsContainer.find('.thumbnail[data-id="' + id + '"]');
         var modelJSON = model.toJSON();
 
-        var formString = this.templateNew({model: modelJSON});
+        var formString = this.templateNew({
+            model: modelJSON,
+            App: App,
+        });
 
         if ($thumbnails.length) {
             $thumbnails.replaceWith(formString);
@@ -107,7 +110,8 @@ module.exports = paginator.extend({
                 itemsNumber: ++this.collection.pageSize
             });
             $thumbnailsContainer.prepend(this.templateNew({
-                model: modelJSON
+                model: modelJSON,
+                App: App,
             }));
         }
 
@@ -148,7 +152,8 @@ module.exports = paginator.extend({
 
         $holder.empty();
         $holder.html(this.template({
-            collection: newModels.toJSON()
+            collection: newModels.toJSON(),
+            App: App,
         }));
 
         this.trigger('selectedElementsChanged', {

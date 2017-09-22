@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var Backbone = require('backbone');
 var dataService = require('../dataService');
 var otherConstants = require('../constants/otherConstants');

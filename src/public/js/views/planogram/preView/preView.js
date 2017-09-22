@@ -6,6 +6,7 @@ var baseDialog = require('../../../views/baseDialog');
 var EditView = require('../../../views/planogram/editView');
 var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
 var FileModel = require('../../../models/file');
+var App = require('../../../appState');
 
 module.exports = baseDialog.extend({
     contentType   : CONSTANTS.PLANOGRAM,
@@ -99,7 +100,8 @@ module.exports = baseDialog.extend({
         this.$el.html(this.template({
             translation : this.translation,
             model       : modelJSON,
-            activityList: this.activityList
+            activityList: this.activityList,
+            App: App,
         }));
 
         this.$el = this.$el.dialog({

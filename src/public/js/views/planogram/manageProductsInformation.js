@@ -264,7 +264,7 @@ module.exports = Backbone.View.extend({
         var layout = this.template({
             translation: this.translation,
             currentLanguage: App.currentUser.currentLanguage,
-            categories: this.categories
+            categories: this.categories,
         });
 
         this.$el = $(layout).dialog({
