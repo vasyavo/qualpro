@@ -72,7 +72,7 @@ const create = (req, res, next) => {
                 ActivityLog.emit('marketing:al-alali-branding-and-monthly-display:published', {
                     actionOriginator: userId,
                     accessRoleLevel,
-                    body: report.toJSON(),
+                    body            : report.toJSON(),
                 });
 
                 cb(null);
@@ -119,12 +119,12 @@ const removeItem = (req, res, next) => {
     const userId = session.uId;
     const accessRoleLevel = session.level;
     const id = req.params.id;
-    
+
     const queryRun = (callback) => {
         async.waterfall([
-            
+
             (cb) => {
-                BrandingAndMonthlyDisplayModel.findOne({ _id : id }).lean().exec(cb);
+                BrandingAndMonthlyDisplayModel.findOne({_id: id}).lean().exec(cb);
             },
             (removeItem, cb) => {
                 const eventModel = new EventModel();
@@ -146,27 +146,27 @@ const removeItem = (req, res, next) => {
                     if (!res.headersSent) {
                         next(err);
                     }
-                    
+
                     return logger.error(err);
                 }
-    
+
                 BrandingAndMonthlyDisplayModel.findOneAndRemove({_id: id}, callback)
             },
         ], (err, body) => {
             if (err) {
                 return next(err);
             }
-            
+
             res.status(200).send(body);
         });
     };
-    
+
     async.waterfall([
-        
+
         (cb) => {
             access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_BRANDING_DISPLAY_REPORT, cb);
         },
-        
+
         (allowed, personnel, cb) => {
             queryRun(cb);
         }
@@ -174,7 +174,7 @@ const removeItem = (req, res, next) => {
         if (err) {
             return next(err);
         }
-        
+
         res.status(200).send(body);
     });
 };
@@ -189,76 +189,76 @@ const getById = (req, res, next) => {
             },
         }, {
             $unwind: {
-                path: '$categories',
+                path                      : '$categories',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'categories',
-                localField: 'categories',
+                from        : 'categories',
+                localField  : 'categories',
                 foreignField: '_id',
-                as: 'categories',
+                as          : 'categories',
             },
         }, {
             $unwind: {
-                path: '$categories',
+                path                      : '$categories',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $group: {
-                _id: '$_id',
-                categories: { $push: '$categories' },
-                branch: { $first: '$branch' },
-                displayType: { $first: '$displayType' },
-                outlet: { $first: '$outlet' },
-                retailSegment: { $first: '$retailSegment' },
-                attachments: { $first: '$attachments' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
+                _id          : '$_id',
+                categories   : {$push: '$categories'},
+                branch       : {$first: '$branch'},
+                displayType  : {$first: '$displayType'},
+                outlet       : {$first: '$outlet'},
+                retailSegment: {$first: '$retailSegment'},
+                attachments  : {$first: '$attachments'},
+                description  : {$first: '$description'},
+                createdAt    : {$first: '$createdAt'},
+                dateEnd      : {$first: '$dateEnd'},
+                dateStart    : {$first: '$dateStart'},
+                createdBy    : {$first: '$createdBy'},
             },
         }, {
             $unwind: {
-                path: '$attachments',
+                path                      : '$attachments',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: CONTENT_TYPES.FILES,
-                localField: 'attachments',
+                from        : CONTENT_TYPES.FILES,
+                localField  : 'attachments',
                 foreignField: '_id',
-                as: 'attachments',
+                as          : 'attachments',
             },
         }, {
             $unwind: {
-                path: '$attachments',
+                path                      : '$attachments',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $group: {
-                _id: '$_id',
-                attachments: { $push: '$attachments' },
-                categories: { $first: '$categories' },
-                branch: { $first: '$branch' },
-                subRegion: { $first: '$subRegion' },
-                region: { $first: '$region' },
-                displayType: { $first: '$displayType' },
-                outlet: { $first: '$outlet' },
-                retailSegment: { $first: '$retailSegment' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
+                _id          : '$_id',
+                attachments  : {$push: '$attachments'},
+                categories   : {$first: '$categories'},
+                branch       : {$first: '$branch'},
+                subRegion    : {$first: '$subRegion'},
+                region       : {$first: '$region'},
+                displayType  : {$first: '$displayType'},
+                outlet       : {$first: '$outlet'},
+                retailSegment: {$first: '$retailSegment'},
+                description  : {$first: '$description'},
+                createdAt    : {$first: '$createdAt'},
+                dateEnd      : {$first: '$dateEnd'},
+                dateStart    : {$first: '$dateStart'},
+                createdBy    : {$first: '$createdBy'},
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.PERSONNEL}s`,
-                localField: 'createdBy',
+                from        : `${CONTENT_TYPES.PERSONNEL}s`,
+                localField  : 'createdBy',
                 foreignField: '_id',
-                as: 'createdBy',
+                as          : 'createdBy',
             },
         }, {
             $unwind: {
@@ -266,42 +266,42 @@ const getById = (req, res, next) => {
             },
         }, {
             $unwind: {
-                path: '$displayType',
+                path                      : '$displayType',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.DISPLAYTYPE}s`,
-                localField: 'displayType',
+                from        : `${CONTENT_TYPES.DISPLAYTYPE}s`,
+                localField  : 'displayType',
                 foreignField: '_id',
-                as: 'displayType',
+                as          : 'displayType',
             },
         }, {
             $unwind: {
-                path: '$displayType',
+                path                      : '$displayType',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $group: {
-                _id: '$_id',
-                displayType: { $push: '$displayType' },
-                branch: { $first: '$branch' },
-                categories: { $first: '$categories' },
-                outlet: { $first: '$outlet' },
-                retailSegment: { $first: '$retailSegment' },
-                attachments: { $first: '$attachments' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
+                _id          : '$_id',
+                displayType  : {$push: '$displayType'},
+                branch       : {$first: '$branch'},
+                categories   : {$first: '$categories'},
+                outlet       : {$first: '$outlet'},
+                retailSegment: {$first: '$retailSegment'},
+                attachments  : {$first: '$attachments'},
+                description  : {$first: '$description'},
+                createdAt    : {$first: '$createdAt'},
+                dateEnd      : {$first: '$dateEnd'},
+                dateStart    : {$first: '$dateStart'},
+                createdBy    : {$first: '$createdBy'},
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.OUTLET}s`,
-                localField: 'outlet',
+                from        : `${CONTENT_TYPES.OUTLET}s`,
+                localField  : 'outlet',
                 foreignField: '_id',
-                as: 'outlet',
+                as          : 'outlet',
             },
         }, {
             $unwind: {
@@ -309,10 +309,10 @@ const getById = (req, res, next) => {
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.RETAILSEGMENT}s`,
-                localField: 'retailSegment',
+                from        : `${CONTENT_TYPES.RETAILSEGMENT}s`,
+                localField  : 'retailSegment',
                 foreignField: '_id',
-                as: 'retailSegment',
+                as          : 'retailSegment',
             },
         }, {
             $unwind: {
@@ -320,10 +320,10 @@ const getById = (req, res, next) => {
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.BRANCH}es`,
-                localField: 'branch',
+                from        : `${CONTENT_TYPES.BRANCH}es`,
+                localField  : 'branch',
                 foreignField: '_id',
-                as: 'branch',
+                as          : 'branch',
             },
         }, {
             $unwind: {
@@ -331,10 +331,10 @@ const getById = (req, res, next) => {
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.DOMAIN}s`,
-                localField: 'branch.subRegion',
+                from        : `${CONTENT_TYPES.DOMAIN}s`,
+                localField  : 'branch.subRegion',
                 foreignField: '_id',
-                as: 'subRegion',
+                as          : 'subRegion',
             },
         }, {
             $unwind: {
@@ -342,10 +342,10 @@ const getById = (req, res, next) => {
             },
         }, {
             $lookup: {
-                from: `${CONTENT_TYPES.DOMAIN}s`,
-                localField: 'subRegion.parent',
+                from        : `${CONTENT_TYPES.DOMAIN}s`,
+                localField  : 'subRegion.parent',
                 foreignField: '_id',
-                as: 'region',
+                as          : 'region',
             },
         }, {
             $unwind: {
@@ -353,33 +353,33 @@ const getById = (req, res, next) => {
             },
         }, {
             $project: {
-                createdAt: 1,
-                description: 1,
-                dateEnd: 1,
-                dateStart: 1,
-                displayType: 1,
-                'attachments._id': 1,
-                'attachments.name': 1,
-                'attachments.preview': 1,
+                createdAt                 : 1,
+                description               : 1,
+                dateEnd                   : 1,
+                dateStart                 : 1,
+                displayType               : 1,
+                'attachments._id'         : 1,
+                'attachments.name'        : 1,
+                'attachments.preview'     : 1,
                 'attachments.originalName': 1,
-                'attachments.contentType': 1,
-                'categories._id': 1,
-                'categories.name': 1,
-                'subRegion._id': 1,
-                'subRegion.name': 1,
-                'region._id': 1,
-                'region.name': 1,
-                'branch._id': 1,
-                'branch.name': 1,
-                'outlet._id': 1,
-                'outlet.name': 1,
-                'retailSegment._id': 1,
-                'retailSegment.name': 1,
-                'createdBy._id': 1,
-                'createdBy.ID': 1,
-                'createdBy.lastName': 1,
-                'createdBy.firstName': 1,
-                'createdBy.country': 1,
+                'attachments.contentType' : 1,
+                'categories._id'          : 1,
+                'categories.name'         : 1,
+                'subRegion._id'           : 1,
+                'subRegion.name'          : 1,
+                'region._id'              : 1,
+                'region.name'             : 1,
+                'branch._id'              : 1,
+                'branch.name'             : 1,
+                'outlet._id'              : 1,
+                'outlet.name'             : 1,
+                'retailSegment._id'       : 1,
+                'retailSegment.name'      : 1,
+                'createdBy._id'           : 1,
+                'createdBy.ID'            : 1,
+                'createdBy.lastName'      : 1,
+                'createdBy.firstName'     : 1,
+                'createdBy.country'       : 1,
             },
         }];
 
@@ -477,7 +477,7 @@ const update = (req, res, next) => {
             user: userId,
             date: Date.now()
         };
-        BrandingAndMonthlyDisplayModel.findByIdAndUpdate(id, body, { new: true }).populate('displayType').exec(callback);
+        BrandingAndMonthlyDisplayModel.findByIdAndUpdate(id, body, {new: true}).populate('displayType').exec(callback);
     };
 
     async.waterfall([
@@ -567,22 +567,22 @@ const getAll = (req, res, next) => {
                 $match: {
                     $or: [
                         {
-                            'createdBy.lastName.ar': { $regex: regex },
+                            'createdBy.lastName.ar': {$regex: regex},
                         },
                         {
-                            'createdBy.lastName.en': { $regex: regex },
+                            'createdBy.lastName.en': {$regex: regex},
                         },
                         {
-                            'createdBy.firstName.ar': { $regex: regex },
+                            'createdBy.firstName.ar': {$regex: regex},
                         },
                         {
-                            'createdBy.firstName.en': { $regex: regex },
+                            'createdBy.firstName.en': {$regex: regex},
                         },
                         {
-                            'categories.name.en': { $regex: regex },
+                            'categories.name.en': {$regex: regex},
                         },
                         {
-                            'categories.name.ar': { $regex: regex },
+                            'categories.name.ar': {$regex: regex},
                         },
                     ],
                 },
@@ -610,13 +610,13 @@ const getAll = (req, res, next) => {
                 $generalMatch.$and.push({
                     $or: [
                         {
-                            [location]: { $in: currentUser[location] },
+                            [location]: {$in: currentUser[location]},
                         },
                         {
-                            [location]: { $eq: [] },
+                            [location]: {$eq: []},
                         },
                         {
-                            [location]: { $eq: null },
+                            [location]: {$eq: null},
                         },
                     ],
                 });
@@ -634,381 +634,216 @@ const getAll = (req, res, next) => {
         mongoQuery
             .append(condition.formCondition)
             .lookup({
-                from: `${CONTENT_TYPES.COMMENT}s`,
-                localField: '_id',
-                foreignField: 'taskId',
-                as: 'commentaries',
-            })
-            .lookup({
-                from: `${CONTENT_TYPES.PERSONNEL}s`,
-                localField: 'createdBy',
+                from        : `${CONTENT_TYPES.PERSONNEL}s`,
+                localField  : 'createdBy',
                 foreignField: '_id',
-                as: 'createdBy',
+                as          : 'createdBy',
             })
             .append([{
-                $unwind: {
-                    path: '$createdBy',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .append([{
-                $unwind: {
-                    path: '$createdBy.country',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.DOMAIN}s`,
-                localField: 'createdBy.country',
-                foreignField: '_id',
-                as: 'countries',
-            })
-            .append([{
-                $unwind: {
-                    path: '$countries',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.ACCESSROLE}s`,
-                localField: 'createdBy.accessRole',
-                foreignField: '_id',
-                as: 'createdBy.accessRole',
-            })
-            .append([{
-                $unwind: {
-                    path: '$createdBy.accessRole',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .append([{
-                $unwind: {
-                    path: '$attachments',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: CONTENT_TYPES.FILES,
-                localField: 'attachments',
-                foreignField: '_id',
-                as: 'attachments',
-            })
-            .append([{
-                $unwind: {
-                    path: '$attachments',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .group({
-                _id: '$_id',
-                attachments: { $push: '$attachments' },
-                categories: { $first: '$categories' },
-                countries: { $first: '$countries' },
-                commentaries: { $first: '$commentaries' },
-                branch: { $first: '$branch' },
-                subRegion: { $first: '$subRegion' },
-                region: { $first: '$region' },
-                retailSegment: { $first: '$retailSegment' },
-                displayType: { $first: '$displayType' },
-                outlet: { $first: '$outlet' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
-            })
-            .append([{
-                $unwind: {
-                    path: '$categories',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: 'categories',
-                localField: 'categories',
-                foreignField: '_id',
-                as: 'categories',
-            })
-            .append([{
-                $unwind: {
-                    path: '$categories',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .group({
-                _id: '$_id',
-                categories: { $push: '$categories' },
-                attachments: { $first: '$attachments' },
-                countries: { $first: '$countries' },
-                commentaries: { $first: '$commentaries' },
-                branch: { $first: '$branch' },
-                subRegion: { $first: '$subRegion' },
-                region: { $first: '$region' },
-                retailSegment: { $first: '$retailSegment' },
-                displayType: { $first: '$displayType' },
-                outlet: { $first: '$outlet' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
-            })
-            .append({
-                $unwind: {
-                    path: '$displayType',
-                    preserveNullAndEmptyArrays: true,
-                },
-            })
-            .lookup({
-                from: `${CONTENT_TYPES.DISPLAYTYPE}s`,
-                localField: 'displayType',
-                foreignField: '_id',
-                as: 'displayType',
-            })
-            .append({
-                $unwind: {
-                    path: '$displayType',
-                    preserveNullAndEmptyArrays: true,
-                },
-            })
-            .group({
-                _id: '$_id',
-                displayType: { $push: '$displayType' },
-                branch: { $first: '$branch' },
-                categories: { $first: '$categories' },
-                outlet: { $first: '$outlet' },
-                attachments: { $first: '$attachments' },
-                description: { $first: '$description' },
-                createdAt: { $first: '$createdAt' },
-                dateEnd: { $first: '$dateEnd' },
-                dateStart: { $first: '$dateStart' },
-                createdBy: { $first: '$createdBy' },
-            })
-            .lookup({
-                from: `${CONTENT_TYPES.OUTLET}s`,
-                localField: 'outlet',
-                foreignField: '_id',
-                as: 'outlet',
-            })
-            .append([{
-                $unwind: {
-                    path: '$outlet',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.BRANCH}es`,
-                localField: 'branch',
-                foreignField: '_id',
-                as: 'branch',
-            })
-            .append([{
-                $unwind: {
-                    path: '$branch',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.RETAILSEGMENT}s`,
-                localField: 'branch.retailSegment',
-                foreignField: '_id',
-                as: 'retailSegment',
-            })
-            .append([{
-                $unwind: {
-                    path: '$retailSegment',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.DOMAIN}s`,
-                localField: 'branch.subRegion',
-                foreignField: '_id',
-                as: 'subRegion',
-            })
-            .append([{
-                $unwind: {
-                    path: '$subRegion',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
-            .lookup({
-                from: `${CONTENT_TYPES.DOMAIN}s`,
-                localField: 'subRegion.parent',
-                foreignField: '_id',
-                as: 'region',
-            })
-            .append([{
-                $unwind: {
-                    path: '$region',
-                    preserveNullAndEmptyArrays: true,
+                $addFields: {
+                    createdBy: {$arrayElemAt: ['$createdBy', 0]},
                 },
             }])
             .append(condition.foreignCondition)
-            .lookup({
-                from: `${CONTENT_TYPES.POSITION}s`,
-                localField: 'createdBy.position',
-                foreignField: '_id',
-                as: 'createdBy.position',
-            })
-            .append([{
-                $unwind: {
-                    path: '$createdBy.position',
-                    preserveNullAndEmptyArrays: true,
-                },
-            }])
             .append(condition.searchCondition)
-            .project({
-                createdAt: 1,
-                description: 1,
-                dateEnd: 1,
-                dateStart: 1,
-                displayType: 1,
-                'categories._id': 1,
-                'categories.name': 1,
-                'countries._id': 1,
-                'countries.name': 1,
-                'commentaries.body': 1,
-                'attachments._id': 1,
-                'attachments.name': 1,
-                'attachments.originalName': 1,
-                'attachments.contentType': 1,
-                'branch._id': 1,
-                'branch.name': 1,
-                'retailSegment._id': 1,
-                'retailSegment.name': 1,
-                'subRegion._id': 1,
-                'subRegion.name': 1,
-                'region._id': 1,
-                'region.name': 1,
-                'outlet._id': 1,
-                'outlet.name': 1,
-                'createdBy._id': 1,
-                'createdBy.ID': 1,
-                'createdBy.lastName': 1,
-                'createdBy.firstName': 1,
-                'createdBy.imageSrc': 1,
-                'createdBy.position.name': 1,
-                'createdBy.accessRole.name': 1,
+            .group({
+                _id    : null,
+                total  : {$sum: 1},
+                rootIds: {$push: '$_id'},
             })
+            .unwind('$rootIds')
             .skip(skip)
             .limit(limit)
-            .sort(query.sortBy)
-            .allowDiskUse(true);
-
-        const getCount = (cb) => {
-            let mongoQuery = BrandingAndMonthlyDisplayModel.aggregate();
-
-            if ($generalMatch.$and.length) {
-                mongoQuery.append({
-                    $match: $generalMatch,
-                });
-            }
-
-
-            mongoQuery
-                .append(condition.formCondition)
-                .lookup({
-                    from: `${CONTENT_TYPES.PERSONNEL}s`,
-                    localField: 'createdBy',
-                    foreignField: '_id',
-                    as: 'createdBy',
-                })
-                .append([{
-                    $unwind: {
-                        path: '$createdBy',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                }])
-                .lookup({
-                    from: `${CONTENT_TYPES.DISPLAYTYPE}s`,
-                    localField: 'displayType',
-                    foreignField: '_id',
-                    as: 'displayType',
-                })
-                .lookup({
-                    from: `${CONTENT_TYPES.OUTLET}s`,
-                    localField: 'outlet',
-                    foreignField: '_id',
-                    as: 'outlet',
-                })
-                .lookup({
-                    from: `${CONTENT_TYPES.BRANCH}es`,
-                    localField: 'branch',
-                    foreignField: '_id',
-                    as: 'branch',
-                })
-                .append([{
-                    $unwind: {
-                        path: '$outlet',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                }])
-                .append([{
-                    $unwind: {
-                        path: '$branch',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                }])
-                .append([{
-                    $unwind: {
-                        path: '$categories',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                }])
-                .lookup({
-                    from: 'categories',
-                    localField: 'categories',
-                    foreignField: '_id',
-                    as: 'categories',
-                })
-                .append([{
-                    $unwind: {
-                        path: '$categories',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                }])
-                .group({
-                    _id: '$_id',
-                    categories: { $push: '$categories' },
-                    attachments: { $first: '$attachments' },
-                    countries: { $first: '$countries' },
-                    commentaries: { $first: '$commentaries' },
-                    branch: { $first: '$branch' },
-                    subRegion: { $first: '$subRegion' },
-                    region: { $first: '$region' },
-                    retailSegment: { $first: '$retailSegment' },
-                    displayType: { $first: '$displayType' },
-                    outlet: { $first: '$outlet' },
-                    description: { $first: '$description' },
-                    createdAt: { $first: '$createdAt' },
-                    dateEnd: { $first: '$dateEnd' },
-                    dateStart: { $first: '$dateStart' },
-                    createdBy: { $first: '$createdBy' },
-                })
-                .append(condition.foreignCondition)
-                .append(condition.searchCondition)
-                .append([{
-                    $group: {
-                        _id: null,
-                        count: {
-                            $sum: 1,
+            .lookup({
+                from        : 'brandingAndMonthlyDisplay',
+                localField  : 'rootIds',
+                foreignField: '_id',
+                as          : 'root',
+            })
+            .append([{
+                $addFields: {
+                    doc: {
+                        $let: {
+                            vars: {
+                                root: {$arrayElemAt: ['$root', 0]},
+                            },
+                            in  : {
+                                _id        : '$$root._id',
+                                attachments: '$$root.attachments',
+                                createdBy  : '$$root.createdBy',
+                                categories : '$$root.categories',
+                                displayType: '$$root.displayType',
+                                outlet     : '$$root.outlet',
+                                branch     : '$$root.branch',
+                                createdAt  : '$$root.createdAt',
+                                description: '$$root.description',
+                                dateEnd    : '$$root.dateEnd',
+                                dateStart  : '$$root.dateStart',
+                                total      : '$total',
+                            },
                         },
                     },
-                }])
-                .exec(cb);
-        };
+                },
+            }])
+            .append([{
+                $replaceRoot: {
+                    newRoot: '$doc',
+                }
+            }])
+            .lookup({
+                from        : `${CONTENT_TYPES.COMMENT}s`,
+                localField  : '_id',
+                foreignField: 'taskId',
+                as          : 'commentaries',
+            })
+            .lookup({
+                from        : CONTENT_TYPES.FILES,
+                localField  : 'attachments',
+                foreignField: '_id',
+                as          : 'attachments',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.PERSONNEL}s`,
+                localField  : 'createdBy',
+                foreignField: '_id',
+                as          : 'createdBy',
+            })
+            .append([{
+                $addFields: {
+                    createdBy: {$arrayElemAt: ['$createdBy', 0]},
+                },
+            }])
+            .lookup({
+                from        : `${CONTENT_TYPES.DOMAIN}s`,
+                localField  : 'createdBy.country',
+                foreignField: '_id',
+                as          : 'countries',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.ACCESSROLE}s`,
+                localField  : 'createdBy.accessRole',
+                foreignField: '_id',
+                as          : 'createdBy.accessRole',
+            })
+            .append([{
+                $addFields: {
+                    countries             : {$arrayElemAt: ['$countries', 0]},
+                    'createdBy.accessRole': {$arrayElemAt: ['$createdBy.accessRole', 0]},
+                },
+            }])
+            .lookup({
+                from        : 'categories',
+                localField  : 'categories',
+                foreignField: '_id',
+                as          : 'categories',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.DISPLAYTYPE}s`,
+                localField  : 'displayType',
+                foreignField: '_id',
+                as          : 'displayType',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.OUTLET}s`,
+                localField  : 'outlet',
+                foreignField: '_id',
+                as          : 'outlet',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.BRANCH}es`,
+                localField  : 'branch',
+                foreignField: '_id',
+                as          : 'branch',
+            })
+            .append([{
+                $addFields: {
+                    outlet: {$arrayElemAt: ['$outlet', 0]},
+                    branch: {$arrayElemAt: ['$branch', 0]},
+                },
+            }])
+            .lookup({
+                from        : `${CONTENT_TYPES.RETAILSEGMENT}s`,
+                localField  : 'branch.retailSegment',
+                foreignField: '_id',
+                as          : 'retailSegment',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.DOMAIN}s`,
+                localField  : 'branch.subRegion',
+                foreignField: '_id',
+                as          : 'subRegion',
+            })
+            .append([{
+                $addFields: {
+                    subRegion    : {$arrayElemAt: ['$subRegion', 0]},
+                    retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
+                },
+            }])
+            .lookup({
+                from        : `${CONTENT_TYPES.DOMAIN}s`,
+                localField  : 'subRegion.parent',
+                foreignField: '_id',
+                as          : 'region',
+            })
+            .lookup({
+                from        : `${CONTENT_TYPES.POSITION}s`,
+                localField  : 'createdBy.position',
+                foreignField: '_id',
+                as          : 'createdBy.position',
+            })
+            .append([{
+                $addFields: {
+                    region              : {$arrayElemAt: ['$region', 0]},
+                    'createdBy.position': {$arrayElemAt: ['$createdBy.position', 0]},
+                },
+            }])
+            .project({
+                createdAt                  : 1,
+                description                : 1,
+                dateEnd                    : 1,
+                dateStart                  : 1,
+                displayType                : 1,
+                'categories._id'           : 1,
+                'categories.name'          : 1,
+                'countries._id'            : 1,
+                'countries.name'           : 1,
+                'commentaries.body'        : 1,
+                'attachments._id'          : 1,
+                'attachments.name'         : 1,
+                'attachments.originalName' : 1,
+                'attachments.contentType'  : 1,
+                'branch._id'               : 1,
+                'branch.name'              : 1,
+                'retailSegment._id'        : 1,
+                'retailSegment.name'       : 1,
+                'subRegion._id'            : 1,
+                'subRegion.name'           : 1,
+                'region._id'               : 1,
+                'region.name'              : 1,
+                'outlet._id'               : 1,
+                'outlet.name'              : 1,
+                'createdBy._id'            : 1,
+                'createdBy.ID'             : 1,
+                'createdBy.lastName'       : 1,
+                'createdBy.firstName'      : 1,
+                'createdBy.imageSrc'       : 1,
+                'createdBy.position.name'  : 1,
+                'createdBy.accessRole.name': 1,
+                total                      : 1,
+            })
+            .sort(query.sortBy)
+            .group({
+                _id  : null,
+                data : {
+                    $push: '$$ROOT',
+                },
+                total: {
+                    $first: '$total',
+                },
+            })
+            .allowDiskUse(true);
 
-        const getData = (cb) => {
-            mongoQuery.exec(cb);
-        };
-
-        async.parallel([
-
-            getCount,
-            getData,
-
-        ], callback);
+        mongoQuery.exec(callback);
     };
 
     async.waterfall([
@@ -1030,13 +865,10 @@ const getAll = (req, res, next) => {
             return next(err);
         }
 
-        const count = _.get(result, '[0][0].count') || 0;
-        const body = {
-            total: count,
-            data: result[1],
-        };
+        const response = result.length ?
+            result[0] : {data: [], total: 0};
 
-        res.send(200, body);
+        res.send(200, response);
     });
 };
 
