@@ -472,7 +472,7 @@ module.exports = BaseView.extend({
 
         $thumbnail.remove();
         --this.updateCount;
-debugger;
+
         this.attachments = _.without(this.attachments, fileId);
         if (!file.get('uploaded')) {
             this.files.remove(file, {silent: true});
@@ -771,7 +771,8 @@ debugger;
         jsonModel.duplicate = this.duplicate;
         formString = this.template({
             jsonModel  : jsonModel,
-            translation: this.translation
+            translation: this.translation,
+             App: App,
         });
 
         buttons = {

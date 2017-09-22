@@ -426,7 +426,7 @@ module.exports = Backbone.View.extend({
         }
 
         var arrayOfBranchesId = this.branches.map(function (branch) {
-            return branch.name[App.currentUser.currentLanguage];
+            return branch._id;
         });
         arrayOfBranchesId.push('withoutbranch');
 

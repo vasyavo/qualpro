@@ -973,7 +973,11 @@ var View = Backbone.View.extend({
         var recordsOnLastPage = pageSize - (totalPages * pageSize - totalRecords);
 
         if ($listRow.length) {
-            $listRow.replaceWith(this.templateNew({model: modelJSON, translation: this.translation}));
+            $listRow.replaceWith(this.templateNew({
+                model: modelJSON,
+                translation: this.translation,
+                App: App,
+            }));
             if (this.preView) {
                 this.preView.trigger('updatePreview', model);
             }

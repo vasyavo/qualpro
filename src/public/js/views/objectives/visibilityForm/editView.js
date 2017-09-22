@@ -155,7 +155,7 @@ module.exports = Backbone.View.extend({
             var fileAsBase64String = fileReaderEvent.target.result;
             var fileType = fileAsBase64String.substr(0, 10);
             var fileObject = {
-                _id: shortId.gen(),
+                _id: shortId.generate(),
                 base64: fileAsBase64String,
                 fileType: fileType,
                 fileName: file.name,
