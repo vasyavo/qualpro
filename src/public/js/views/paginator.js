@@ -993,7 +993,8 @@ var View = Backbone.View.extend({
             });
             $listTable.prepend(this.templateNew({
                 model      : modelJSON,
-                translation: this.translation
+                translation: this.translation,
+                App: App,
             }));
         }
 

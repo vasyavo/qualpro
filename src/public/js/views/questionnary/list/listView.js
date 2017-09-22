@@ -7,6 +7,7 @@ var template = require('../../../../templates/questionnary/list/list.html');
 var NewRowTemplate = require('../../../../templates/questionnary/list/newRow.html');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -72,7 +73,8 @@ module.exports = paginator.extend({
         $currentEl.empty();
         $currentEl.html(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
     },
 
@@ -82,7 +84,8 @@ module.exports = paginator.extend({
 
         $currentEl.html(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         return this;

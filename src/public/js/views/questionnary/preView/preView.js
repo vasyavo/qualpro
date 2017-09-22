@@ -429,7 +429,8 @@ module.exports = BaseView.extend({
             self.$el.find('#allRespondentsCount').html(answers.length);
             respondentsFullListTemplate += self.respondentsFullListTemplate({
                 answer     : answer,
-                translation: self.translation
+                translation: self.translation,
+                App: App,
             });
         });
 
@@ -600,6 +601,7 @@ module.exports = BaseView.extend({
             question   : question,
             translation: self.translation,
             allowEdit: false,
+            App: App,
         };
 
         if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -628,7 +630,8 @@ module.exports = BaseView.extend({
         var formString = this.template({
             model       : jsonModel,
             translation : this.translation,
-            activityList: this.activityList
+            activityList: this.activityList,
+            App: App,
         });
 
         this.$el = $(formString).dialog({

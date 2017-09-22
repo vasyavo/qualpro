@@ -103,7 +103,8 @@ module.exports = BaseView.extend({
         $list = $optionsContainer.find('.js_optionsList');
         $list.append(this.listOptionTemplate({
             option     : option || '',
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
     },
 
@@ -138,7 +139,8 @@ module.exports = BaseView.extend({
         $curEl.find('#questionTable').append(this.createQuestionViewTemplate({
             question         : question || {},
             someIdForCheckBox: this.someIdForCheckBox,
-            translation      : this.translation
+            translation      : this.translation,
+            App: App,
         }));
 
         if (question) {
@@ -378,7 +380,8 @@ module.exports = BaseView.extend({
             model      : jsonModel,
             title      : title,
             translation: this.translation,
-            edit       : this.edit
+            edit       : this.edit,
+            App: App,
         });
         var self = this;
         var $curEl;
