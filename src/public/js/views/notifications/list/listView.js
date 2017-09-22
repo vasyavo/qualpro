@@ -68,7 +68,8 @@ module.exports = paginator.extend({
 
         $holder.append(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         return this;
