@@ -15,7 +15,6 @@ var FilterCollection = require('../../collections/filter/filterCollection');
 var QuestionCollection = require('../../collections/consumersSurvey/questionCollection');
 var OTHER_CONSTANTS = require('../../constants/otherConstants');
 var CONTENT_TYPES = require('../../constants/contentType');
-var populate = require('../../populate');
 var BaseView = require('../../views/baseDialog');
 var custom = require('../../custom');
 var implementShowHideArabicInputIn = require('../../helpers/implementShowHideArabicInputIn');
@@ -122,7 +121,8 @@ module.exports = BaseView.extend({
         $list = $optionsContainer.find('.js_optionsList');
         $list.append(this.listOptionTemplate({
             option     : option || '',
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
     },
 
@@ -155,7 +155,8 @@ module.exports = BaseView.extend({
         $curEl.find('#consumersSurveyTable').append(this.createConsumersSurveyViewTemplate({
             question         : question || {},
             someIdForCheckBox: this.someIdForCheckBox,
-            translation      : this.translation
+            translation      : this.translation,
+            App: App,
         }));
 
         if (question) {
@@ -420,7 +421,8 @@ module.exports = BaseView.extend({
             model      : jsonModel,
             title      : title,
             translation: this.translation,
-            edit       : this.edit
+            edit       : this.edit,
+            App: App,
         });
 
         var self = this;
