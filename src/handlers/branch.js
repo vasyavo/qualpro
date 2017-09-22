@@ -666,12 +666,143 @@ var BranchHandler = function () {
 
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
-            pipeLine = getAllPipeLine({
-                isMobile       : isMobile,
-                queryObject    : queryObject,
-                sort           : sort,
-                aggregateHelper: aggregateHelper
-            });
+            if (isMobile) {
+                pipeLine = [
+                    {
+                        $match: queryObject
+                    },
+                    {
+                        $sort: {
+                            'editedBy.date': 1,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            root: { $push: '$_id' },
+                            total: { $sum: 1 },
+                        },
+                    },
+                    {
+                        $unwind: '$root',
+                    },
+                    {
+                        $lookup: {
+                            from: 'branches',
+                            localField: 'root',
+                            foreignField: '_id',
+                            as: '_id',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            _id: {
+                                $let: {
+                                    vars: {
+                                        root: {
+                                            $arrayElemAt: [
+                                                '$_id',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$root._id',
+                                        subRegion: '$$root.subRegion',
+                                        retailSegment: '$$root.retailSegment',
+                                        outlet: '$$root.outlet',
+                                        address: '$$root.address',
+                                        archived: '$$root.archived',
+                                        name: '$$root.name',
+                                        manager: '$$root.manager',
+                                        total: '$total',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: '$_id',
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: 'personnels',
+                            localField: 'manager',
+                            foreignField: '_id',
+                            as: 'manager',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            manager: {
+                                $let: {
+                                    vars: {
+                                        manager: {
+                                            $arrayElemAt: [
+                                                '$manager',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$manager._id',
+                                        name: '$$manager.name',
+                                        firstName: '$$manager.firstName',
+                                        lastName: '$$manager.lastName',
+                                        phoneNumber: '$$manager.phoneNumber',
+                                        email: '$$manager.email',
+                                        imageSrc: '$$manager.imageSrc',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            manager: {
+                                $cond: [
+                                    { $eq: ['$manager', {}] },
+                                    null,
+                                    '$manager',
+                                ],
+                            },
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: '$total',
+                            data: {
+                                $push: '$$ROOT',
+                            },
+                        },
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            total: '$_id',
+                            data: {
+                                _id: 1,
+                                subRegion: 1,
+                                retailSegment: 1,
+                                outlet: 1,
+                                address: 1,
+                                archived: 1,
+                                name: 1,
+                                manger: 1,
+                            },
+                        },
+                    },
+                ];
+            } else {
+                pipeLine = getAllPipeLine({
+                    isMobile       : isMobile,
+                    queryObject    : queryObject,
+                    sort           : sort,
+                    aggregateHelper: aggregateHelper
+                });
+            }
 
             aggregation = BranchModel.aggregate(pipeLine);
 
@@ -785,16 +916,153 @@ var BranchHandler = function () {
 
             queryObject = _.extend({}, searchObject, queryObject);
 
-            pipeLine = getAllPipeLine({
-                isMobile         : isMobile,
-                queryObject      : queryObject,
-                aggregateHelper  : aggregateHelper,
-                searchFieldsArray: searchFieldsArray,
-                filterSearch     : filterSearch,
-                sort             : sort,
-                skip             : skip,
-                limit            : limit
-            });
+            if (isMobile) {
+                pipeLine = [
+                    {
+                        $match: queryObject,
+                    },
+                    {
+                        $sort: {
+                            'editedBy.date': 1,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            root: { $push: '$_id' },
+                            total: { $sum: 1 },
+                        },
+                    },
+                    {
+                        $unwind: '$root',
+                    },
+                    {
+                        $skip: skip,
+                    },
+                    {
+                        $limit: limit,
+                    },
+                    {
+                        $lookup: {
+                            from: 'branches',
+                            localField: 'root',
+                            foreignField: '_id',
+                            as: '_id',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            _id: {
+                                $let: {
+                                    vars: {
+                                        root: {
+                                            $arrayElemAt: [
+                                                '$_id',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$root._id',
+                                        subRegion: '$$root.subRegion',
+                                        retailSegment: '$$root.retailSegment',
+                                        outlet: '$$root.outlet',
+                                        address: '$$root.address',
+                                        archived: '$$root.archived',
+                                        name: '$$root.name',
+                                        manager: '$$root.manager',
+                                        total: '$total',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: '$_id',
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: 'personnels',
+                            localField: 'manager',
+                            foreignField: '_id',
+                            as: 'manager',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            manager: {
+                                $let: {
+                                    vars: {
+                                        manager: {
+                                            $arrayElemAt: [
+                                                '$manager',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$manager._id',
+                                        name: '$$manager.name',
+                                        firstName: '$$manager.firstName',
+                                        lastName: '$$manager.lastName',
+                                        phoneNumber: '$$manager.phoneNumber',
+                                        email: '$$manager.email',
+                                        imageSrc: '$$manager.imageSrc',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            manager: {
+                                $cond: [
+                                    { $eq: ['$manager', {}] },
+                                    null,
+                                    '$manager',
+                                ],
+                            },
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: '$total',
+                            data: {
+                                $push: '$$ROOT',
+                            },
+                        },
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            total: '$_id',
+                            data: {
+                                _id: 1,
+                                subRegion: 1,
+                                retailSegment: 1,
+                                outlet: 1,
+                                address: 1,
+                                archived: 1,
+                                name: 1,
+                                manger: 1,
+                            },
+                        },
+                    },
+                ];
+            } else {
+                pipeLine = getAllPipeLine({
+                    isMobile         : isMobile,
+                    queryObject      : queryObject,
+                    aggregateHelper  : aggregateHelper,
+                    searchFieldsArray: searchFieldsArray,
+                    filterSearch     : filterSearch,
+                    sort             : sort,
+                    skip             : skip,
+                    limit            : limit
+                });
+            }
 
             aggregation = BranchModel.aggregate(pipeLine);
 
