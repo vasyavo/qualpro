@@ -193,7 +193,7 @@ module.exports = BaseView.extend({
         }
 
         attachmentsIdFromServer.map(function(fileId) {
-            this.files.remove(fileId);
+            self.files.remove(fileId);
         });
 
         this.model.setFieldsNames(this.translation, this.body);

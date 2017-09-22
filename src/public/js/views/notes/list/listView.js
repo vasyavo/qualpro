@@ -127,7 +127,8 @@ module.exports = paginator.extend({
         $holder = $currentEl.find('.listTable');
         $holder.append(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         }));
 
         return this;
