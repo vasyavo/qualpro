@@ -716,7 +716,8 @@ module.exports = BaseView.extend({
         jsonModel.duplicate = this.duplicate;
         formString = this.template({
             jsonModel  : jsonModel,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
         this.$el = $(formString).dialog({
             dialogClass: "create-dialog full-height-dialog",
