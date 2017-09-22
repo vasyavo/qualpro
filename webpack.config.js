@@ -12,7 +12,6 @@ module.exports = {
         alias: {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
-            'jqueryui': path.resolve(__dirname, 'src/public/js/libs/jquery-ui/jquery-ui.min'),
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
             imageCrop: 'jquery-jcrop',
         },
@@ -27,14 +26,6 @@ module.exports = {
             {
                 test: /app/,
                 use: 'imports-loader?backbone,jqueryui,imageCrop',
-            },
-            {
-                test: /jquery-ui/,
-                use: 'imports-loader?jQuery=jquery',
-            },
-            {
-                test: /ckeditor/,
-                use: 'imports-loader?jQuery=jquery',
             },
             {
                 test: /lightSlider/,

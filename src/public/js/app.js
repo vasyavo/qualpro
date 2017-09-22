@@ -6,6 +6,7 @@ var Custom = require('./custom');
 var App = require('./appState');
 
 require('ckeditor');
+require('ckeditor/adapters/jquery');
 require('jquery-mousewheel');
 require('rater-jquery');
 require('jquery-bar-rating');
@@ -47,7 +48,7 @@ var initialize = function () {
     Communication.checkLogin(Custom.runApplication);
 };
 var applyDefaults = function () {
-    CKEDITOR.config.customConfig = '../../helpers/ckeditor/config.js';
+    CKEDITOR.config.customConfig = '/src/public/js/helpers/ckeditor/config.js';
 
     $.fn.fadeFn = function (options) {
         var visibleState = options.visibleState;

@@ -1,4 +1,4 @@
-var $ = require('jquery');
+var $ = window.jQuery = require('jquery');
 var _ = require('underscore');
 var Backbone = require('backbone');
 var MiniGrid = require('minigrid');

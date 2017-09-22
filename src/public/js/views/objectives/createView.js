@@ -620,11 +620,11 @@ module.exports = BaseView.extend({
         var jsonModel = this.model.toJSON();
         var formString = this.template({
             jsonModel  : jsonModel,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
         var self = this;
         var dateStart = new Date();
-        var endDate;
         var $startDate;
         var $endDate;
         var $curEl;
