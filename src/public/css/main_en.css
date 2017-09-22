@@ -7886,7 +7886,7 @@ tr.clicked {
   cursor: pointer;
 }
 .promotionTableWrap .absoluteContent .scrollable {
-  width: calc(100% - 2px);
+  width: 100%;
 }
 .ui-datepicker {
   margin-left: 11px!important;
