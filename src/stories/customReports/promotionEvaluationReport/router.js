@@ -2,7 +2,7 @@ const express = require('express');
 
 const getAll = require('./routes/getAll');
 const getCharts = require('./routes/getCharts');
-const getFilters = require('./routes/filters/index');
+const getFilters = require('./routes/getFilters');
 const XMLExport = require('./routes/XMLExport');
 
 const router = express.Router();

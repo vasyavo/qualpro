@@ -293,7 +293,7 @@ module.exports = {
         _id : 105,
         name: {
             en: 'Visibility Form',
-            ar: '' //todo set ar translation
+            ar: 'نموذج الرؤية',
         },
         href: CONSTANTS.VISIBILITYFORM
     }

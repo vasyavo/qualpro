@@ -33,10 +33,11 @@ module.exports = (req, res, next) => {
         },
     };
 
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+    const queryFilter = query.filter || {};
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
-        const queryFilter = query.filter || {};
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
@@ -174,6 +175,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: '$setPromotion._id',
                 category: '$setPromotion.category',
+                parentAttachments: '$setPromotion.attachments',
                 description: '$setPromotion.description',
                 promotion: '$setPromotion.promotion',
                 brand: '$setPromotion.brand',
@@ -210,6 +212,16 @@ module.exports = (req, res, next) => {
                 localField: 'category',
                 foreignField: '_id',
                 as: 'category',
+            },
+        });
+
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'parentAttachments',
+                foreignField: '_id',
+                as: 'parentAttachments',
             },
         });
 
@@ -317,6 +329,7 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 description: 1,
                 promotion: 1,
+                parentAttachments: 1,
                 packing: 1,
                 expiry: 1,
                 dateStart: 1,
@@ -417,6 +430,18 @@ module.exports = (req, res, next) => {
                     },
                     date: 1,
                 },
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 attachments: {
                     $reduce: {
                         input: '$comments',
@@ -440,6 +465,15 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
             },
         });
 
@@ -470,6 +504,18 @@ module.exports = (req, res, next) => {
                 displayType: 1,
                 createdBy: 1,
                 total: 1,
+                attachments: {
+                    $map: {
+                        input: '$parentAttachments',
+                        as: 'attachment',
+                        in: {
+                            _id: '$$attachment._id',
+                            preview: '$$attachment.preview',
+                            originalName: '$$attachment.originalName',
+                            contentType: '$$attachment.contentType',
+                        },
+                    },
+                },
                 publisher: {
                     $concat: [
                         '$createdBy.user.name.en',
@@ -484,6 +530,37 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$item._id',
                             body: '$$item.body',
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$item.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                                imageSrc: '$$user.imageSrc',
+                                            },
+
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
                             attachments: {
                                 $map: {
                                     input: {
@@ -556,7 +633,13 @@ module.exports = (req, res, next) => {
             const currentCountry = currency.defaultData.find((country) => {
                 return country._id.toString() === item.country._id.toString();
             });
-            item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+            item.price = Number(item.price);
+            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                item.price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
+                item.price = `${item.price} $`;
+            } else {
+                item.price = `${item.price.toFixed(2)} ${currentCountry.currency}`;
+            }
         });
 
         res.status(200).send(response);

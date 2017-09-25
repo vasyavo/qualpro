@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
+const locationFiler = require('./../../utils/locationFullMatchFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -40,13 +41,19 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel', 'createdByPersonnel',
         ];
         const pipeline = [];
 
         pipeline.push({
             $match: {
                 archived: false,
+            },
+        });
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
             },
         });
 
@@ -120,6 +127,37 @@ module.exports = (req, res, next) => {
             });
         }
 
+
+        if (queryFilter.country && queryFilter.country.length) {
+            pipeline.push({
+                $match: {
+                    country: {
+                        $in: queryFilter.country,
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -152,17 +190,106 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
             pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
+                $addFields: {
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$subRegion',
+                                            as: 'subRegion',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$subRegion'], '$$filters.subRegion'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'subRegion',
+                                    in: '$$subRegion',
+                                },
+                            },
+                        },
                     },
                 },
             });
         }
 
-        applyAnalyzeBy(pipeline, analyzeByParam);
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$region',
+                                            as: 'region',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$region'], '$$filters.region'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'region',
+                                    in: '$$region',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+            pipeline.push({
+                $addFields: {
+                    branch: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    branch: queryFilter[CONTENT_TYPES.BRANCH],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$branch',
+                                            as: 'branch',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$branch'], '$$filters.branch'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'branch',
+                                    in: '$$branch',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter, personnel);
 
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)
@@ -193,7 +320,8 @@ module.exports = (req, res, next) => {
                                 const thisItem = {};
 
                                 items.forEach(item => {
-                                    thisItem[item.status] = item.count;
+                                    thisItem[item.status] = thisItem[item.status] || 0;
+                                    thisItem[item.status] += item.count;
                                 });
 
                                 return thisItem;

@@ -6,25 +6,26 @@ var BadgeStore = require('../../services/badgeStore');
 
 module.exports = Marionette.CompositeView.extend({
 
-    initialize : function (options) {
+    initialize: function (options) {
         this.translation = options.translation;
 
         BadgeStore.cleanupDocuments();
     },
 
-    className : 'thumbnailHolder scrollable',
+    className: 'thumbnailHolder scrollable',
 
     template : function (ops) {
         return _.template(Template)(ops);
     },
 
-    templateContext : function () {
+    templateContext: function () {
         return {
-            breadcrumbs : this.collection.breadcrumbs
+            breadcrumbs: this.collection.breadcrumbs,
+            translation: this.translation
         };
     },
 
-    onRender : function () {
+    onRender: function () {
         var that = this;
         var collection = this.collection;
 
@@ -79,8 +80,21 @@ module.exports = Marionette.CompositeView.extend({
         this.collection.trigger('item:checked');
     },
 
-    collectionEvents : {
-        'sync' : 'render'
-    }
+    collectionEvents: {
+        'sync': 'render'
+    },
+
+    changeTranslatedFields: function (translation) {
+        var that = this;
+        var $elementsForTranslation = this.$el.find('[data-translation]');
+
+        this.translation = translation;
+        $elementsForTranslation.each(function (index, el) {
+            var $element = $(el);
+            var property = $element.attr('data-translation');
+
+            $element.html(that.translation[property]);
+        });
+    },
 
 });

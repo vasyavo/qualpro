@@ -61,7 +61,8 @@ module.exports = paginator.extend({
         $holder.empty();
         $holder.html(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
         }));
     },
 
@@ -76,7 +77,8 @@ module.exports = paginator.extend({
         $holder = $currentEl.find('.reportingWrap');
         $holder.append(this.template({
             collection : jsonCollection,
-            translation: this.translation
+            translation: this.translation,
+            newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
         }));
 
         return this;

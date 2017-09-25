@@ -15,7 +15,7 @@ var translation = {
     createdByMe      : ' تم إنشاؤه من قبلي',
     myCoverObjectives: ' الأهداف المغطاة',
     closed           : 'المغلقة',
-    myCCObjectives   : '', //todo translation
+    myCCObjectives   : 'الأهداف المنسوخة',
     newObjective     : 'هدف جديد',
     // list
     priority         : 'الأولوية',
@@ -91,6 +91,7 @@ var translation = {
     // form
     forms: 'النماذج',
     form : 'النموذج',
+    before: 'قبل',
 
     // effort
     effort        : 'الجهود',
@@ -104,7 +105,8 @@ var translation = {
     },
 
     dialogTitle: 'ملفات الاهداف',
-    countOfAttachedFiles: '' // todo
+    applyToAll: 'تطبيق الصورة على الجميع',
+    countOfAttachedFiles: 'عدد الملفات المرفقة'
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

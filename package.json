@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "JSONStream": "^1.3.1",
     "abstract-scheduler": "git+https://d6e7978abd2d2f3cbea3d54216daf6b8f7bd156d:x-oauth-basic@github.com/foxtrapplimited/abstract-scheduler.git#0.6",
     "ajv": "5.0.0",
     "async": "2.1.2",
@@ -103,7 +104,7 @@
     "xss-filters": "1.2.6"
   },
   "devDependencies": {
-    "aglio": "2.2.1",
+    "aglio": "^2.2.1",
     "chai": "3.5.0",
     "chai-datetime": "1.4.0",
     "co-mocha": "1.1.3",
@@ -163,7 +164,7 @@
     "lint"
   ],
   "engines": {
-    "node": "6.5.0",
+    "node": "6.11.0",
     "npm": "3.10.3",
     "redis": "3.2",
     "mongodb": "3.4.1"

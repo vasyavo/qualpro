@@ -74,14 +74,16 @@ module.exports = (req, res, next) => {
         if (timeFilter) {
             timeFilter.map((frame) => {
                 $timeMatch.$or.push({
-                    $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
-                    ],
+                    'createdBy.date': {
+                        $gte: moment(frame.from, 'MM/DD/YYYY')._d,
+                        $lte: moment(frame.to, 'MM/DD/YYYY').add(1, 'day')._d,
+                    },
+                });
+                $timeMatch.$or.push({
+                    'editedBy.date': {
+                        $gte: moment(frame.from, 'MM/DD/YYYY')._d,
+                        $lte: moment(frame.to, 'MM/DD/YYYY').add(1, 'day')._d,
+                    },
                 });
                 return frame;
             });

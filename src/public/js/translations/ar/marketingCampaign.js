@@ -16,11 +16,13 @@ var brandingAndDisplayTranslation = {
     brandingItemsTable : 'جدول العلامات التجارية وتقارير العرض للسلع',
     employee           : 'الموظف',
     comment            : 'التعليق',
+    delete: 'حذف',
     // create
     createTitle        : 'انشاء نشاط تسويقي جديد',
     publishBtn         : 'نشر',
     cancelBtn          : ' إلغاء',
     attachments        : 'الملفات المرفقة',
+    attachTitle        : 'الملفات والتعليقات الخاصة بحملة العلالي التسويقية والدعائية',
     attachFiles        : ' إرفاق ملفات',
     description        : 'الوصف',
     selectTitle        : ' اختر عنوان النص',

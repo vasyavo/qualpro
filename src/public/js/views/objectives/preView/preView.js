@@ -107,22 +107,25 @@ module.exports = BaseView.extend({
         });
 
         var withoutBranches = !this.model.get('branch').length;
+        var form = this.model.get('form');
 
-        dataService.getData('/form/visibility/' + this.model.get('form')._id, {}, function (err, response) {
-            if (withoutBranches) {
-                if (response.after.description) {
-                    self.afterPartFilled = true;
-                }
-            } else {
-                self.afterPartFilled = true;
-
-                response.branches.forEach(function (branch) {
-                    if (!branch.after.description) {
-                        self.afterPartFilled = false;
+        if (form && form._id && form.contentType === 'visibility') {
+            dataService.getData('/form/visibility/' + form._id, {}, function (err, response) {
+                if (withoutBranches) {
+                    if (response.after.description) {
+                        self.afterPartFilled = true;
                     }
-                });
-            }
-        });
+                } else {
+                    self.afterPartFilled = true;
+
+                    response.branches.forEach(function (branch) {
+                        if (!branch.after.description) {
+                            self.afterPartFilled = false;
+                        }
+                    });
+                }
+            });
+        }
 
         this.progressChanged = false;
 
@@ -257,11 +260,14 @@ module.exports = BaseView.extend({
     showEditObjectiveDialog: function (model, duplicate) {
         var self = this;
 
-        this.editObjectiveView = new EditObjectiveView({model: model, duplicate: duplicate});
+        this.editObjectiveView = new EditObjectiveView({
+            model: model,
+            duplicate: duplicate,
+            translation: this.translation,
+        });
 
         this.editObjectiveView.on('modelSaved', function (model) {
             self.changeRowInTree(model);
-
         });
     },
 
@@ -516,7 +522,7 @@ module.exports = BaseView.extend({
         var defFilter = this.defFilterLogic.getDefFilter('personnel', 'assignToACM');
         var modelJSON = this.model.toJSON();
 
-        if (modelJSON.objectiveType === 'country'){
+        if (modelJSON.objectiveType === 'country') {
             this.trigger('showSubObjectiveDialog', this.model, false, defFilter);
         } else {
             this.trigger('showAssignObjectiveDialog', this.model, false, defFilter);

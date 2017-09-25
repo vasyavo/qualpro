@@ -39,6 +39,7 @@ var brandingAndDisplayTranslation = {
     preViewTitle       : 'View Marketing Campaign',
     table              : 'Table',
     edit               : 'Edit',
+    delete             : 'Delete',
     duplicate          : 'Duplicate',
     brand              : 'Brand',
     category           : 'Category',

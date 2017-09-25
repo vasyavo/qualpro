@@ -214,7 +214,7 @@ module.exports = Backbone.View.extend({
         $holder.html(this.descriptionTemplate(currentUser));
     },
 
-        render: function () {
+    render: function () {
         var userAccessLevel = App.currentUser.accessRole.level;
         var templateData = {
             showContactUsBadge : null

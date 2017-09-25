@@ -1,6 +1,7 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const ReportUtils = require('./../stories/test-utils').ReportUtils;
+const aclRolesNames = require('./../constants/aclRolesNames');
 
 var Promotions = function () {
     var async = require('async');
@@ -60,30 +61,47 @@ var Promotions = function () {
         var forSync = options.forSync;
         var pipeLine = [];
 
-        // fix do not show draft to other users
         if (isMobile) {
             if (forSync) {
                 queryObject.status = {
-                    $ne: 'draft'
+                    $ne: 'draft',
                 };
             } else {
                 queryObject.status = {
-                    $nin: ['draft', 'expired']
+                    $nin: ['draft', 'expired'],
                 };
             }
         } else {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            'createdBy.user': personnel._id,
-                            status: {$in: ['draft', 'expired']}
-                        }, {
-                            status: {$nin: ['draft', 'expired']}
-                        }
-                    ]
-                }
+            const $match = {
+                $or: [],
+            };
+
+            // regarding QP-1411 Reporting: Al Alali Promotion Evaluation -> Expired items doesn't displayed for MA
+            if ([aclRolesNames.MASTER_ADMIN].includes(personnel.accessRole.level)) {
+                $match.$or.push({
+                    'createdBy.user': {
+                        $ne: personnel._id,
+                    },
+                    status          : {
+                        $ne: 'draft',
+                    },
+                });
+            } else {
+                $match.$or.push({
+                    'createdBy.user': {
+                        $ne: personnel._id,
+                    },
+                    status          : {
+                        $nin: ['draft', 'expired'],
+                    },
+                });
+            }
+
+            $match.$or.push({
+                'createdBy.user': personnel._id
             });
+
+            pipeLine.push({$match});
         }
 
         if (Object.keys(queryObject).length) {
@@ -169,7 +187,7 @@ var Promotions = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -187,7 +205,7 @@ var Promotions = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -215,7 +233,7 @@ var Promotions = function () {
                             position : 1,
                             firstName: 1,
                             lastName : 1,
-                            imageSrc: 1,
+                            imageSrc : 1,
                         }
                     }
                 }
@@ -233,7 +251,7 @@ var Promotions = function () {
                             accessRole: 1,
                             firstName : 1,
                             lastName  : 1,
-                            imageSrc: 1,
+                            imageSrc  : 1,
                         }
                     }
                 }
@@ -332,7 +350,7 @@ var Promotions = function () {
                     const eventPayload = {
                         actionOriginator: userId,
                         accessRoleLevel,
-                        body: modelAsJson,
+                        body            : modelAsJson,
                     };
 
                     if (modelAsJson.status === PROMOTION_STATUSES.DRAFT) {
@@ -458,7 +476,7 @@ var Promotions = function () {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.promotionType) {
@@ -588,7 +606,7 @@ var Promotions = function () {
                     return next(err);
                 }
 
-                const body = response.length ? response[0] : { data: [], total: 0 };
+                const body = response.length ? response[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.promotionType) {
@@ -632,7 +650,7 @@ var Promotions = function () {
         const store = new ReportUtils({
             actionOriginator: userId,
             accessRoleLevel,
-            reportType: 'al-alali-promo-evaluation',
+            reportType      : 'al-alali-promo-evaluation',
         });
 
         const update = (options, callback) => {
@@ -647,7 +665,7 @@ var Promotions = function () {
             async.waterfall([
 
                 (cb) => {
-                    PromotionModel.findOne({ _id: promotionId }).lean().exec(cb);
+                    PromotionModel.findOne({_id: promotionId}).lean().exec(cb);
                 },
 
                 (report, cb) => {
@@ -733,7 +751,7 @@ var Promotions = function () {
                 },
 
                 (cb) => {
-                    PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, { new: true }, cb);
+                    PromotionModel.findByIdAndUpdate(promotionId, fullUpdate, {new: true}, cb);
                 },
 
                 (report, cb) => {
@@ -929,7 +947,7 @@ var Promotions = function () {
                             position : 1,
                             firstName: 1,
                             lastName : 1,
-                            imageSrc: 1,
+                            imageSrc : 1,
                         }
                     }
                 }
@@ -947,7 +965,7 @@ var Promotions = function () {
                             accessRole: 1,
                             firstName : 1,
                             lastName  : 1,
-                            imageSrc: 1,
+                            imageSrc  : 1,
                         }
                     }
                 }

@@ -5,7 +5,9 @@ var Marionette = require('backbone.marionette');
 var CreateFileView = require('../../views/documents/createFile');
 var CreateFolderView = require('../../views/documents/createFolder');
 var DocumentsModel = require('../../models/documents');
+var FilterView = require('../../views/filter/filtersBarView');
 var CONTENT_TYPES = require('../../constants/contentType');
+var FilterBarTemplate = require('../../../templates/filter/filterBar.html');
 var Template = require('../../../templates/documents/topBar.html');
 
 module.exports = Marionette.View.extend({
@@ -25,12 +27,19 @@ module.exports = Marionette.View.extend({
         };
     },
 
+    filterBarTemplate : _.template(FilterBarTemplate),
+
+    filter: {},
+
     onRender : function () {
         if (this.archived) {
             this.switchUIToArchiveTab();
         } else {
             this.ui.unArchiveButton.addClass('hidden');
         }
+
+        this.renderFilters();
+        this.$el.find('.filterHeader').on('click', this.toggleActionDropDown.bind(this));
     },
 
     ui : {
@@ -48,7 +57,8 @@ module.exports = Marionette.View.extend({
         copy : '#copy',
         cut : '#cut',
         paste : '#paste',
-        search : '#search'
+        search : '#search',
+        filterBar: '.filterBar',
     },
 
     events : {
@@ -64,7 +74,41 @@ module.exports = Marionette.View.extend({
         'click @ui.cut' : 'cut',
         'click @ui.copy' : 'copy',
         'click @ui.paste' : 'paste',
-        'keyup @ui.search' : 'search'
+        'keyup @ui.search' : 'search',
+    },
+
+    renderFilters: function () {
+        var that = this;
+        var filterBar = this.$el.find('.filterBar');
+
+        filterBar.html(this.filterBarTemplate({
+            contentType: 'documents',
+            translation: this.translation,
+            showClear  : true,
+            showHeader : true,
+        }));
+
+        var filterHolder = filterBar.find('.filtersFullHolder');
+
+        this.filterView = new FilterView({
+            el: filterHolder,
+            translation: this.translation,
+            contentType: 'documents',
+            filter: this.filter,
+        });
+        this.filterView.render();
+
+        this.filterView.bind('filter', function (filter) {
+            that.filter = filter;
+
+            that.collection.state.filter = filter;
+            that.collection.refresh();
+        });
+    },
+
+    toggleActionDropDown: function (e) {
+        this.$el.find('.filterHeader').toggleClass('upArrow');
+        this.ui.filterBar.toggleClass('filterBarCollapse');
     },
 
     checkAllItems : function (event) {
@@ -297,6 +341,19 @@ module.exports = Marionette.View.extend({
 
         ui.actionHolder.addClass('hidden');
         ui.checkAll.prop('checked', false);
-    }
+    },
+
+    changeTranslatedFields: function (translation) {
+        var that = this;
+        var $elementsForTranslation = this.$el.find('[data-translation]');
+
+        this.translation = translation;
+        $elementsForTranslation.each(function (index, el) {
+            var $element = $(el);
+            var property = $element.attr('data-translation');
+
+            $element.html(that.translation[property]);
+        });
+    },
 
 });

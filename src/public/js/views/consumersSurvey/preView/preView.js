@@ -334,6 +334,8 @@ module.exports = BaseView.extend({
     renderFullRespondentsList: function () {
         var self = this;
         var $curEl = this.$el;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
         var answers = self.answersCollection.getAnswerFromPersonnels();
         var $respondentsFullList = $curEl.find('#respondentsFullList');
         var respondentsFullListTemplate = '';
@@ -349,6 +351,8 @@ module.exports = BaseView.extend({
             respondentsFullListTemplate += self.respondentsFullListTemplate({
                 answer     : answer,
                 translation: self.translation,
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
                 App: App,
             });
         });
@@ -376,17 +380,19 @@ module.exports = BaseView.extend({
         self.renderRespondentsQuestions();
     },
 
-    renderRespondentsQuestions: function () {
-        var self = this;
-        var currentUserAccessRole = App.currentUser.accessRole.level;
-        var $respondentsList = this.$el.find('#questionFullList');
-        var answers = this.answersCollection.getSelected({
-            modelKey: 'selectedForPersonnel'
-        });
-        var respondentQuestionsIds = _.pluck(answers, 'questionId');
-        var respondentQuestions = _.filter(this.model.get('questions'), function (question) {
-            return respondentQuestionsIds.indexOf(question._id) !== -1;
-        });
+        renderRespondentsQuestions: function () {
+            var self = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            var currentUserAccessRole = App.currentUser.accessRole.level;
+            var $respondentsList = this.$el.find('#questionFullList');
+            var answers = this.answersCollection.getSelected({
+                modelKey: 'selectedForPersonnel'
+            });
+            var respondentQuestionsIds = _.pluck(answers, 'questionId');
+            var respondentQuestions = _.filter(this.model.get('questions'), function (question) {
+                return respondentQuestionsIds.indexOf(question._id) !== -1;
+            });
 
         $respondentsList.html('');
 
@@ -406,6 +412,8 @@ module.exports = BaseView.extend({
                 customerName: respondentAnswer.customer.name,
                 answerId: respondentAnswer._id,
                 allowEdit: false,
+                currentLanguage,
+                anotherLanguage,
             };
 
             var fullAnswerTemplateOptions = {
@@ -415,6 +423,8 @@ module.exports = BaseView.extend({
                 answerId: respondentAnswer._id,
                 customerName: respondentAnswer.customer.name,
                 allowEdit: false,
+                currentLanguage,
+                anotherLanguage,
             };
 
             var npsAnswerTemplateOptions = {
@@ -424,6 +434,8 @@ module.exports = BaseView.extend({
                 answerId: respondentAnswer._id,
                 customerName: respondentAnswer.customer.name,
                 allowEdit: false,
+                currentLanguage,
+                anotherLanguage,
             };
 
             if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
@@ -516,20 +528,24 @@ module.exports = BaseView.extend({
         return locationsArray.length ? locationsArray.join(' > ') : '';
     },
 
-    renderRespondents: function () {
-        var self = this;
-        var currentUserAccessRole = App.currentUser.accessRole.level;
-        var $respondentsList = this.$el.find('#respondentsList');
-        var answers = this.answersCollection.getSelected({modelKey: 'selected'});
-        var respondentList = '';
-        var questions = this.model.get('questions');
-        var question = _.findWhere(questions, {_id: self.answersCollection.questionId});
-        var templateOptions = {
-            question   : question,
-            translation: self.translation,
-            allowEdit: false,
-            App: App,
-        };
+        renderRespondents: function () {
+            var self = this;
+            var currentLanguage = App.currentUser.currentLanguage;
+            var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
+            var currentUserAccessRole = App.currentUser.accessRole.level;
+            var $respondentsList = this.$el.find('#respondentsList');
+            var answers = this.answersCollection.getSelected({modelKey: 'selected'});
+            var respondentList = '';
+            var questions = this.model.get('questions');
+            var question = _.findWhere(questions, {_id: self.answersCollection.questionId});
+            var templateOptions = {
+                question   : question,
+                translation: self.translation,
+                allowEdit: false,
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
+                App: App,
+            };
 
         if ([ACL_ROLES.MASTER_ADMIN, ACL_ROLES.COUNTRY_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
             templateOptions.allowEdit = true;
@@ -577,11 +593,15 @@ module.exports = BaseView.extend({
             }
         });
         $curEl = this.$el;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
         jsonModel.questions.forEach(function (question) {
             questionList += self.questionListTemplate({
                 question   : question,
-                translation: self.translation
+                translation: self.translation,
+                currentLanguage: currentLanguage,
+                anotherLanguage: anotherLanguage,
             });
         });
 

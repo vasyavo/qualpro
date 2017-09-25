@@ -1,11 +1,12 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
+const FileHandler = require('../handlers/file');
 
 var ContactUs = function() {
     var async = require('async');
     var _ = require('lodash');
-    var FileHandler = require('../handlers/file');
-    var fileHandler = new FileHandler();
+
+    const fileHandler = new FileHandler();
     var mongoose = require('mongoose');
     var ObjectId = mongoose.Types.ObjectId;
     var CONTENT_TYPES = require('../public/js/constants/contentType.js');
@@ -22,12 +23,12 @@ var ContactUs = function() {
         const accessRoleLevel = session.level;
 
         const queryRun = (body, callback) => {
-            const files = req.files;
-
             async.waterfall([
 
                 (cb) => {
-                    if (!files && !files.length) {
+                    const files = req.files;
+
+                    if (!files || !files.files) {
                         return cb(null, []);
                     }
 

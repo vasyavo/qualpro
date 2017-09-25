@@ -29,17 +29,17 @@ var translation = {
     skipped      : 'تخطي',
     commentText  : 'التعليق',
     edit         : 'تعديل بيانات',
-    delete: '', // todo
-    saveBtn : '', // todo ar
+    delete       : 'حذف',
+    saveBtn      : 'حفظ',
 
     // edit
-    competitorBrandingEditTitle: '', // todo ar
+    competitorBrandingEditTitle: 'تعديل بيانات  العلامات التجارية وتقارير العرض للمنافسين',
 
     // topBar
     all        : ' العلامات التجارية وتقارير العرض للمنافسين',
     okBtn      : 'موافق',
     dialogTitle: ' التعليقات والمرفقات',
-    goToBtn : '' //todo
+    goToBtn    : 'الذهاب الى',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);

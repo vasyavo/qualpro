@@ -499,10 +499,20 @@ var Rating = function () {
                 conditions.year = query.year;
             }
 
+            const dataKeys = query.dateKeys && query.dateKeys.length &&  query.dateKeys.split(',').map(item => {
+                return item.trim();
+            });
+
+            if (dataKeys) {
+                conditions.dataKey = {
+                    $in: dataKeys,
+                };
+            }
+
             dbQuery = MonthlyModel.find(conditions)
                 .sort({
                     dataKey: -1
-                });
+                }).populate('createdBy.user', '_id firstName lastName');
 
             if (query.recentsNum) {
                 dbQuery = dbQuery.limit(+query.recentsNum);

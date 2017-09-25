@@ -199,7 +199,7 @@ module.exports = baseDialog.extend({
             showCancelBtn: false,
             buttons      : {
                 save: {
-                    text : 'Ok',
+                    text : this.translation.okBtn,
                     click: function () {
                         var close = self.save();
 

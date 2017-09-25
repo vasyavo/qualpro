@@ -3,10 +3,10 @@ const analyzeByMethods = {
     region: require('./analyzeByRegion'),
     subRegion: require('./analyzeBySubRegion'),
     branch: require('./analyzeByBranch'),
-    category: require('./analyzeByCategory'),
+    product: require('./analyzeByProduct'),
+    publisherPosition: require('./analyzeByPublisherPosition'),
     publisher: require('./analyzeByPublisher'),
-    position: require('./analyzeByPosition'),
-    personnel: require('./analyzeByPersonnel'),
+    assignee: require('./analyzeByAssignee'),
     promotionType: require('./analyzeByDetails'),
 };
 

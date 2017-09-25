@@ -35,7 +35,7 @@ module.exports = {
         _id : 'online',
         name: {
             en: 'Online',
-            ar: 'على الانترنت' // toDo translate correctly
+            ar: 'متاح حاليا'
         }
     },
 

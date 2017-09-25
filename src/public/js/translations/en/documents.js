@@ -15,7 +15,7 @@ var documentsTranslation = {
     copyButton : 'Copy',
     cutButton : 'Cut',
     pasteButton : 'Paste',
-    // list
+    root       : 'Root',
 
     // create
     createTitle : 'Create Document',
@@ -26,9 +26,11 @@ var documentsTranslation = {
     cancelBtn   : 'Cancel',
     attachments : 'Attachment',
     attachFiles : 'Attach File',
+
     // edit
     editTitle   : 'Edit Document',
     saveBtn     : 'Save',
+
     // preview
     okBtn       : 'Ok',
     preViewTitle: 'View Document',

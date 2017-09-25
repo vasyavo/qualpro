@@ -1,35 +1,66 @@
+const ObjectId = require('mongoose').Types.ObjectId;
+const _ = require('lodash');
 const CONTENT_TYPES = require('./../../../public/js/constants/contentType');
 
-const locations = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION, CONTENT_TYPES.BRANCH];
+const props = [CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION, CONTENT_TYPES.BRANCH];
 
-module.exports = (pipeline, personnel, filter) => {
+
+/**
+ * @function
+ * @param {Array} pipeline Current pipeline.
+ * @param {Object} personnel Current user.
+ * @param {Object} filter Filter from user.
+ * @param {Object|Boolean} scopeFilter
+ */
+
+module.exports = (pipeline, personnel, filter, scopeFilter) => {
     const $locationMatch = {
         $and: [],
     };
 
-    locations.forEach((location) => {
-        const locationItems = personnel[location] && personnel[location].length ? personnel[location] : filter[location];
+    props.forEach(prop => {
+        let items;
 
-        if (locationItems && locationItems.length) {
+        if (scopeFilter) {
+            if (personnel[prop] && personnel[prop].length) {
+                items = personnel[prop].map(id => {
+                    return _.isString(id) ? ObjectId(id) : id;
+                });
+            } else {
+                items = null;
+            }
+
+            scopeFilter[prop] = items || null; // for filter current scope of this location
+            filter[prop] = items || filter[prop]; // for filter under scope of this location
+        } else if (personnel[prop] && personnel[prop].length) {
+            items = personnel[prop].map(id => {
+                return _.isString(id) ? ObjectId(id) : id;
+            });
+        } else {
+            items = filter[prop];
+        }
+
+
+        if (items && items.length) {
             $locationMatch.$and.push({
                 $or: [
                     {
-                        [location]: {
-                            $in: locationItems,
+                        [prop]: {
+                            $in: items,
                         },
                     },
                     {
-                        [location]: { $eq: null },
+                        [prop]: { $eq: null },
                     },
                     {
-                        [location]: { $eq: [] },
+                        [prop]: { $eq: [] },
                     },
                 ],
             });
         }
     });
 
-    if ($locationMatch.$and.length) {
+    if ($locationMatch.$and.length && pipeline) {
         pipeline.push({
             $match: $locationMatch,
         });

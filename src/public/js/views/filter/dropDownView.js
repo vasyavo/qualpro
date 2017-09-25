@@ -30,6 +30,7 @@ module.exports = Backbone.View.extend({
     initialize: function (options) {
         var self = this;
 
+        this.translation = options.translation;
         this.forPosition = options.forPosition === undefined ? true : options.forPosition;
         this.displayText = options.displayText;
         this.contentType = options.contentType;
@@ -170,22 +171,17 @@ module.exports = Backbone.View.extend({
     setSelected: function (options) {
         var $input = this.$el.find('.dropDownInput>input');
         var names = [];
-        var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ||
-            Cookies.get('currentLanguage') || 'en';
+        var currentLanguage = (App.currentUser && App.currentUser.currentLanguage);
         var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-        var self = this;
-        var selectedValues;
-        var selectedValuesIds;
-        var model;
 
-        selectedValues = _.compact(this.selectedValues);
-        selectedValues.forEach(function (name, index) {
-            names.push(name.currentLanguage || name[currentLanguage] || name[anotherLanguage] || name);
+        var selectedValues = _.compact(this.selectedValues);
+        selectedValues.forEach(function (name) {
+            names.push(name[currentLanguage] || name[anotherLanguage] || name);
         });
 
         $input.val(names.join(', '));
-        selectedValuesIds = _.compact(this.selectedValuesIds);
-        model = this.collection.get(selectedValuesIds[0]);
+        var selectedValuesIds = _.compact(this.selectedValuesIds);
+        var model = this.collection.get(selectedValuesIds[0]);
         if (model && model.get('auto')) {
             $input.attr('data-auto', true);
         }
@@ -403,6 +399,10 @@ module.exports = Backbone.View.extend({
     makePagination: function ($paginationEl, status) {
         var $prevPage;
         var $nextPage;
+        var ofText = {
+            en: 'of',
+            ar: 'من',
+        };
 
         if (status) {
             $paginationEl.find('.counter').html((this.start + 1) + '-' + this.end + ' of ' + this.filteredCollection.length);
@@ -484,13 +484,31 @@ module.exports = Backbone.View.extend({
 
     render: function () {
         var $curEl = this.$el;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var selectAllText = {
+            en: 'Select all',
+            ar: 'اختر الكل',
+        };
+        var prev = {
+            en: 'prev',
+            ar: 'السابق',
+        };
+        var next = {
+            en: 'next',
+            ar: 'التالي',
+        };
 
         $curEl.html(this.template({
             displayText : this.displayText,
             forPosition : this.forPosition,
             contentType : this.contentType,
             dataProperty: this.dataProperty,
-            showSelectAll : this.showSelectAll
+            showSelectAll : this.showSelectAll,
+            translation: {
+                selectAll: selectAllText[currentLanguage],
+                next: next[currentLanguage],
+                prev: prev[currentLanguage],
+            },
         }));
 
         if (this.selectedValuesIds.length) {

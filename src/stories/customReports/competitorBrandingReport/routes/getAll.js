@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const moment = require('moment');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -8,7 +9,7 @@ const CompetitorBrandingModel = require('./../../../../types/competitorBranding/
 const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -82,6 +83,10 @@ module.exports = (req, res, next) => {
                 },
             });
         }
+/*
+        pipeline.push({
+            $match: { category: { $ne: [] } },
+        });*/
 
         if ($generalMatch.$and.length) {
             pipeline.push({
@@ -89,24 +94,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -292,19 +289,32 @@ module.exports = (req, res, next) => {
                             branch: { $arrayElemAt: ['$branch', 0] },
                         },
                         in: {
-                            $concat: [
-                                '$$country.name.en',
-                                ' -> ',
-                                '$$region.name.en',
-                                ' -> ',
-                                '$$subRegion.name.en',
-                                ' -> ',
-                                '$$retailSegment.name.en',
-                                ' -> ',
-                                '$$outlet.name.en',
-                                ' -> ',
-                                '$$branch.name.en',
-                            ],
+                            en: {
+                                $concat: [
+                                    '$$country.name.en',
+                                    ' -> ',
+                                    '$$region.name.en',
+                                    ' -> ',
+                                    '$$subRegion.name.en',
+                                    ' -> ',
+                                    '$$retailSegment.name.en',
+                                    ' -> ',
+                                    '$$outlet.name.en',
+                                ],
+                            },
+                            ar: {
+                                $concat: [
+                                    '$$country.name.ar',
+                                    ' -> ',
+                                    '$$region.name.ar',
+                                    ' -> ',
+                                    '$$subRegion.name.ar',
+                                    ' -> ',
+                                    '$$retailSegment.name.ar',
+                                    ' -> ',
+                                    '$$outlet.name.ar',
+                                ],
+                            },
                         },
                     },
                 },
@@ -323,6 +333,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 location: 1,
+                'branch.name': 1,
             },
         });
 
@@ -368,8 +379,8 @@ module.exports = (req, res, next) => {
                 total: 1,
                 location: 1,
                 attachments: 1,
-                dateStart: 1,
-                dateEnd: 1,
+                dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
+                dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },
                 description: 1,
                 createdBy: 1,
                 category: {
@@ -466,6 +477,19 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
+
+        response.data.forEach(item => {
+            item.description = {
+                en: sanitizeHtml(item.description.en),
+                ar: sanitizeHtml(item.description.ar),
+            };
+        });
+
+        response.data.forEach(item => {
+            item.category = item.category ? item.category : 'N/A';
+            item.dateStart = item.dateStart ? item.dateStart : 'N/A';
+            item.dateEnd = item.dateEnd ? item.dateEnd : 'N/A';
+        });
 
         res.status(200).send(response);
     });

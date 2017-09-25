@@ -33,8 +33,15 @@ module.exports = Backbone.Collection.extend({
         return response.data;
     },
 
-    getFirstPage : function () {
-        this.state.page = 1;
+        refresh: function () {
+            this.fetch({
+                reset : true,
+                data : this.state,
+            });
+        },
+
+        getFirstPage : function () {
+            this.state.page = 1;
 
         this.fetch({
             reset : true,

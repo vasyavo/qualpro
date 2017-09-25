@@ -12,7 +12,7 @@ var translation = {
     aboutSKUFormat   : 'فيما يتعلق برمز الهوية',
     addNewBtn        : 'أضف سلعة جديدة',
     deleteBtn        : 'حذف السلعة',
-    delete: '', // todo
+    delete           : 'حذف',
     questions        : 'الاسئلة',
     type             : 'نوع الاستطلاع',
     options          : 'خيارات',
@@ -20,16 +20,16 @@ var translation = {
 
     //create Question
     enterQuestion     : {
-        en: 'Ar Enter Question in English',
-        ar: 'Ar Enter Question in Arabic' // todo translation
+        en: 'أدخل السؤال في اللغة الإنجليزية',
+        ar: 'أدخل السؤال باللغة العربية'
     },
     enterTitle     : {
-        en: 'Ar Enter Title in English',
-        ar: 'Ar Enter Title in Arabic' // todo translation
+        en: 'أدخل العنوان باللغة الإنجليزية',
+        ar: 'أدخل العنوان باللغة العربية'
     },
     enterOption     : {
-        en: 'Ar Enter Option to choose in English',
-        ar: 'Ar Enter Option to choose in Arabic' // todo translation
+        en: 'أدخل الخيار لاختيار باللغة الإنجليزية',
+        ar: 'أدخل الخيار للاختيار باللغة العربية'
     },
     title        : 'العنوان',
     dueDate      : 'تاريخ الاستحقاق',
@@ -50,7 +50,7 @@ var translation = {
     okBtn             : 'موافق',
 
     //edit answer
-    editAnswerViewTitle: '', // todo
+    editAnswerViewTitle: 'تعديل اجابة السؤال',
 
     // top Bar
     all   : 'استطلاع العلالى',

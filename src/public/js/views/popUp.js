@@ -18,19 +18,23 @@ module.exports = Backbone.View.extend({
     render: function (options) {
         options = options || {};
 
+        var saveTitles = {
+            en: 'Ok',
+            ar: 'موافق',
+        };
+        var currentLanguage = App.currentUser.currentLanguage;
         var contentType = options.contentType;
         var action = options.action;
         var title = '';
         var message = '';
         var saveCb = options.saveCb;
-        var saveTitle = options.saveTitle || 'OK';
+        var saveTitle = options.saveTitle || saveTitles[currentLanguage];
         var showCancelBtn = options.showCancelBtn || true;
         var iconClass = options.iconClass || '';
         var buttons = {};
         var dialogOptions;
         var CONTENT;
         var ACTION;
-        var currentLanguage = App.currentUser.currentLanguage;
 
         if (contentType) {
             CONTENT = MESSAGES[contentType];
@@ -57,7 +61,7 @@ module.exports = Backbone.View.extend({
             title        : title,
             showCancelBtn: showCancelBtn,
             height       : '80%',
-            buttons      : buttons
+            buttons      : buttons,
         };
 
         this.$el.html(this.template({message: message, title: title, iconClass: iconClass}));

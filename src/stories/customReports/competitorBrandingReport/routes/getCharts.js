@@ -81,30 +81,26 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push({
+            $match: { category: { $ne: [] } },
+        });
+
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -112,26 +108,29 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $addFields: {
-                category: {
-                    $let: {
-                        vars: {
-                            allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
-                        },
-                        in: {
-                            $filter: {
-                                input: { $ifNull: ['$category', []] },
-                                as: 'category',
-                                cond: {
-                                    $setIsSubset: [['$$category'], '$$allowedCategory'],
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length){
+            pipeline.push({
+                $addFields: {
+                    category: {
+                        $let: {
+                            vars: {
+                                allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
+                            },
+                            in: {
+                                $filter: {
+                                    input: { $ifNull: ['$category', []] },
+                                    as: 'category',
+                                    cond: {
+                                        $setIsSubset: [['$$category'], '$$allowedCategory'],
+                                    },
                                 },
                             },
                         },
                     },
                 },
-            },
-        });
+            });
+        }
+
 
         pipeline.push({
             $lookup: {

@@ -11,24 +11,26 @@ var documentsTranslation = {
     action     : 'اتخاذ إجراء',
     disable    : ' إلغاء تفعيل',
     unDisable  : 'إعادة تفعيل',
-    delete : '', //todo
-    copyButton : '',//todo
-    cutButton : '',//todo
-    pasteButton : '',//todo
-    // list
+    delete     : 'حذف',
+    copyButton : 'نسخ',
+    cutButton  : 'قص',
+    pasteButton: 'لصق',
+    root       : 'من خلال',
 
     // create
     createTitle : 'إنشاء وثيقة',
-    createFolderTitle : '',//todo
+    createFolderTitle: 'أنشئ مجلد',
     titleInput  : 'إدخال عنوان النص',
     title       : 'عنوان النص',
     createBtn   : 'إنشاء',
     cancelBtn   : ' إلغاء',
     attachments : 'المرفقات',
     attachFiles : 'إرفاق ملفات',
+
     // edit
     editTitle   : 'تعديل الوثيقة',
     saveBtn     : 'حفظ',
+
     // preview
     okBtn       : 'موافق',
     preViewTitle: 'عرض الوثيقة',

@@ -745,7 +745,8 @@ module.exports = BaseView.extend({
         };
 
         if (jsonModel.status._id === CONSTANTS.OBJECTIVE_STATUSES.CLOSED
-            && App.currentUser._id !== jsonModel.createdBy.user._id) {
+            && App.currentUser._id !== jsonModel.createdBy.user._id
+            && App.currentUser.accessRole.level  !== 1) {
             return false;
         }
 

@@ -28,7 +28,10 @@ var priceSurveyTranslation = {
     value    : 'Value',
     employee : 'Employee',
     options  : 'Options',
+    okBtn: 'Ok',
     saveBtn  : 'Save',
+    delete: 'Delete',
+    edit: 'Edit',
 
     // topBar
     all: 'Price Survey'

@@ -93,6 +93,7 @@ var translation = {
     // form
     forms: 'Forms',
     form : 'form',
+    before: 'Before',
 
     // effort
     effort  : 'Effort',
@@ -107,6 +108,7 @@ var translation = {
     },
 
     dialogTitle: 'Objectives files',
+    applyToAll: 'Apply to all',
     countOfAttachedFiles: 'Count of attached files'
 };
 

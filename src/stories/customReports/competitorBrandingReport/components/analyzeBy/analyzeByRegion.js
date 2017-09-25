@@ -91,9 +91,9 @@ module.exports = (pipeline) => {
 
     pipeline.push({
         $sort: {
-            'country._id': 1,
-            'category._id': 1,
-            'region._id': 1,
+            'country.name': 1,
+            'category.name': 1,
+            'region.name': 1,
         },
     });
 
@@ -110,7 +110,7 @@ module.exports = (pipeline) => {
             branch: { $push: '$branch' },
             category: { $first: '$category' },
             data: { $push: '$count' },
-            labels: { $push: '$region.name' },
+            labels: { $push: '$region' },
         },
     });
 
@@ -214,11 +214,7 @@ module.exports = (pipeline) => {
             },
             country: 1,
             category: 1,
-            datasets: [
-                {
-                    data: '$data',
-                },
-            ],
+            datasets: [{ data: '$data' }],
             labels: '$labels',
         },
     });

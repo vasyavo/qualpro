@@ -271,6 +271,19 @@ module.exports = Marionette.View.extend({
             ui.itemPricesButtonTitle.html(translation.importItemsPricesTitle);
             ui.competitorListButtonTitle.html(translation.importCompetitorListTitle);
         }
-    }
+    },
+
+    changeTranslatedFields: function (translation) {
+        var that = this;
+        var $elementsForTranslation = this.$el.find('[data-translation]');
+
+        this.translation = translation;
+        $elementsForTranslation.each(function (index, el) {
+            var $element = $(el);
+            var property = $element.attr('data-translation');
+
+            $element.html(that.translation[property]);
+        });
+    },
 
 });

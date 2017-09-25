@@ -1,9 +1,8 @@
+const ObjectId = require('bson-objectid');
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
-const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const NewProductLaunch = require('./../../../../types/newProductLaunch/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -12,7 +11,6 @@ const moment = require('moment');
 const currency = require('../../utils/currency');
 
 const ajv = new Ajv();
-const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
@@ -32,20 +30,12 @@ module.exports = (req, res, next) => {
             },
         },
     };
-
     let currentLanguage;
 
+    const query = req.body;
+    const timeFilter = query.timeFilter;
+    const queryFilter = query.filter || {};
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const timeFilter = query.timeFilter;
-        const queryFilter = query.filter || {};
-        const filters = [
-            CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-        ];
-        const pipeline = [];
-
         currentLanguage = personnel.currentLanguage || 'en';
 
         if (timeFilter) {
@@ -61,17 +51,44 @@ module.exports = (req, res, next) => {
             }
         }
 
-        filters.forEach((filterName) => {
-            if (queryFilter[filterName] && queryFilter[filterName][0]) {
+        // map set String ID to set ObjectID
+        [
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.BRANCH,
+            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.PERSONNEL,
+        ].forEach(filterName => {
+            if (queryFilter[filterName] && queryFilter[filterName].length) {
                 queryFilter[filterName] = queryFilter[filterName].map((item) => {
                     return ObjectId(item);
                 });
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        const pipeline = [];
 
-        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, 'packing'], queryFilter, personnel);
+        const $locationMatch = generalFiler([
+            CONTENT_TYPES.COUNTRY,
+            CONTENT_TYPES.REGION,
+            CONTENT_TYPES.SUBREGION,
+            CONTENT_TYPES.RETAILSEGMENT,
+            CONTENT_TYPES.OUTLET,
+            CONTENT_TYPES.BRANCH,
+        ], queryFilter);
+
+        if ($locationMatch.$and.length) {
+            pipeline.push({ $match: $locationMatch });
+        }
+
+        const $generalMatch = generalFiler([
+            CONTENT_TYPES.DISPLAY_TYPE,
+            'packing',
+        ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             $generalMatch.$and.push({
@@ -81,20 +98,90 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
-            $generalMatch.$and.push({
-                'brand.name': {
-                    $in: queryFilter[CONTENT_TYPES.BRAND],
-                },
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.CATEGORY].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ category: { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({
+                    $or: [
+                        { 'category_name.en': { $in: setString } },
+                        { 'category_name.ar': { $in: setString } },
+                    ],
+                });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRAND] && queryFilter[CONTENT_TYPES.BRAND].length) {
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.BRAND].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
+            });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'brand._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'brand.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter[CONTENT_TYPES.VARIANT] && queryFilter[CONTENT_TYPES.VARIANT].length) {
-            $generalMatch.$and.push({
-                'variant.name': {
-                    $in: queryFilter[CONTENT_TYPES.VARIANT],
-                },
+            const setObjectId = [];
+            const setString = [];
+
+            queryFilter[CONTENT_TYPES.VARIANT].forEach(id => {
+                if (ObjectId.isValid(id)) {
+                    setObjectId.push(ObjectId(id));
+                } else {
+                    setString.push(id);
+                }
             });
+
+            const $or = [];
+
+            if (setObjectId.length) {
+                $or.push({ 'variant._id': { $in: setObjectId } });
+            }
+
+            if (setString.length) {
+                $or.push({ 'variant.name': { $in: setString } });
+            }
+
+            if ($or.length) {
+                $generalMatch.$and.push({ $or });
+            }
         }
 
         if (queryFilter.distributor && queryFilter.distributor.length) {
@@ -114,24 +201,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -145,23 +224,23 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter.shelfLife) {
-            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
-
-            pipeline.push({
-                $addFields: {
-                    shelfLifePeriod: {
-                        $trunc: {
-                            $divide: [
-                                {
-                                    $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
-                                },
-                                86400000,
-                            ],
-                        },
+        pipeline.push({
+            $addFields: {
+                shelfLifePeriod: {
+                    $trunc: {
+                        $divide: [
+                            {
+                                $subtract: ['$shelfLifeEnd', '$shelfLifeStart'],
+                            },
+                            86400000,
+                        ],
                     },
                 },
-            });
+            },
+        });
+
+        if (queryFilter.shelfLife) {
+            queryFilter.shelfLife = parseInt(queryFilter.shelfLife, 10);
 
             pipeline.push({
                 $match: {
@@ -213,6 +292,174 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
+            $addFields: {
+                customCategory: {
+                    en: '$category_name.en',
+                    ar: '$category_name.ar',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                category: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$category',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    category: { $arrayElemAt: ['$category', 0] },
+                                },
+                                in: {
+                                    _id: '$$category._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$category.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$category.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customCategory.en', // tip: the same as ar
+                            custom: true,
+                            name: {
+                                en: {
+                                    $toUpper: '$customCategory.en',
+                                },
+                                ar: {
+                                    $toUpper: '$customCategory.ar',
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                brand: '$brand._id',
+                customBrand: {
+                    en: '$brand.name',
+                    ar: '$brand.name',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brand',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                brand: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$brand',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    brand: { $arrayElemAt: ['$brand', 0] },
+                                },
+                                in: {
+                                    _id: '$$brand._id',
+                                    name: {
+                                        $toUpper: '$$brand.name.en',
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customBrand.en', // tip: same as ar
+                            custom: true,
+                            name: {
+                                $toUpper: '$customBrand.en',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                variant: '$variant._id',
+                customVariant: {
+                    en: '$variant.name',
+                    ar: '$variant.name',
+                },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'variants',
+                localField: 'variant',
+                foreignField: '_id',
+                as: 'variant',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                variant: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$variant',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    variant: { $arrayElemAt: ['$variant', 0] },
+                                },
+                                in: {
+                                    _id: '$$variant._id',
+                                    name: {
+                                        $toUpper: '$$variant.name.en',
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$customVariant.en', // tip: same as ar
+                            custom: true,
+                            name: {
+                                $toUpper: '$customVariant.en',
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
             $project: {
                 _id: 1,
                 country: 1,
@@ -225,7 +472,7 @@ module.exports = (req, res, next) => {
                 brand: 1,
                 category: 1,
                 variant: 1,
-                packing: 1,
+                packing: { $concat: ['$packing', ' ', '$packingType'] },
                 displayType: 1,
                 additionalComment: 1,
                 price: 1,
@@ -293,15 +540,6 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category',
-            },
-        });
-
-        pipeline.push({
-            $lookup: {
                 from: 'displayTypes',
                 localField: 'displayType',
                 foreignField: '_id',
@@ -331,63 +569,6 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 additionalComment: 1,
-                location: {
-                    $concat: [
-                        {
-                            $let: {
-                                vars: {
-                                    country: { $arrayElemAt: ['$country', 0] },
-                                },
-                                in: '$$country.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    region: { $arrayElemAt: ['$region', 0] },
-                                },
-                                in: '$$region.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                                },
-                                in: '$$subRegion.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                                },
-                                in: '$$retailSegment.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    outlet: { $arrayElemAt: ['$outlet', 0] },
-                                },
-                                in: '$$outlet.name.en',
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $let: {
-                                vars: {
-                                    branch: { $arrayElemAt: ['$branch', 0] },
-                                },
-                                in: '$$branch.name.en',
-                            },
-                        },
-                    ],
-                },
                 country: {
                     $let: {
                         vars: {
@@ -449,14 +630,7 @@ module.exports = (req, res, next) => {
                 },
                 createdBy: 1,
                 brand: 1,
-                category: {
-                    $let: {
-                        vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
-                        },
-                        in: '$$category.name',
-                    },
-                },
+                category: 1,
                 variant: 1,
                 packing: 1,
                 displayType: {
@@ -521,8 +695,11 @@ module.exports = (req, res, next) => {
                         <th>Publisher</th>
                         <th>Position</th>
                         <th>Brand</th>
+                        <th>Status Brand</th>
                         <th>Product</th>
+                        <th>Status Product</th>
                         <th>Variant</th>
+                        <th>Status Variant</th>
                         <th>Packing</th>
                         <th>Display Type</th>
                         <th>Price</th>
@@ -535,11 +712,20 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
+    
                         const currentCountry = currency.defaultData.find((country) => {
                             return country._id.toString() === item.country._id.toString();
                         });
-                        const price = parseFloat(item.price * currentCountry.currencyInUsd).toFixed(2);
-                        return `
+                        item.price = Number(item.price);
+                        let price = item.price.toFixed(2);
+                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
+                            price = `${price} $`;
+                        } else {
+                            price = `${price} ${currentCountry.currency}`;
+                        }
+    
+            return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region[currentLanguage]}</td>
@@ -550,8 +736,11 @@ module.exports = (req, res, next) => {
                                 <td>${item.createdBy.user.name[currentLanguage]}</td>
                                 <td>${item.position[currentLanguage]}</td>
                                 <td>${item.brand.name}</td>
-                                <td>${item.category ? item.category[currentLanguage] : ''}</td>
+                                <td style="color: red">${item.brand.custom ? 'NEW' : ''}</td>
+                                <td>${item.category.name ? item.category.name[currentLanguage] : ''}</td>
+                                <td style="color: red">${item.category.custom ? 'NEW' : ''}</td>
                                 <td>${item.variant.name}</td>
+                                <td style="color: red">${item.variant.custom ? 'NEW' : ''}</td>
                                 <td>${item.packing}</td>
                                 <td>${item.displayType[currentLanguage].join(', ')}</td>
                                 <td>${price}</td>
@@ -559,7 +748,7 @@ module.exports = (req, res, next) => {
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.distributor[currentLanguage]}</td>
-                                <td>${item.additionalComment[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] +': '+ item.additionalComment[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}

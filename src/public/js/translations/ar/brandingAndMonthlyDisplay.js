@@ -4,41 +4,42 @@ var filtersTranslation = require('./filters');
 
 var translation = {
     // list view
-    brand      : '', // todo
-    category   : '', // todo
-    displayType: '', // todo
-    startDate  : '', // todo
-    endDate    : '', // todo
-    location   : '', // todo
+    brand      : 'المنافس',
+    category   : 'الفئة',
+    displayType: 'نوع العرض',
+
+    startDate: 'تاريخ البدء',
+    endDate  : 'تاريخ الانتهاء',
+    location : 'الموقع',
 
     // preview
-    titlePreview : '', // todo
-    country      : '', // todo
-    region       : '', // todo
-    subRegion    : '', // todo
-    retailSegment: '', // todo
-    outlet       : '', // todo
-    branch       : '', // todo
-    description  : '', // todo
-    attachments  : '', // todo
-    files        : '', // todo
-    attachBtn    : '', // todo
-    sendBtn      : '', // todo
-    noTranslation: '', // todo
-    skipped      : '', // todo
-    commentText  : '', // todo
-    missedData   : '', // todo
+    titlePreview : 'عرض بيانات النشاط التسويقي',
+    country      : 'الدولة',
+    region       : 'المنطقة',
+    subRegion    : 'المنطقة الفرعية',
+    retailSegment: 'الفئة التجارية',
+    outlet       : 'العميل',
+    branch       : 'الفرع',
+    description  : 'الوصف',
+    attachments  : 'الملفات المرفقة',
+    files        : 'الملفات',
+    attachBtn    : 'ارفاق',
+    sendBtn      : 'ارسال',
+    noTranslation: ' لا يوجد ترجمة ',
+    skipped      : 'تخطي',
+    commentText  : 'التعليق',
+    missedData   : 'البيانات المفقودة',
     edit         : 'تعديل بيانات',
-    delete: '', // todo
+    delete: 'حذف',
 
     // edit
-    saveBtn: '', // todo
-    brandingAndMonthlyDisplayEditTitle: '', // todo
+    saveBtn: 'حفظ',
+    brandingAndMonthlyDisplayEditTitle: 'تعديل العلامات التجارية وتقارير العرض',
 
     // topBar
-    all        : '', // todo
-    okBtn      : '', // todo
-    dialogTitle: '' // todo
+    all: ' العلامات التجارية وتقارير العرض للمنافسين',
+    okBtn: 'موافق',
+    dialogTitle: ' التعليقات والمرفقات',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);

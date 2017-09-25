@@ -1,19 +1,13 @@
 <div class="featureTitleWrap" data-translation="all"><%- translation.all %></div>
-<div class="filterBar">
-    <div class="filterHeader">
-        <span class="searchInputWrap">
-            <input type="text" placeholder="Search" id="search" class="searchInput">
-        </span>
-    </div>
-</div>
+<div class="filterBar"></div>
 
 <div id="viewBar" class="viewBar documentsViewBar">
     <div id="templateSwitcher" class="templateSwitcher">
-        <a id="unarchived-tab" class="changeContentView viewBarTabActive"><%- translation.all %></a>
-        <a id="archived-tab" class="changeContentView"><%- translation.archive %></a>
+        <a id="unarchived-tab" class="changeContentView viewBarTabActive" data-translation="all"><%- translation.all %></a>
+        <a id="archived-tab" class="changeContentView" data-translation="archive"><%- translation.archive %></a>
     </div>
 
-    <span id="create-folder" class="createBtn" data-translation="newDocument">New Folder</span> <!-- new folder button. todo translation -->
+    <span id="create-folder" class="createBtn" data-translation="createFolderTitle"><%- translation.createFolderTitle %></span>
     <span id="create-file" class="createBtn" data-translation="newDocument"><%- translation.newDocument %></span>
     <div id="checkbox-area" class="checkboxArea">
         <input type="checkbox" id="check-all" class="btnCustomCheckbox"/>
@@ -21,14 +15,14 @@
     </div>
 
     <div id="actionHolder" class="actionHolder actionBtn hidden">
-        <span class="dropDown downArrow triUp"><%- translation.action %></span>
+        <span class="dropDown downArrow triUp" data-translation="action"><%- translation.action %></span>
         <ul id="actions-dropdown" class="dropDownContent">
-            <li id="copy" class="editBtn"><%- translation.copyButton %></li>
-            <li id="cut" class="editBtn"><%- translation.cutButton %></li>
-            <li id="paste" class="editBtn hidden"><%- translation.pasteButton %></li>
-            <li id="archive" class="archiveBtn"><%- translation.disable %></li>
-            <li id="unarchive" class="archiveBtn"><%- translation.unDisable %></li>
-            <li id="delete" class="archiveBtn"><%- translation.delete %></li>
+            <li id="copy" class="editBtn" data-translation="copyButton"><%- translation.copyButton %></li>
+            <li id="cut" class="editBtn" data-translation="cutButton"><%- translation.cutButton %></li>
+            <li id="paste" class="editBtn hidden" data-translation="pasteButton"><%- translation.pasteButton %></li>
+            <li id="archive" class="archiveBtn" data-translation="disable"><%- translation.disable %></li>
+            <li id="unarchive" class="archiveBtn" data-translation="unDisable"><%- translation.unDisable %></li>
+            <li id="delete" class="archiveBtn" data-translation="delete"><%- translation.delete %></li>
         </ul>
     </div>
 

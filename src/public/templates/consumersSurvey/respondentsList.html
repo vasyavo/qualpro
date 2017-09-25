@@ -2,17 +2,17 @@
 <div id="respondent-answer-container-<%- answer._id %>" class="questionsList flexRowStretch noShrink borderBottom">
     <div class="questionsDescription flexGrow">
         <div class="fontBold"><%= answer.customer.name %></div>
-        <div class="fontGray fontSmall"><%- answer.customer.nationality.name[App.currentUser.currentLanguage] %></div>
+        <div class="fontGray fontSmall"><%- answer.customer.nationality.name[currentLanguage] || answer.customer.nationality.name[anotherLanguage] %></div>
         <div class="fontGray fontSmall"><%- answer.customer.gender %></div>
         <div class="fontGray textEllipsis hoverFullText"><%= translation.location %>: <%= answer.location %></div>
     </div>
     <div class="questionsStatusBlock questionnaireMultiEllipsis noShrink">
         <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? 'answer' : question.type._id === 'singleChoice' ? 'question' : ''%>">
-            <span class="questionsCount"><%= answer && answer.text && answer.text.currentLanguage || optionIndex.join(', ') %></span>
+            <span class="questionsCount"><%= answer && answer.text && answer.text[currentLanguage] || answer.text && answer.text[anotherLanguage] || optionIndex.join(', ') %></span>
         </div>
     </div>
-    <div class="<%= allowEdit ? '' : 'hidden' %>">
-        <button class="edit-answer" data-customer-name="<%- answer.customer.name %>">Edit</button>
-        <button class="delete-answer" data-id="<%- answer._id %>"><%- translation.delete %></button>
+    <div class="<%= allowEdit ? 'edit-question' : 'hidden' %>">
+        <button class="edit-answer" data-customer-name="<%- answer.customer.name %>"><%- translation.editBtn %></button>
+        <button class="delete-answer" data-id="<%- answer._id %>"><%- translation.deleteBtn %></button>
     </div>
 </div>

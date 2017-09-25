@@ -5,7 +5,7 @@ const AccessManager = require('./../../../../helpers/access')();
 const PriceSurveyModel = require('./../../../../types/priceSurvey/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 
@@ -90,7 +90,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.CATEGORY, CONTENT_TYPES.VARIANT], queryFilter, personnel);
 
@@ -361,6 +361,65 @@ module.exports = (req, res, next) => {
             brands: [],
             positions: [],
         };
+
+        response.analyzeBy = [
+            {
+                name: {
+                    en: 'Country',
+                    ar: '',
+                },
+                value: 'country',
+            },
+            {
+                name: {
+                    en: 'Region',
+                    ar: '',
+                },
+                value: 'region',
+            },
+            {
+                name: {
+                    en: 'Sub Region',
+                    ar: '',
+                },
+                value: 'subRegion',
+            },
+            {
+                name: {
+                    en: 'Branch',
+                    ar: '',
+                },
+                value: 'branch',
+            },
+            {
+                name: {
+                    en: 'Publisher',
+                    ar: '',
+                },
+                value: 'publisher',
+            },
+            {
+                name: {
+                    en: 'Publisher Position',
+                    ar: '',
+                },
+                value: 'publisherPosition',
+            },
+            {
+                name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
+            {
+                name: {
+                    en: 'Product',
+                    ar: '',
+                },
+                value: 'product',
+            },
+        ];
 
         res.status(200).send(response);
     });

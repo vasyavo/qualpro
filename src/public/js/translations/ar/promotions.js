@@ -42,7 +42,7 @@ var promotionsTranslation = {
     saveBtn            : 'حفظ',
     duplicatePromotion : 'تكرار إنشاء الترويج',
     editPromotion      : 'تعديل بيانات',
-    editPromotionItem : '', // todo ar
+    editPromotionItem : 'تعديل بيانات السلع المروجة',
     // preview
     okBtn              : 'موافق',
     preViewTitle       : 'عرض بيانات الترويج',

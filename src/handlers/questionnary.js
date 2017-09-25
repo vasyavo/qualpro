@@ -1,6 +1,7 @@
 const async = require('async');
 const _ = require('underscore');
 const lodash = require('lodash');
+const moment = require('moment');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const QuestionnaryModel = require('./../types/questionnaries/model');
@@ -597,10 +598,10 @@ const QuestionnaryHandler = function () {
 
             if (isMobile) {
                 // user sees only ongoing questionnaire via mobile app
-                const currentDate = new Date();
+                const currentDate = moment().startOf('day')._d;
 
                 queryObject.dueDate = {
-                    $gt: currentDate,
+                    $gte: currentDate,
                 };
 
                 queryObject.status = {
@@ -1164,7 +1165,7 @@ const QuestionnaryHandler = function () {
                     body.countAll = personnelCount;
                     body.countBranches = branchCount;
                     body.status = 'draft';
-                    body.dueDate = new Date(body.dueDate);
+                    body.dueDate = moment(body.dueDate).endOf('day').toDate();
                     body.personnels = personnelIds;
                     body.createdBy = createdBy;
                     body.editedBy = createdBy;
@@ -1354,7 +1355,7 @@ const QuestionnaryHandler = function () {
                     }
 
                     if (body.dueDate) {
-                        body.dueDate = new Date(body.dueDate);
+                        body.dueDate = moment(body.dueDate).endOf('day').toDate();
                     }
 
                     if (personnelCount) {

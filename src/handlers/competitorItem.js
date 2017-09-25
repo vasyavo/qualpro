@@ -350,13 +350,91 @@ var CompetitorItem = function () {
 
             aggregationHelper.setSyncQuery(queryObject, lastLogOut);
 
-            pipeLine = getAllPipeLine({
-                queryObject      : queryObject,
-                aggregationHelper: aggregationHelper,
-                sort             : sort,
-                query            : query,
-                isMobile         : isMobile
-            });
+            pipeLine = [
+                {
+                    $match: queryObject,
+                },
+                {
+                    $match: {
+                        archived: false,
+                    },
+                },
+                {
+                    $addFields: {
+                        origin: {
+                            $filter: {
+                                input: '$origin',
+                                as: 'origin',
+                                cond: {
+                                    $ne: ['$$origin', null],
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: null,
+                        total: {
+                            $sum: 1,
+                        },
+                        data: {
+                            $push: '$$ROOT',
+                        },
+                    },
+                },
+                {
+                    $unwind: {
+                        path: '$data',
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $project: {
+                        _id: '$data._id',
+                        name: '$data.name',
+                        packing: '$data.packing',
+                        archived: '$data.archived',
+                        brand: '$data.brand',
+                        variant: '$data.variant',
+                        product: '$data.product',
+                        origin: '$data.origin',
+                        country: '$data.country',
+                        total: 1,
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$total',
+                        data: {
+                            $push: '$$ROOT',
+                        },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        total: '$_id',
+                        data: 1,
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        total: '$_id',
+                        data: {
+                            _id: 1,
+                            name: 1,
+                            packing: 1,
+                            archived: 1,
+                            brand: 1,
+                            variant: 1,
+                            origin: 1,
+                            country: 1,
+                        },
+                    },
+                },
+            ];
 
             aggregation = CompetitorItem.aggregate(pipeLine);
 
@@ -463,70 +541,161 @@ var CompetitorItem = function () {
                 delete queryObject.product;
             }
 
-            function contentFinder(parallelCb) {
-                var pipeLine;
-                var aggregation;
+            var pipeLine;
+            var aggregation;
 
-                var searchFieldsArray = [
-                    'variant.name.en',
-                    'variant.name.ar',
+            var searchFieldsArray = [
+                'variant.name.en',
+                'variant.name.ar',
+            ];
+            if (isMobile || limit === -1) {
+                pipeLine = [
+                    {
+                        $match: queryObject,
+                    },
+                    {
+                        $match: {
+                            archived: false,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            root: { $push: '$_id' },
+                            total: { $sum: 1 },
+                        },
+                    },
+
+                    {
+                        $unwind: '$root',
+                    },
+
+                    {
+                        $skip: skip,
+                    },
+
+                    {
+                        $limit: limit,
+                    },
+
+                    {
+                        $lookup: {
+                            from: 'competitorItems',
+                            localField: 'root',
+                            foreignField: '_id',
+                            as: '_id',
+                        },
+                    },
+
+                    {
+                        $addFields: {
+                            _id: {
+                                $let: {
+                                    vars: {
+                                        root: {
+                                            $arrayElemAt: [
+                                                '$_id',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in: {
+                                        _id: '$$root._id',
+                                        name: '$$root.name',
+                                        packing: '$$root.packing',
+                                        archived: '$$root.archived',
+                                        brand: '$$root.brand',
+                                        variant: '$$root.variant',
+                                        product: '$$root.product',
+                                        origin: '$$root.origin',
+                                        country: '$$root.country',
+                                        total: '$total',
+                                    },
+                                },
+                            },
+                        },
+                    },
+
+                    {
+                        $replaceRoot: {
+                            newRoot: '$_id',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            origin: {
+                                $filter: {
+                                    input: '$origin',
+                                    as: 'origin',
+                                    cond: {
+                                        $ne: ['$$origin', null],
+                                    },
+                                },
+                            },
+                        },
+                    },
+
+                    {
+                        $group: {
+                            _id: '$total',
+                            data: {
+                                $push: '$$ROOT',
+                            },
+                        },
+                    },
+
+                    {
+                        $project: {
+                            _id: 0,
+                            total: '$_id',
+                            data: 1,
+                        },
+                    },
+
+                    {
+                        $project: {
+                            _id: 0,
+                            total: '$_id',
+                            data: {
+                                _id: 1,
+                                name: 1,
+                                packing: 1,
+                                archived: 1,
+                                brand: 1,
+                                variant: 1,
+                                origin: 1,
+                                country: 1,
+                            },
+                        },
+                    },
+
                 ];
-
-                if (isMobile || limit === -1) {
-                    pipeLine = getAllPipeLine({
-                        queryObject           : queryObject,
-                        aggregationHelper     : aggregationHelper,
-                        sort                  : sort,
-                        queryObjectAfterLookup: queryObjectAfterLookup,
-                        searchFieldsArray     : searchFieldsArray,
-                        filterSearch          : filterSearch,
-                        query                 : query,
-                        limit                 : limit,
-                        skip                  : skip,
-                        isMobile              : isMobile
-                    });
-                } else {
-                    pipeLine = self.getAllForUI({
-                        queryObject      : queryObject,
-                        aggregationHelper: aggregationHelper,
-                        queryObjectAfterLookup: queryObjectAfterLookup,
-                        query            : query,
-                        skip             : skip,
-                        limit            : limit,
-                        sort             : sort,
-                        searchFieldsArray: searchFieldsArray,
-                        filterSearch     : filterSearch
-                    });
-                }
-
-                aggregation = CompetitorItem.aggregate(pipeLine);
-
-                aggregation.options = {
-                    allowDiskUse: true
-                };
-
-                aggregation.exec(function (err, result) {
-                    if (err) {
-                        return parallelCb(err);
-                    }
-
-                    parallelCb(null, result);
+            } else {
+                pipeLine = self.getAllForUI({
+                    queryObject      : queryObject,
+                    aggregationHelper: aggregationHelper,
+                    query            : query,
+                    skip             : skip,
+                    limit            : limit,
+                    sort             : sort,
+                    searchFieldsArray: searchFieldsArray,
+                    filterSearch     : filterSearch
                 });
-
             }
+            aggregation = CompetitorItem.aggregate(pipeLine);
 
-            parallelTasks = {
-                data: contentFinder
+            aggregation.options = {
+                allowDiskUse: true,
             };
 
-            async.parallel(parallelTasks, function (err, response) {
+            aggregation.exec((err, response) => {
                 if (err) {
                     return next(err);
                 }
 
-                response = response.data && response.data[0] ? response.data[0] : {data: [], total: 0};
+                response = response.length ? response[0] : { data: [], total: 0 };
 
-                next({status: 200, body: response});
+                next({ status: 200, body: response });
             });
         }
 

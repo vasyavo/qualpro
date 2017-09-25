@@ -5,12 +5,14 @@ const analyzeByMethods = {
     region: require('./analyzeByRegion'),
     subRegion: require('./analyzeBySubRegion'),
     branch: require('./analyzeByBranch'),
+    position: require('./analyzeByPosition'),
+    priority: require('./analyzeByPriority'),
 };
 
-module.exports = (pipeline, analyzeBy) => {
+module.exports = (pipeline, analyzeBy, queryFilter, personnel) => {
     if (analyzeByMethods[analyzeBy]) {
-        return analyzeByMethods[analyzeBy](pipeline);
+        return analyzeByMethods[analyzeBy](pipeline, queryFilter, personnel);
     }
 
-    return analyzeByMethods.originator(pipeline);
+    return analyzeByMethods.originator(pipeline, queryFilter, personnel);
 };

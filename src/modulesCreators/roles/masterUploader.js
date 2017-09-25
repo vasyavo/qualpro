@@ -311,7 +311,7 @@ module.exports = [
     }, {
         module: ACL_MODULES.CUSTOM_REPORT,
         cms: {
-            edit: false,
+            edit: true,
             write: true,
             read: true
         },

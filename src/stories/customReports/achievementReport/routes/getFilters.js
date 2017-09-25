@@ -1,25 +1,60 @@
 const mongoose = require('mongoose');
 const async = require('async');
+const Ajv = require('ajv');
 const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const AchievementFormModel = require('./../../../../types/achievementForm/model');
+const moment = require('moment');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 
+const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
+    const timeFilterSchema = {
+        type: 'object',
+        properties: {
+            timeFrames: {
+                type: 'array',
+                items: {
+                    from: {
+                        type: 'string',
+                    },
+                    to: {
+                        type: 'string',
+                    },
+                    required: ['from', 'to'],
+                },
+            },
+        },
+    };
+
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
+        const timeFilter = query.timeFilter;
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
         ];
         const pipeline = [];
+
+        if (timeFilter) {
+            const timeFilterValidate = ajv.compile(timeFilterSchema);
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+
+            if (!timeFilterValid) {
+                const err = new Error(timeFilterValidate.errors[0].message);
+
+                err.status = 400;
+
+                return next(err);
+            }
+        }
 
         filters.forEach((filterName) => {
             if (queryFilter[filterName] && queryFilter[filterName][0]) {
@@ -29,7 +64,7 @@ module.exports = (req, res, next) => {
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
 
@@ -44,6 +79,31 @@ module.exports = (req, res, next) => {
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
+            });
+        }
+
+        const $timeMatch = {};
+        $timeMatch.$or = [];
+
+        if (timeFilter) {
+            timeFilter.map((frame) => {
+                $timeMatch.$or.push({
+                    $and: [
+                        {
+                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                        },
+                        {
+                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                        },
+                    ],
+                });
+                return frame;
+            });
+        }
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
             });
         }
 
@@ -294,7 +354,16 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
-        const response = result[0];
+        const response = result && result[0] ? result[0] : {
+            countries: [],
+            regions: [],
+            subRegions: [],
+            retailSegments: [],
+            outlets: [],
+            branches: [],
+            positions: [],
+            personnels: [],
+        };
 
         response.analyzeBy = [
             {

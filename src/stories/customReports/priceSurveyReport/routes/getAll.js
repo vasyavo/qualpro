@@ -34,10 +34,11 @@ module.exports = (req, res, next) => {
         },
     };
 
+    const query = req.body;
+    const queryFilter = query.filter || {};
+    const timeFilter = query.timeFilter;
+
     const queryRun = (personnel, callback) => {
-        const query = req.body;
-        const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
         const page = query.page || 1;
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
@@ -446,10 +447,21 @@ module.exports = (req, res, next) => {
                 return country._id.toString() === item.country._id.toString();
             });
             item.med = getMedian(item.arrayOfPrice);
-            item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
-            item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
-            item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
-            item.med = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
+            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                item.min = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+                item.avg = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
+                item.max = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
+                item.med = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
+                item.min = `${item.min} $`;
+                item.avg = `${item.avg} $`;
+                item.max = `${item.max} $`;
+                item.med = `${item.med} $`;
+            } else {
+                item.min = `${item.min.toFixed(2)} ${currentCountry.currency}`;
+                item.avg = `${item.avg.toFixed(2)} ${currentCountry.currency}`;
+                item.max = `${item.max.toFixed(2)} ${currentCountry.currency}`;
+                item.med = `${item.med.toFixed(2)} ${currentCountry.currency}`;
+            }
         });
 
         res.status(200).send(response);

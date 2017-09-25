@@ -319,7 +319,7 @@ const modules = [
 
     {
         _id     : 31,
-        name    : {en: 'al alali Questionnaire', ar: 'استطلاع العلالي'},
+        name    : {en: 'al alali Questionnaire', ar: 'استبيان العلالي'},
         href    : 'questionnary',
         sequence: 31,
         parrent : 16,
@@ -394,7 +394,7 @@ const modules = [
 
     {
         _id     : 38,
-        name    : {en: 'al alali Marketing Campaigns', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        name    : {en: 'al alali Marketing Campaigns', ar: 'حملة العلالي التسويقية والدعائية'},
         href    : CONSTANTS.MARKETING_CAMPAIGN,
         sequence: 38,
         parrent : 16,
@@ -471,7 +471,7 @@ const modules = [
 
     {
         _id     : 42,
-        name    : {en: 'Documents', ar: 'لوثائق'},
+        name    : {en: 'Documents', ar: 'الوثائق'},
         href    : CONSTANTS.DOCUMENTS,
         sequence: 42,
         parrent : null,
@@ -500,7 +500,7 @@ const modules = [
 
     {
         _id     : 46,
-        name    : {en: 'Import/Export', ar: ''}, // todo insert ar translation
+        name    : {en: 'Import/Export', ar: 'استخراج وتحميل​'},
         href    : CONSTANTS.IMPORT_EXPORT,
         sequence: 46,
         parrent : null,

@@ -135,6 +135,7 @@ module.exports = (req, res, next) => {
                                     ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
                                 },
                                 position: '$$user.position',
+                                imageSrc: '$$user.imageSrc',
                             },
                         },
                     },
@@ -503,6 +504,10 @@ module.exports = (req, res, next) => {
             item.description = {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
+            };
+            item.additionalComment = {
+                en: sanitizeHtml(item.additionalComment.en),
+                ar: sanitizeHtml(item.additionalComment.ar),
             };
         });
 

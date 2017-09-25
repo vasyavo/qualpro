@@ -359,7 +359,7 @@ const OutletHandler = function () {
         let pipeObject;
 
         pipeLine.push({
-            $match: isMobile ? _.pick(queryObject, 'subRegion', 'retailSegment', 'archived') : _.pick(queryObject, 'subRegions', 'retailSegments', 'archived'),
+            $match: isMobile ? _.pick(queryObject, 'subRegion', 'retailSegment') : _.pick(queryObject, 'subRegions', 'retailSegments', 'archived'),
         });
 
         if (translated && translated.length === 1) {
@@ -588,7 +588,7 @@ const OutletHandler = function () {
                     self.getSubRegionsByCountryOrRegion(queryObject, 'subRegion', waterfallCb);
                 },
                 function (ids, waterfallCb) {
-                    if (ids) {
+                    if (ids && ids.length) {
                         if (isMobile) {
                             queryObject.subRegion = { $in: ids };
                         } else {

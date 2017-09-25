@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -40,13 +41,19 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION, 'createdByPersonnel',
+            CONTENT_TYPES.POSITION, 'createdByPersonnel', 'assignedToPersonnel',
         ];
         const pipeline = [];
 
         pipeline.push({
             $match: {
                 archived: false,
+            },
+        });
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
             },
         });
 
@@ -120,6 +127,16 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
         if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
             pipeline.push({
                 $match: {
@@ -172,6 +189,105 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$subRegion',
+                                            as: 'subRegion',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$subRegion'], '$$filters.subRegion'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'subRegion',
+                                    in: '$$subRegion',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$region',
+                                            as: 'region',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$region'], '$$filters.region'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'region',
+                                    in: '$$region',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
+            pipeline.push({
+                $addFields: {
+                    branch: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    branch: queryFilter[CONTENT_TYPES.BRANCH],
+                                },
+                            },
+                            in: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$branch',
+                                            as: 'branch',
+                                            cond: {
+                                                $and: [
+                                                    { $setIsSubset: [['$$branch'], '$$filters.branch'] },
+                                                ],
+                                            },
+                                        },
+                                    },
+                                    as: 'branch',
+                                    in: '$$branch',
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         applyAnalyzeBy(pipeline, analyzeByParam);
 
         ObjectiveModel.aggregate(pipeline)
@@ -201,11 +317,13 @@ module.exports = (req, res, next) => {
                         return {
                             data: dataset.data.map(items => {
                                 const thisItem = {};
-
+                                let total = 0;
                                 items.forEach(item => {
-                                    thisItem[item.status] = item.count;
+                                    total += item.count;
+                                    thisItem[item.status] = thisItem[item.status] || 0;
+                                    thisItem[item.status] += item.count;
                                 });
-
+                                thisItem.total = thisItem.total || total;
                                 return thisItem;
                             }),
                         };

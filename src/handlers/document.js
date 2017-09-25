@@ -363,6 +363,182 @@ const Documents = function () {
         });
     };
 
+    const getByIds = (_ids, cb) => {
+        const pipeLine = [{
+            $match: {
+                _id: { $in: _ids },
+            },
+        }, {
+            $unwind: {
+                path: '$breadcrumbs',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $lookup: {
+                from: 'documents',
+                foreignField: '_id',
+                localField: 'breadcrumbs',
+                as: 'breadcrumbs',
+            },
+        }, {
+            $unwind: {
+                path: '$breadcrumbs',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $project: {
+                _id: 1,
+                title: 1,
+                createdBy: 1,
+                editedBy: 1,
+                attachment: 1,
+                type: 1,
+                parent: 1,
+                deleted: 1,
+                archived: 1,
+
+                breadcrumbs: {
+                    _id: 1,
+                    title: 1,
+                },
+            },
+        }, {
+            $group: {
+                _id: '$_id',
+                title: { $first: '$title' },
+                createdBy: { $first: '$createdBy' },
+                editedBy: { $first: '$editedBy' },
+                attachment: { $first: '$attachment' },
+                type: { $first: '$type' },
+                parent: { $first: '$parent' },
+                deleted: { $first: '$deleted' },
+                archived: { $first: '$archived' },
+
+                breadcrumbs: {
+                    $push: '$breadcrumbs',
+                },
+            },
+        }, {
+            $lookup: {
+                from: 'files',
+                foreignField: '_id',
+                localField: 'attachment',
+                as: 'attachment',
+            },
+        }, {
+            $unwind: {
+                path: '$attachment',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $lookup: {
+                from: 'documents',
+                foreignField: '_id',
+                localField: 'parent',
+                as: 'parent',
+            },
+        }, {
+            $unwind: {
+                path: '$parent',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                foreignField: '_id',
+                localField: 'createdBy.user',
+                as: 'createdBy.user',
+            },
+        }, {
+            $unwind: {
+                path: '$createdBy.user',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $lookup: {
+                from: 'personnels',
+                foreignField: '_id',
+                localField: 'editedBy.user',
+                as: 'editedBy.user',
+            },
+        }, {
+            $unwind: {
+                path: '$editedBy.user',
+                preserveNullAndEmptyArrays: true,
+            },
+        }, {
+            $project: {
+                _id: 1,
+                title: 1,
+                type: 1,
+                deleted: 1,
+                archived: 1,
+                breadcrumbs: 1,
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+                editedBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        firstName: 1,
+                        lastName: 1,
+                        imageSrc: 1,
+                    },
+                },
+                attachment: {
+                    _id: 1,
+                    preview: 1,
+                    contentType: 1,
+                    extension: 1,
+                    originalName: 1,
+                    name: 1,
+                },
+                parent: {
+                    _id: 1,
+                    title: 1,
+                },
+            },
+        }, {
+            $project: {
+                _id: 1,
+                title: 1,
+                createdBy: 1,
+                editedBy: 1,
+                type: 1,
+                deleted: 1,
+                archived: 1,
+                breadcrumbs: 1,
+                attachment: {
+                    $ifNull: ['$attachment', null],
+                },
+                parent: {
+                    $ifNull: ['$parent', null],
+                },
+            },
+        }];
+
+        DocumentModel.aggregate(pipeLine).allowDiskUse(true).exec((err, docs) => {
+            if (err) {
+                return cb(err);
+            }
+
+            const result = docs && docs.length ? { data: docs } : null;
+
+            if (!result) {
+                return errorSender.badRequest(cb, 'Documents not found');
+            }
+
+            cb(null, result);
+        });
+    };
+
     const getAllDocs = (options, cb) => {
         const pipeLine = [];
         const {
@@ -377,6 +553,7 @@ const Documents = function () {
             skip = 0,
             count = 20,
             search = '',
+            filter = null,
         } = options;
 
         const matchObj = {
@@ -401,6 +578,18 @@ const Documents = function () {
                 ];
             }
         } else {
+            if (filter && filter.time) {
+                const fromDate = filter.time.values[0];
+                const toDate = filter.time.values[1];
+                matchObj.$match['createdBy.date'] = {
+                    $gte: new Date(fromDate),
+                    $lte: new Date(toDate),
+                };
+                matchObj.$match['editedBy.date'] = {
+                    $gte: new Date(fromDate),
+                    $lte: new Date(toDate),
+                };
+            }
             // web should not see deleted items
             matchObj.$match.deleted = false;
 
@@ -787,7 +976,7 @@ const Documents = function () {
 
         async.waterfall([
             (cb) => {
-                DocumentModel.findById(id, function (err, model) {
+                DocumentModel.findById(id, (err, model) => {
                     if (err) {
                         return cb(err);
                     }
@@ -834,7 +1023,7 @@ const Documents = function () {
                     },
                 };
 
-                DocumentModel.find(findObj, '_id breadcrumbs', function (err, models) {
+                DocumentModel.find(findObj, '_id breadcrumbs', (err, models) => {
                     if (err) {
                         return cb(err);
                     }
@@ -862,7 +1051,7 @@ const Documents = function () {
                     });
                 });
             },
-        ], function (err, modified) {
+        ], (err, modified) => {
             if (err) {
                 return cb(err);
             }
@@ -890,7 +1079,7 @@ const Documents = function () {
                 return cb(null, [], []);
             }
 
-            async.each(needToCopyModels, function (oldModel, eachCb) {
+            async.each(needToCopyModels, (oldModel, eachCb) => {
                 const editedBy = {
                     user: oldModel.editedBy.user,
                     date: new Date(),
@@ -947,7 +1136,7 @@ const Documents = function () {
 
         async.waterfall([
             (cb) => {
-                DocumentModel.findById(id).lean().exec(function (err, model) {
+                DocumentModel.findById(id).lean().exec((err, model) => {
                     if (err) {
                         return cb(err);
                     }
@@ -1028,7 +1217,7 @@ const Documents = function () {
                         cb(null, modified);
                     });
             },
-        ], function (err, modified) {
+        ], (err, modified) => {
             if (err) {
                 return cb(err);
             }
@@ -1339,7 +1528,7 @@ const Documents = function () {
 
                     };
 
-                    DocumentModel.distinct('_id', findObj, function (err, items) {
+                    DocumentModel.distinct('_id', findObj, (err, items) => {
                         if (err) {
                             return cb(err);
                         }
@@ -1358,7 +1547,7 @@ const Documents = function () {
                         editedBy,
                     };
 
-                    DocumentModel.update({ _id: { $in: ids } }, updateObj, { multi: true }, function (err) {
+                    DocumentModel.update({ _id: { $in: ids } }, updateObj, { multi: true }, (err) => {
                         if (err) {
                             return cb(err);
                         }
@@ -1368,7 +1557,7 @@ const Documents = function () {
                         cb(null, ids);
                     });
                 },
-            ], function (err, data) {
+            ], (err, data) => {
                 if (err) {
                     return next(err);
                 }
@@ -1386,7 +1575,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'remove', function (err, body) {
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'remove', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1496,7 +1685,7 @@ const Documents = function () {
                         });
                     }
                 },
-            ], function (err, modified) {
+            ], (err, modified) => {
                 if (err) {
                     return next(err);
                 }
@@ -1514,7 +1703,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'archive', function (err, body) {
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'archive', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1642,7 +1831,7 @@ const Documents = function () {
                         });
                     }
                 },
-            ], function (err, modified) {
+            ], (err, modified) => {
                 if (err) {
                     return next(err);
                 }
@@ -1660,7 +1849,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'move', function (err, body) {
+            joiValidate(req.body, req.session.level, CONTENT_TYPES.DOCUMENTS, 'move', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1675,7 +1864,7 @@ const Documents = function () {
         function queryRun() {
             const id = ObjectId(req.params.id);
 
-            getById(id, function (err, result) {
+            getById(id, (err, result) => {
                 if (err) {
                     return next(err);
                 }
@@ -1687,7 +1876,42 @@ const Documents = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
+            if (err) {
+                return next(err);
+            }
+            if (!allowed) {
+                return errorSender.forbidden(next);
+            }
+
+            queryRun();
+        });
+    };
+
+    this.getByIds = function (req, res, next) {
+        function queryRun() {
+            let ids = req.body.ids;
+            if (ids && ids.length) {
+                ids = ids.map((id) => {
+                    return ObjectId(id);
+                });
+
+                getByIds(ids, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    if (!result) {
+                        return res.status(404);
+                    }
+
+                    res.status(200).send(result);
+                });
+            } else {
+                res.status(200).send({ data: [] });
+            }
+        }
+
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1714,6 +1938,7 @@ const Documents = function () {
                 sortOrder,
                 archived,
                 search,
+                filter,
             } = query;
             const skip = (page - 1) * count;
 
@@ -1738,6 +1963,7 @@ const Documents = function () {
                         sortBy,
                         sortOrder,
                         search,
+                        filter,
                     }, (err, response) => {
                         if (err) {
                             return parallelCb(err);
@@ -1770,7 +1996,7 @@ const Documents = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1779,7 +2005,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1831,7 +2057,7 @@ const Documents = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1840,7 +2066,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, body) {
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', (err, body) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1936,7 +2162,7 @@ const Documents = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1945,7 +2171,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', function (err, query) {
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'read', (err, query) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -1987,7 +2213,7 @@ const Documents = function () {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.DOCUMENT, function (err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.DOCUMENT, (err, allowed) => {
             if (err) {
                 return next(err);
             }
@@ -1996,7 +2222,7 @@ const Documents = function () {
                 return errorSender.forbidden(next);
             }
 
-            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'sync', function (err, query) {
+            joiValidate(req.query, req.session.level, CONTENT_TYPES.DOCUMENTS, 'sync', (err, query) => {
                 if (err) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.NOT_VALID_PARAMS);
                 }
@@ -2022,7 +2248,7 @@ const Documents = function () {
             },
 
             (fileIds, cb) => {
-                fileHandler.getByIds(fileIds, userId, function (err, result) {
+                fileHandler.getByIds(fileIds, userId, (err, result) => {
                     if (err) {
                         return cb(err);
                     }
@@ -2048,7 +2274,7 @@ const Documents = function () {
                         editedBy: createdBy,
                         title: titles[i],
                         type: 'file',
-                    }, function (err, result) {
+                    }, (err, result) => {
                         if (err) {
                             return callback(err);
                         }
@@ -2060,7 +2286,7 @@ const Documents = function () {
                     });
                 }
 
-                async.each(fileModels, iterator, function (err) {
+                async.each(fileModels, iterator, (err) => {
                     if (err) {
                         return cb(err);
                     }

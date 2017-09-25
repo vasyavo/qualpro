@@ -68,12 +68,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                countAnswered: { $gt: 0 },
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
@@ -97,7 +91,7 @@ module.exports = (req, res, next) => {
         if (queryFilter.status && queryFilter.status.length) {
             $generalMatch.$and.push({
                 status: {
-                    $in: _.union(queryFilter.status, personnel._id),
+                    $in: queryFilter.status,
                 },
             });
         }
@@ -114,30 +108,28 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
             });
         }
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         pipeline.push({
             $lookup: {

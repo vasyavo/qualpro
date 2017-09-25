@@ -1,5 +1,6 @@
 const conversion = require('./../../../../utils/conversionHtmlToXlsx');
 const mongoose = require('mongoose');
+const _ = require('lodash');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
@@ -9,6 +10,7 @@ const ObjectiveModel = require('./../../../../types/objective/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -40,7 +42,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel', 'createdByPersonnel',
         ];
         const pipeline = [];
 
@@ -125,6 +127,26 @@ module.exports = (req, res, next) => {
         if ($timeMatch.$or.length) {
             pipeline.push({
                 $match: $timeMatch,
+            });
+        }
+
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
             });
         }
 
@@ -243,11 +265,37 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $lookup: {
+                from: 'comments',
+                localField: 'comments',
+                foreignField: '_id',
+                as: 'comments',
+            },
+        });
+
+        pipeline.push({
             $project: {
                 title: '$title',
                 createdBy: '$createdBy',
                 priority: '$priority',
+                description: '$description',
                 status: '$status',
+                dateStart: '$dateStart',
+                dateEnd: '$dateEnd',
+                objectiveType: '$objectiveType',
+                comments: '$comments',
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 form: '$form',
                 country: {
                     $reduce: {
@@ -347,6 +395,76 @@ module.exports = (req, res, next) => {
             },
         });
 
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                title: 1,
+                createdBy: 1,
+                priority: 1,
+                status: 1,
+                form: 1,
+                description: 1,
+                objectiveType: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                retailSegment: 1,
+                outlet: 1,
+                branch: 1,
+                position: 1,
+                assignedTo: 1,
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'comment',
+                        in: {
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                            },
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
         ObjectiveModel.aggregate(pipeline)
             .allowDiskUse(true)
             .exec(callback);
@@ -372,33 +490,48 @@ module.exports = (req, res, next) => {
                         <th>Country</th>
                         <th>Region</th>
                         <th>Sub Region</th>
-                        <th>Retail Segment</th>
-                        <th>Outlet</th>
+                        <th>Trade Channel</th>
+                        <th>Customer</th>
                         <th>Branch</th>
                         <th>Title</th>
                         <th>Assigned To</th>
                         <th>Assigned By</th>
+                        <th>Position</th>
+                        <th>Description</th>
                         <th>Form Type</th>
                         <th>Status</th>
                         <th>Priority</th>
+                        <th>Creation date</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Comments</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
+                        const comments = item.comments.map(comment => {
+                            return `${comment.createdBy.firstName[currentLanguage]} ${comment.createdBy.lastName[currentLanguage]} : ${sanitizeHtml(comment.body)}`
+                        });
                         return `
                             <tr>
-                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : ''}</td>
+                                <td>${item.country[currentLanguage] ? item.country[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.region[currentLanguage] ? item.region[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.subRegion[currentLanguage] ? item.subRegion[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.retailSegment[currentLanguage] ? item.retailSegment[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.outlet[currentLanguage] ? item.outlet[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.branch[currentLanguage] ? item.branch[currentLanguage].join(', ') : 'N/A'}</td>
                                 <td>${item.title[currentLanguage]}</td>
-                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : ''}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] + ', ' + item.position.name[currentLanguage]}</td>
+                                <td>${item.assignedTo[currentLanguage] ? item.assignedTo[currentLanguage].join(', ') : 'N/A'}</td>
+                                <td>${item.createdBy.user.name[currentLanguage]}</td>
+                                <td>${item.position.name[currentLanguage]}</td>
+                                <td>${sanitizeHtml(item.description[currentLanguage])}</td>
                                 <td>${item.form.contentType}</td>
                                 <td>${item.status}</td>
                                 <td>${item.priority}</td>
+                                <td>${moment(item.createdBy.date).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')}</td>
+                                <td>${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
+                                <td>${comments}</td>
                             </tr>
                         `;
         }).join('')}

@@ -51,7 +51,9 @@ module.exports = BaseView.extend({
         branch       : []
     },
 
-    fileForVFWithoutBranches : {},
+    fileForVFWithoutBranches: {},
+
+    formWasUnlinked: false,
 
     events: {
         'click #attachFile'          : 'showAttachDialog',
@@ -82,8 +84,8 @@ module.exports = BaseView.extend({
 
         var assigne = this.model.get('assignedTo')[0];
 
-        this.assigneWithoutBranches = !assigne.branch.length;
-        this.locations.location = this.model.get('location');
+            this.assigneWithoutBranches = assigne && assigne.branch && !assigne.branch.length;
+            this.locations.location = this.model.get('location');
 
         var branches = this.model.get('branch') || [];
         var outlets = this.model.get('outlet') || [];
@@ -175,11 +177,15 @@ module.exports = BaseView.extend({
 
     showUnlinkPopUp: function () {
         var self = this;
+        var okText = {
+            en: 'Ok',
+            ar: 'موافق',
+        };
 
         App.showPopUp({
             contentType: this.contentType,
             action     : 'unlinkForm',
-            saveTitle  : 'Ok',
+            saveTitle  : okText[App.currentUser.currentLanguage],
             saveCb     : function () {
                 self.unlinkForm();
                 $(this).dialog('close').dialog('destroy').remove();
@@ -195,6 +201,7 @@ module.exports = BaseView.extend({
         this.savedVisibilityModel = null;
         this.visibilityFormAjax = null;
         this.model.unset('form');
+        this.formWasUnlinked = true;
         $el.find('#formThumbnail').html('');
         $el.find('.formBlock').hide();
         this.showLinkForm();
@@ -239,17 +246,35 @@ module.exports = BaseView.extend({
                 });
             }
 
-            if (this.visibilityFormData) {
-                showVF();
-            } else {
-                dataService.getData('/form/visibility/' + form.formId, {}, function (err, response) {
-                    if (err) {
-                        return App.renderErrors([
-                            ERROR_MESSAGES.visibilityFormNotLoaded[self.currentLanguage]
-                        ]);
-                    }
-                    var resultFileObjects = [];
-                    var applyToAll = false;
+                if (this.formWasUnlinked) {
+                    var description = {
+                        en: _.unescape(this.$el.find('.objectivesTextarea[data-property="en"]').val()),
+                        ar: _.unescape(this.$el.find('.objectivesTextarea[data-property="ar"]').val())
+                    };
+
+                    this.visibilityForm = new VisibilityFormEditView({
+                        translation    : self.translation,
+                        description    : description[App.currentUser.currentLanguage],
+                        locationString : self.locations.location,
+                        outlets        : this.outletsForVisibility,
+                        withoutBranches: !this.outletsForVisibility.length,
+                        initialData    : this.visibilityFormData ? this.visibilityFormData : null
+                    });
+
+                    this.visibilityForm.on('save', function (data) {
+                        self.visibilityFormData = data;
+                    });
+                } else if (this.visibilityFormData) {
+                    showVF();
+                } else {
+                    dataService.getData('/form/visibility/' + form.formId, {}, function (err, response) {
+                        if (err) {
+                            return App.renderErrors([
+                                ERROR_MESSAGES.visibilityFormNotLoaded[self.currentLanguage]
+                            ]);
+                        }
+                        var resultFileObjects = [];
+                        var applyToAll = false;
 
                     if (response.before.files.length) {
                         resultFileObjects = response.before.files.map(function (fileObj) {
@@ -426,15 +451,15 @@ module.exports = BaseView.extend({
 
         var value = val.toISOString();
 
-        if (id === 'dateStart'){
-            this.changed.dateStart = value;
-            if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0){
+            if (id === 'dateStart') {
+                this.changed.dateStart = value;
+                if (val.diff(moment(this.model.get('dateEnd'), 'DD.MM.YYYY')) > 0) {
+                    this.changed.dateEnd = value;
+                }
+            } else {
                 this.changed.dateEnd = value;
             }
-        } else {
-            this.changed.dateEnd = value;
-        }
-    },
+        },
 
     changeDesc: function (e) {
         var jsonModel = this.model.toJSON();

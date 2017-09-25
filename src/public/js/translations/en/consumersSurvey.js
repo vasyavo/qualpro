@@ -48,6 +48,7 @@ var translation = {
     goToBtn           : 'Go to',
     questionaryPreview: 'Consumer Survey Preview',
     okBtn             : 'Ok',
+    nps: 'NPS',
 
     //edit answer
     editAnswerViewTitle: 'Edit answer of question',

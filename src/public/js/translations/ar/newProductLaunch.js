@@ -30,13 +30,13 @@ var newProductLaunch = {
     displayType  : 'نوع العرض ',
     distributor  : 'الموزع ',
     shelfLife    : 'تاريخ الانتاج / تاريخ الانتهاء',
-    startDate : '', // todo
-    endDate : '', // todo
+    startDate    : 'تاريخ البدء',
+    endDate      : 'تاريخ الانتهاء',
 
-    goToBtn : '', // todo
+    goToBtn      : 'الذهاب الى',
     edit         : 'تعديل بيانات',
-    delete: '', // todo
-    newProductLaunchEditTitle : '', // todo
+    delete       : 'حذف',
+    newProductLaunchEditTitle : 'تعديل بيانات طرح منتج جديد',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, newProductLaunch);

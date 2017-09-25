@@ -30,19 +30,20 @@ module.exports = Backbone.Router.extend({
     view       : null,
 
     routes: {
-        home : 'any',
-        'login(/:confirmed)' : 'login',
-        'logout' : 'logout',
-        forgotPass : 'forgotPass',
-        'qualPro/documents(/filter=:filter)' : 'documentsHomePage',
-        'qualPro/documents/:id(/filter=:filter)' : 'showDocumentsView',
-        'qualPro/importExport' : 'goToImportExportView',
+        'home': 'any',
+        'login(/:confirmed)': 'login',
+        'logout': 'logout',
+        'forgotPass': 'forgotPass',
+        'qualPro/documents(/filter=:filter)': 'documentsHomePage',
+        'qualPro/documents/:id(/filter=:filter)': 'showDocumentsView',
+        'qualPro/importExport': 'goToImportExportView',
+        'qualPro/importExport/*any': 'goToImportExportView',
+        'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)': 'goToCustomReport',
         'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
-        'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getDomainList',
-        // 'qualPro/:contentType(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'getList',
-        'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)' : 'goToContent',
-        'qualPro/:contentType/form/:contentId' : 'goToForm',
-        '*any' : 'any'
+        'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'getDomainList',
+        'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToContent',
+        'qualPro/:contentType/form/:contentId': 'goToForm',
+        '*any': 'any'
     },
 
     initialize: function () {
@@ -98,9 +99,20 @@ module.exports = Backbone.Router.extend({
                 that.wrapperView.undelegateEvents();
             }
 
-            if (!that.wrapperView) {
-                that.main('documents');
-            }
+            that.main('documents');
+
+            that.mainView.topMenu.currentCT = 'documents';
+
+            that.mainView.on('languageChanged', function () {
+                App.$preLoader.fadeFn({
+                    visibleState: false,
+                });
+            });
+
+            that.mainView.on('translationLoaded', function (translation) {
+                that.view.changeTranslatedFields(translation);
+                that.topBarView.changeTranslatedFields(translation);
+            });
 
             var $loader = $('#alaliLogo');
             if (!$loader.hasClass('smallLogo')) {
@@ -140,9 +152,18 @@ module.exports = Backbone.Router.extend({
                 translation : translation
             });
 
+            that.changeView(documentsListView);
+            that.changeTopBarView(documentsTopBarView);
+
             $('#contentHolder').html(documentsListView.render().$el);
 
             documentsCollection.getFirstPage();
+
+            if (!App.filterCollections) {
+                App.filterCollections = [];
+            }
+
+            App.filterCollections['documents'] = documentsCollection;
         });
     },
 
@@ -167,9 +188,20 @@ module.exports = Backbone.Router.extend({
                 that.wrapperView.undelegateEvents();
             }
 
-            if (!that.wrapperView) {
                 that.main('importExport');
-            }
+
+                that.mainView.topMenu.currentCT = 'importExport';
+
+                that.mainView.on('languageChanged', function () {
+                    App.$preLoader.fadeFn({
+                        visibleState: false,
+                    });
+                });
+
+                that.mainView.on('translationLoaded', function (translation) {
+                    that.view.changeTranslatedFields(translation);
+                    that.topBarView.changeTranslatedFields(translation);
+                });
 
             var $loader = $('#alaliLogo');
             if (!$loader.hasClass('smallLogo')) {
@@ -187,9 +219,13 @@ module.exports = Backbone.Router.extend({
             $('#topBarHolder').html(importExportTopBar.render().$el);
 
             var importExportOverview = new ImportExportOverview({
-                model: importExportModel,
+                model      : importExportModel,
                 translation: translation,
             });
+
+            that.changeView(importExportOverview);
+            that.changeTopBarView(importExportTopBar);
+
             $('#contentHolder').html(importExportOverview.render().$el);
         });
     },

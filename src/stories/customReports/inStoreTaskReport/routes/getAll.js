@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
+const _ = require('lodash');
 const AccessManager = require('./../../../../helpers/access')();
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
@@ -9,6 +10,7 @@ const CONSTANTS = require('./../../../../constants/mainConstants');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -42,7 +44,7 @@ module.exports = (req, res, next) => {
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
-            CONTENT_TYPES.POSITION,
+            CONTENT_TYPES.POSITION, 'assignedToPersonnel', 'createdByPersonnel',
         ];
         const pipeline = [];
 
@@ -86,7 +88,6 @@ module.exports = (req, res, next) => {
         });
 
         locationFiler(pipeline, personnel, queryFilter);
-
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, 'status', 'priority'], queryFilter, personnel);
 
         if (queryFilter.formType && queryFilter.formType.length) {
@@ -128,6 +129,126 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    subRegion: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$subRegion',
+                                    as: 'subRegion',
+                                    cond: {
+                                        $setIsSubset: [['$$subRegion'], '$$filters.subRegion'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    region: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$region',
+                                    as: 'region',
+                                    cond: {
+                                        $setIsSubset: [['$$region'], '$$filters.region'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.RETAILSEGMENT}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    retailSegment: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    retailSegment: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$retailSegment',
+                                    as: 'retailSegment',
+                                    cond: {
+                                        $setIsSubset: [['$$retailSegment'], '$$filters.retailSegment'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (_.get(queryFilter, `${CONTENT_TYPES.OUTLET}.length`)) {
+            pipeline.push({
+                $addFields: {
+                    outlet: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    outlet: queryFilter[CONTENT_TYPES.OUTLET],
+                                },
+                            },
+                            in: {
+                                $filter: {
+                                    input: '$outlet',
+                                    as: 'outlet',
+                                    cond: {
+                                        $setIsSubset: [['$$outlet'], '$$filters.outlet'],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.assignedToPersonnel && queryFilter.assignedToPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    assignedTo: {
+                        $in: _.union(queryFilter.assignedToPersonnel, personnel._id),
+                    },
+                },
+            });
+        }
+
+        if (queryFilter.createdByPersonnel && queryFilter.createdByPersonnel.length) {
+            pipeline.push({
+                $match: {
+                    'createdBy.user': {
+                        $in: queryFilter.createdByPersonnel,
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'personnels',
@@ -159,16 +280,6 @@ module.exports = (req, res, next) => {
                 },
             },
         });
-
-        if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
-            pipeline.push({
-                $match: {
-                    'createdBy.user.position': {
-                        $in: queryFilter[CONTENT_TYPES.POSITION],
-                    },
-                },
-            });
-        }
 
         pipeline.push({
             $group: {
@@ -364,12 +475,25 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
                 assignedTo: {
                     $map: {
                         input: '$assignedTo',
                         as: 'personnel',
                         in: {
                             _id: '$$personnel._id',
+                            position: '$$personnel.position',
                             name: {
                                 en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
                                 ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
@@ -377,6 +501,25 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+            },
+        });
+
+        if (queryFilter.POSITION && queryFilter.POSITION.length) {
+            pipeline.push({
+                $match: {
+                    'assignedTo.position': {
+                        $in: _.union(queryFilter.POSITION, personnel._id),
+                    },
+                },
+            });
+        }
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
             },
         });
 
@@ -439,6 +582,37 @@ module.exports = (req, res, next) => {
                                     },
                                 },
                             },
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                                imageSrc: '$$user.imageSrc',
+                                            },
+
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
                         },
                     },
                 },
@@ -472,7 +646,12 @@ module.exports = (req, res, next) => {
 
         const response = result.length ?
             result[0] : { data: [], total: 0 };
-
+        response.data.forEach(item => {
+            item.description = {
+                en: sanitizeHtml(item.description.en),
+                ar: sanitizeHtml(item.description.ar),
+            };
+        });
         res.status(200).send(response);
     });
 };

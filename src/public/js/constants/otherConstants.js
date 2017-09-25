@@ -30,7 +30,7 @@ var CONSTANTS = {
             _id    : 'target',
             name   : {
                 en: 'Target',
-                ar: '' // todo
+                ar: 'المبيعات المستهدفة'
             },
             sortKey: 0
         },
@@ -38,7 +38,7 @@ var CONSTANTS = {
             _id    : 'salary',
             name   : {
                 en: 'Salary',
-                ar: '' // todo
+                ar: 'الراتب'
             },
             sortKey: 1
         },
@@ -46,7 +46,7 @@ var CONSTANTS = {
             _id    : 'out_of_stock',
             name   : {
                 en: 'Out of stock',
-                ar: '' // todo
+                ar: 'إنتهى من المخزن'
             },
             sortKey: 2
         },
@@ -54,7 +54,7 @@ var CONSTANTS = {
             _id    : 'new_arrivals',
             name   : {
                 en: 'New arrivals',
-                ar: '' // todo
+                ar: 'وصول مخزون جديد'
             },
             sortKey: 3
         },
@@ -62,7 +62,7 @@ var CONSTANTS = {
             _id    : 'annual_leave',
             name   : {
                 en: 'Annual leave',
-                ar: '' // todo
+                ar: 'الاجازة السنوية'
             },
             sortKey: 4
         },
@@ -70,7 +70,7 @@ var CONSTANTS = {
             _id    : 'near_expiry_products',
             name   : {
                 en: 'Near expiry products',
-                ar: '' // todo
+                ar: 'منتجات قرب انتهاء الصلاحية'
             },
             sortKey: 5
         },
@@ -78,7 +78,7 @@ var CONSTANTS = {
             _id    : 'other',
             name   : {
                 en: 'Other',
-                ar: '' // todo
+                ar: 'أخرى'
             },
             sortKey: 6
         }
@@ -214,7 +214,7 @@ var CONSTANTS = {
             _id : 'NPS',
             name: {
                 en: 'NPS',
-                ar: '' //todo translation
+                ar: 'تقييم تصنيف العملاء',
             },
 
             sortKey: 0
@@ -226,7 +226,7 @@ var CONSTANTS = {
             _id : 'yearly',
             name: {
                 en: 'Yearly',
-                ar: 'Ar Yearly' //todo translation
+                ar: 'سنوي'
             },
 
             sortKey: 0
@@ -235,7 +235,7 @@ var CONSTANTS = {
             _id : 'visibility',
             name: {
                 en: 'Visibility',
-                ar: 'Ar Visibility' //todo translation
+                ar: 'رؤية'
             },
 
             sortKey: 1
@@ -247,7 +247,7 @@ var CONSTANTS = {
             _id : 'monthlyDisplay',
             name: {
                 en: 'Monthly Display',
-                ar: 'Ar Monthly Display'
+                ar: 'العرض الشهري'
             },
 
             sortKey: 0
@@ -256,7 +256,7 @@ var CONSTANTS = {
             _id : 'activityDisplay',
             name: {
                 en: 'Activity Display',
-                ar: 'Ar Activity Display'
+                ar: 'نشاط خاص بعرض شهرى'
             },
 
             sortKey: 1

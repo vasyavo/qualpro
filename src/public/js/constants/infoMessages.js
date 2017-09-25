@@ -1,46 +1,46 @@
 module.exports = {
     fileSuccessfullyImported: {
         en: 'File successfully imported',
-        ar: '', // todo ar
+        ar: 'تم تحميل الملف الى النظام بنجاح',
     },
     confirmDeletePromoEvaluationItem: {
         en: 'Are you sure you want to delete this promo evaluation item?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج تقييم ترويج السلع'
     },
     confirmDeleteCompetitorPromotionActivity: {
         en: 'Are you sure you want to delete this competitor promotion activity report?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج أنشطة ترويج المنافسين'
     },
     confirmDeleteCompetitorBrandingAndDisplay: {
         en: 'Are you sure you want to delete this competitor branding and display report?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج العلامات التجارية وتقارير العرض للمنافسين'
     },
     confirmDeleteAchievementFormReport: {
         en: 'Are you sure you want to delete this achievement form report?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج الانجازات'
     },
     confirmDeleteNewProductLaunch: {
         en: 'Are you sure you want to delete this new product launch report?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج طرح منتج جديد'
     },
     confirmDeleteShelfShareItem: {
         en: 'Are you sure you want to delete this shelf share item?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج حصة الرف'
     },
     confirmDeletePriceSurveyItem: {
         en: 'Are you sure you want to delete this price survey item?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج استقصاء الأسعار'
     },
     confirmDeleteAnswer: {
         en: 'Are you sure you want to delete this answer?',
-        ar: '' // todo
+        ar: 'هل تريد حذف الاجابة'
     },
     confirmDeleteComment: {
         en: 'Are you sure you want to delete this comment?',
-        ar: '' // todo
+        ar: 'هل تريد حذف التعليق'
     },
     confirmDeleteBrandingAndMonthlyReport: {
         en: 'Are you sure you want to delete this branding and monthly display report?',
-        ar: '' // todo
+        ar: 'هل تريد حذف نموذج العلامات التجارية وتقارير العرض الخاصة بالعلالي'
     }
 };

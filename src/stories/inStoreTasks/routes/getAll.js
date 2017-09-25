@@ -229,6 +229,7 @@ module.exports = function (req, res, next) {
                     filterSearch,
                     skip,
                     limit,
+                    personnel,
                     coveredIds,
                     currentUserLevel,
                     subordinates: arrayOfSubordinateUsersId,

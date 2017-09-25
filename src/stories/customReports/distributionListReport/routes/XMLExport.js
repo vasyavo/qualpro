@@ -40,11 +40,25 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.VARIANT, CONTENT_TYPES.ITEM,
-            CONTENT_TYPES.POSITION, 'executorPosition', CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.POSITION, 'executorPosition', 'executor', CONTENT_TYPES.PERSONNEL,
         ];
-        const pipeline = [];
 
         currentLanguage = personnel.currentLanguage || 'en';
+
+        const pipeline = [{
+            $project: {
+                objective: 1,
+                branches: 1,
+                'items.category': 1,
+                'items.variant': 1,
+                'items.item': 1,
+                'items.branches.branch': 1,
+                'items.branches.indicator': 1,
+                publisher: '$createdBy.user',
+                createdAt: '$createdBy.date',
+                updatedAt: '$editedBy.date',
+            },
+        }];
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
@@ -67,6 +81,23 @@ module.exports = (req, res, next) => {
             }
         });
 
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
+                    $and: [
+                        { createdAt: { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { createdAt: { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                    ],
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
+            });
+        }
+
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
@@ -75,181 +106,41 @@ module.exports = (req, res, next) => {
             });
         }
 
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'branches',
-                foreignField: '_id',
-                as: 'branches',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.subRegion',
-                    },
-                },
-                retailSegments: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.retailSegment',
-                    },
-                },
-                outlets: {
-                    $map: {
-                        input: '$branches',
-                        as: 'item',
-                        in: '$$item.outlet',
-                    },
-                },
-                branches: null,
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
             pipeline.push({
                 $match: {
-                    subRegions: { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
-            pipeline.push({
-                $match: {
-                    retailSegments: { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
-                },
-            });
-        }
-
-        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
-            pipeline.push({
-                $match: {
-                    outlets: { $in: queryFilter[CONTENT_TYPES.OUTLET] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'subRegions',
-                foreignField: '_id',
-                as: 'subRegions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                subRegions: null,
-                retailSegments: null,
-                outlets: null,
-                regions: {
-                    $map: {
-                        input: '$subRegions',
-                        as: 'item',
-                        in: '$$item.parent',
+                    publisher: {
+                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
                     },
                 },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
-            pipeline.push({
-                $match: {
-                    regions: { $in: queryFilter[CONTENT_TYPES.REGION] },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'regions',
-                foreignField: '_id',
-                as: 'regions',
-            },
-        });
-
-        pipeline.push({
-            $addFields: {
-                regions: null,
-                countries: {
-                    $map: {
-                        input: '$regions',
-                        as: 'item',
-                        in: '$$item.parent',
-                    },
-                },
-            },
-        });
-
-        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
-            pipeline.push({
-                $match: {
-                    countries: { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
-                },
-            });
-        }
-
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
-                    $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
-                    ],
-                });
-                return frame;
-            });
-        }
-
-        if ($timeMatch.$or.length) {
-            pipeline.push({
-                $match: $timeMatch,
             });
         }
 
         pipeline.push({
             $lookup: {
                 from: 'personnels',
-                localField: 'createdBy.user',
+                localField: 'publisher',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as: 'publisher',
             },
         });
 
         pipeline.push({
             $addFields: {
-                createdBy: {
-                    user: {
-                        $let: {
-                            vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                publisher: {
+                    $let: {
+                        vars: {
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
+                        },
+                        in: {
+                            _id: '$$publisher._id',
+                            name: {
+                                en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
+                                ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
-                                },
-                                position: '$$user.position',
-                            },
+                            position: '$$publisher.position',
                         },
                     },
-                    date: '$createdBy.date',
                 },
             },
         });
@@ -257,12 +148,40 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
                 $match: {
-                    'createdBy.user.position': {
+                    'publisher.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
                 },
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'publisher.position',
+                foreignField: '_id',
+                as: 'publisher.position',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                'publisher.position': {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$publisher.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: {
+                                en: '$$position.name.en',
+                                ar: '$$position.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
         pipeline.push({
             $lookup: {
@@ -284,7 +203,7 @@ module.exports = (req, res, next) => {
                         in: '$$objective._id',
                     },
                 },
-                executors: {
+                assignee: {
                     $let: {
                         vars: {
                             objective: { $arrayElemAt: ['$objective', 0] },
@@ -295,11 +214,11 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
+        if (queryFilter.executor && queryFilter.executor.length) {
             pipeline.push({
                 $match: {
-                    executors: {
-                        $in: queryFilter[CONTENT_TYPES.PERSONNEL],
+                    assignee: {
+                        $in: queryFilter.executor,
                     },
                 },
             });
@@ -308,34 +227,74 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'personnels',
-                localField: 'executors',
+                localField: 'assignee',
                 foreignField: '_id',
-                as: 'executors',
+                as: 'assignee',
             },
         });
 
         pipeline.push({
             $addFields: {
-                executors: null,
-                executorPositions: {
-                    $map: {
-                        input: '$executors',
-                        as: 'item',
-                        in: '$$item.position',
+                assignee: {
+                    $let: {
+                        vars: {
+                            assignee: { $arrayElemAt: ['$assignee', 0] },
+                        },
+                        in: {
+                            _id: '$$assignee._id',
+                            name: {
+                                en: { $concat: ['$$assignee.firstName.en', ' ', '$$assignee.lastName.en'] },
+                                ar: { $concat: ['$$assignee.firstName.ar', ' ', '$$assignee.lastName.ar'] },
+                            },
+                            position: '$$assignee.position',
+                        },
                     },
                 },
             },
         });
 
+        // some objectives contains not existing users
+        pipeline.push({
+            $match: { 'assignee._id': { $ne: null } },
+        });
+
         if (queryFilter.executorPosition && queryFilter.executorPosition.length) {
             pipeline.push({
                 $match: {
-                    executorPositions: {
+                    'assignee.position': {
                         $in: queryFilter.executorPosition,
                     },
                 },
             });
         }
+
+        pipeline.push({
+            $lookup: {
+                from: 'positions',
+                localField: 'assignee.position',
+                foreignField: '_id',
+                as: 'assignee.position',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                'assignee.position': {
+                    $let: {
+                        vars: {
+                            position: { $arrayElemAt: ['$assignee.position', 0] },
+                        },
+                        in: {
+                            _id: '$$position._id',
+                            name: {
+                                en: '$$position.name.en',
+                                ar: '$$position.name.ar',
+                            },
+                        },
+                    },
+                },
+            },
+        });
 
         pipeline.push({
             $unwind: '$items',
@@ -385,7 +344,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $sort: {
-                'createdBy.date': 1,
+                createdAt: 1,
             },
         });
 
@@ -416,6 +375,30 @@ module.exports = (req, res, next) => {
                 },
             },
         });
+
+        if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
+            pipeline.push({
+                $match: {
+                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
+            pipeline.push({
+                $match: {
+                    'branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
+                },
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
+            pipeline.push({
+                $match: {
+                    'branch.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
+                },
+            });
+        }
 
         pipeline.push({
             $lookup: {
@@ -468,125 +451,106 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $group: {
-                _id: {
-                    _id: '$_id',
-                    variant: '$items.variant',
-                    category: '$items.category',
-                },
-                items: {
-                    $push: {
-                        branch: '$branch',
-                        indicator: '$items.branches.indicator',
-                        retailSegment: '$retailSegment',
-                        outlet: '$outlet',
-                        timestamp: '$editedBy.date',
-                    },
-                },
-                subRegion: { $addToSet: '$branch.subRegion' },
-            },
-        });
-
-        pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'subRegion',
+                localField: 'branch.subRegion',
                 foreignField: '_id',
                 as: 'subRegion',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                region: '$subRegion.parent',
+            $addFields: {
                 subRegion: {
-                    $reduce: {
-                        input: '$subRegion',
-                        initialValue: [],
+                    $let: {
+                        vars: {
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                        },
                         in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
-                                },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
-                            },
+                            name: '$$subRegion.name',
+                            parent: '$$subRegion.parent',
                         },
                     },
                 },
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
+            pipeline.push({
+                $match: {
+                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'region',
+                localField: 'subRegion.parent',
                 foreignField: '_id',
                 as: 'region',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                subRegion: 1,
-                country: '$region.parent',
+            $addFields: {
                 region: {
-                    $reduce: {
-                        input: '$region',
-                        initialValue: [],
+                    $let: {
+                        vars: {
+                            region: { $arrayElemAt: ['$region', 0] },
+                        },
                         in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
-                                },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
-                            },
+                            name: '$$region.name',
+                            parent: '$$region.parent',
                         },
                     },
                 },
             },
         });
 
+        if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
+            pipeline.push({
+                $match: {
+                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
+                },
+            });
+        }
+
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'country',
+                localField: 'region.parent',
                 foreignField: '_id',
                 as: 'country',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 1,
-                total: 1,
-                items: 1,
-                subRegion: 1,
-                region: 1,
-                country: {
-                    $reduce: {
-                        input: '$country',
-                        initialValue: [],
+            $addFields: {
+                country: { $arrayElemAt: ['$country', 0] },
+                location: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
                         in: {
-                            $cond: {
-                                if: {
-                                    $setIsSubset: [['$$this.name.en'], '$$value'],
-                                },
-                                then: '$$value',
-                                else: {
-                                    $setUnion: ['$$value', ['$$this.name.en']],
-                                },
+                            en: {
+                                $concat: [
+                                    '$$country.name.en',
+                                    ' -> ',
+                                    '$region.name.en',
+                                    ' -> ',
+                                    '$subRegion.name.en',
+                                ],
+                            },
+                            ar: {
+                                $concat: [
+                                    '$$country.name.ar',
+                                    ' -> ',
+                                    '$region.name.ar',
+                                    ' -> ',
+                                    '$subRegion.name.ar',
+                                ],
                             },
                         },
                     },
@@ -595,9 +559,35 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
+            $sort: {
+                location: 1,
+                editedAt: 1,
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                country: 1,
+                region: 1,
+                subRegion: 1,
+                outlet: 1,
+                retailSegment: 1,
+                branch: 1,
+                category: '$items.category',
+                variant: '$items.variant',
+                item: '$items.item',
+                indicator: '$items.branches.indicator',
+                publisher: '$publisher',
+                assignee: '$assignee',
+                timestamp: '$editedBy.date',
+                objective: 1,
+            },
+        });
+
+        pipeline.push({
             $lookup: {
                 from: 'variants',
-                localField: '_id.variant',
+                localField: 'variant',
                 foreignField: '_id',
                 as: 'variant',
             },
@@ -606,68 +596,23 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $lookup: {
                 from: 'categories',
-                localField: '_id.category',
+                localField: 'category',
                 foreignField: '_id',
                 as: 'category',
             },
         });
 
         pipeline.push({
-            $project: {
-                _id: 0,
-                items: 1,
-                location: {
-                    $concat: [
-                        {
-                            $reduce: {
-                                input: '$country',
-                                initialValue: {
-                                    $arrayElemAt: ['$country', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $reduce: {
-                                input: '$region',
-                                initialValue: {
-                                    $arrayElemAt: ['$region', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                        ' -> ',
-                        {
-                            $reduce: {
-                                input: '$subRegion',
-                                initialValue: {
-                                    $arrayElemAt: ['$subRegion', 0],
-                                },
-                                in: {
-                                    $cond: {
-                                        if: { $eq: ['$$this', '$$value'] },
-                                        then: '$$value',
-                                        else: { $concat: ['$$value', ', ', '$$this'] },
-                                    },
-                                },
-                            },
-                        },
-                    ],
-                },
-                total: 1,
+            $lookup: {
+                from: 'items',
+                localField: 'item',
+                foreignField: '_id',
+                as: 'item',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
                 category: {
                     $let: {
                         vars: {
@@ -690,16 +635,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-            },
-        });
-
-        pipeline.push({
-            $unwind: '$items',
-        });
-
-        pipeline.push({
-            $sort: {
-                'items.timestamp': 1,
+                item: {
+                    $let: {
+                        vars: {
+                            item: { $arrayElemAt: ['$item', 0] },
+                        },
+                        in: {
+                            _id: '$$item._id',
+                            name: '$$item.name',
+                        },
+                    },
+                },
             },
         });
 
@@ -725,28 +671,38 @@ module.exports = (req, res, next) => {
             <table>
                 <thead>
                     <tr>
-                        <th>Location</th>
-                        <th>Category</th>
-                        <th>Variant</th>
+                        <th>Country</th>
+                        <th>Region</th>
+                        <th>Sub Region</th>
                         <th>Trade Channel</th>
                         <th>Outlet</th>
                         <th>Branch</th>
+                        <th>Category</th>
+                        <th>Variant</th>
+                        <th>Item</th>
                         <th>Indicator</th>
                         <th>Timestamp</th>
+                        <th>Publisher</th>
+                        <th>Assignee</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${result.map(item => {
                         return `
                             <tr>
-                                <td>${item.location}</td>
+                                <td>${item.country.name[currentLanguage]}</td>
+                                <td>${item.region.name[currentLanguage]}</td>
+                                <td>${item.subRegion.name[currentLanguage]}</td>
+                                <td>${item.retailSegment.name[currentLanguage]}</td>
+                                <td>${item.outlet.name[currentLanguage]}</td>
+                                <td>${item.branch.name[currentLanguage]}</td>
                                 <td>${item.category.name[currentLanguage]}</td>
                                 <td>${item.variant.name[currentLanguage]}</td>
-                                <td>${item.items.retailSegment.name[currentLanguage]}</td>
-                                <td>${item.items.outlet.name[currentLanguage]}</td>
-                                <td>${item.items.branch.name[currentLanguage]}</td>
-                                <td>${item.items.indicator}</td>
-                                <td>${moment(item.items.timestamp).format('DD MMMM, YYYY')}</td>
+                                <td>${item.item.name[currentLanguage]}</td>
+                                <td>${item.indicator}</td>
+                                <td>${moment(item.timestamp).format('DD MMMM, YYYY')}</td>
+                                <td>${item.publisher.name[currentLanguage]}</td>
+                                <td>${item.assignee.name[currentLanguage]}</td>
                             </tr>
                         `;
                     }).join('')}
@@ -776,6 +732,5 @@ module.exports = (req, res, next) => {
                 }).status(200).send(buf);
             });
         });
-
     });
 };

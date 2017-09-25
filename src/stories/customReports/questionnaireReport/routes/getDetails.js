@@ -69,12 +69,6 @@ module.exports = (req, res, next) => {
             }
         });
 
-        pipeline.push({
-            $match: {
-                countAnswered: { $gt: 0 },
-            },
-        });
-
         locationFiler(pipeline, personnel, queryFilter);
 
         const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET], queryFilter, personnel);
@@ -107,24 +101,28 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
+                };
+            }),
+        };
+
+        if ($timeMatch.$or.length) {
+            pipeline.push({
+                $match: $timeMatch,
             });
         }
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -252,15 +250,21 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$answer',
+            $unwind: {
+                path: '$answer',
+                preserveNullAndEmptyArrays: true,
+            },
         });
 
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'answer.personnel': {
                         $in: _.union(queryFilter.assignedTo, personnel._id),
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -284,8 +288,8 @@ module.exports = (req, res, next) => {
                         in: {
                             _id: '$$personnel._id',
                             name: {
-                                en: { $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] },
-                                ar: { $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] },
+                                en: { $ifNull: [{ $concat: ['$$personnel.firstName.en', ' ', '$$personnel.lastName.en'] }, 'N/A Personnel'] },
+                                ar: { $ifNull: [{ $concat: ['$$personnel.firstName.ar', ' ', '$$personnel.lastName.ar'] }, 'N/A Personnel'] },
                             },
                             position: '$$personnel.position',
                         },
@@ -296,10 +300,13 @@ module.exports = (req, res, next) => {
 
         if (queryFilter[CONTENT_TYPES.POSITION] && queryFilter[CONTENT_TYPES.POSITION].length) {
             pipeline.push({
-                $match: {
+                $match: { $or: [{
                     'personnel.position': {
                         $in: queryFilter[CONTENT_TYPES.POSITION],
                     },
+                }, {
+                    answer: null,
+                }],
                 },
             });
         }
@@ -313,7 +320,7 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$records',
+            $unwind: '$records'
         });
 
         pipeline.push({
@@ -336,8 +343,8 @@ module.exports = (req, res, next) => {
                 outlet: '$records.answer.outlet',
                 branch: '$records.answer.branch',
                 personnel: '$records.personnel',
-                question: '$records.answer.question',
-                answer: { $arrayElemAt: ['$records.answer.answerText', 0] },
+                question: { $ifNull: ['$records.answer.question', { en: 'N/A', ar: 'N/A' }] },
+                answer: { $ifNull: [{ $arrayElemAt: ['$records.answer.answerText', 0] }, { en: 'N/A', ar: 'N/A' }] },
             },
         });
 
@@ -411,18 +418,21 @@ module.exports = (req, res, next) => {
                             branch: { $arrayElemAt: ['$branch', 0] },
                         },
                         in: {
-                            $concat: [
-                                '$$country.name.en',
-                                ' -> ',
-                                '$$region.name.en',
-                                ' -> ',
-                                '$$subRegion.name.en',
-                                ' -> ',
-                                '$$retailSegment.name.en',
-                                ' -> ',
-                                '$$outlet.name.en',
-                                ' -> ',
-                                '$$branch.name.en',
+                            $ifNull: [{
+                                $concat: [
+                                    '$$country.name.en',
+                                    ' -> ',
+                                    '$$region.name.en',
+                                    ' -> ',
+                                    '$$subRegion.name.en',
+                                    ' -> ',
+                                    '$$retailSegment.name.en',
+                                    ' -> ',
+                                    '$$outlet.name.en',
+                                    ' -> ',
+                                    '$$branch.name.en',
+                                ],
+                            }, 'N/A Location',
                             ],
                         },
                     },
@@ -456,8 +466,8 @@ module.exports = (req, res, next) => {
                             position: { $arrayElemAt: ['$position', 0] },
                         },
                         in: {
-                            _id: '$$position._id',
-                            name: '$$position.name',
+                            _id: { $ifNull: ['$$position._id', 'N/A'] },
+                            name: { $ifNull: ['$$position.name', 'N/A Position'] },
                         },
                     },
                 },
@@ -533,10 +543,12 @@ module.exports = (req, res, next) => {
         response.data.forEach(dataItem => {
             dataItem.respondents.forEach(respondent => {
                 respondent.items.forEach(item => {
-                    item.answer = {
-                        en: sanitizeHtml(item.answer.en),
-                        ar: sanitizeHtml(item.answer.ar),
-                    };
+                    if (item.answer) {
+                        item.answer = {
+                            en: sanitizeHtml(item.answer.en),
+                            ar: sanitizeHtml(item.answer.ar),
+                        };
+                    }
                 });
             });
         });

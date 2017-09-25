@@ -25,7 +25,7 @@ var translation = {
     createdByMe    : 'تم إنشاؤه من قبلي',
     myCoverTasks   : 'المهام المغطاة بالإنابة',
     closed         : 'المغلقة',
-    myCCTasks      : '', //todo translation
+    myCCTasks      : 'المهام المنسوخة',
     newTask        : 'مهمة جديدة',
     priority       : 'الأولوية',
     location       : 'الموقع',
@@ -62,7 +62,7 @@ var translation = {
     form       : 'النمازج',
     goToBtn    : 'الذهاب الى',
     dialogTitle: ' ملفات المهام في المتاجر',
-    countOfAttachedFiles: '' // todo
+    countOfAttachedFiles: 'عدد الملفات المرفقة'
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation, visibilityForm);

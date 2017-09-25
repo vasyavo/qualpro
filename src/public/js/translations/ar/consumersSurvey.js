@@ -12,7 +12,7 @@ var translation = {
     aboutSKUFormat   : 'SKU حول',
     addNewBtn        : 'أضف سلعة جديدة',
     deleteBtn        : 'حذف السلعة',
-    delete: '', // todo
+    delete           : 'حذف',
     questions        : ' استطلاعات',
     type             : ' نوع السؤال',
     options          : 'الخيارات',
@@ -48,9 +48,10 @@ var translation = {
     goToBtn           : 'الذهاب الى',
     questionaryPreview: 'معاينة استطلاع العملاء',
     okBtn             : 'موافق',
+    nps: 'تقييم تصنيف العملاء',
 
     //edit answer
-    editAnswerViewTitle: '', // todo
+    editAnswerViewTitle: 'تعديل اجابة السؤال',
 
     // top Bar
     all   : 'استطلاع العملاء الخاص بالعلالي',

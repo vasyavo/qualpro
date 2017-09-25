@@ -445,6 +445,7 @@ module.exports = Backbone.View.extend({
             enableDrag: false,
             adaptiveHeight: true,
             enableTouch: true,
+            rtl: true
         });
 
         this.delegateEvents(this.events);

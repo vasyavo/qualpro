@@ -3,7 +3,7 @@ var paginationTranslation = require('./pagination');
 var filtersTranslation = require('./filters');
 
 var translation = {
-    competitorPromotionEditTitle : '', // todo ar
+    competitorPromotionEditTitle : 'تعديل بيانات  ترويج المنافسين',
     all         : ' أنشطة ترويج المنافسين',
     title       : 'تقرير تقيم أنشطة ترويج المنافسين',
     category    : 'الفئة',
@@ -28,14 +28,14 @@ var translation = {
     files       : 'الملفات',
     attach      : 'ارفاق',
     send        : 'ارسال',
-    saveBtn : '', // todo ar
+    saveBtn     : 'حفظ',
     location    : 'الموقع',
     okBtn       : 'موافق',
     edit     : 'تعديل بيانات',
-    delete: '', // todo
+    delete      : 'حذف',
     dialogTitle : ' التعليقات والمرفقات',
-    goToBtn : '', //todo ar
-    weight : '', // todo ar
+    goToBtn     :  'الذهاب الى',
+    weight      : 'التغليف',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);

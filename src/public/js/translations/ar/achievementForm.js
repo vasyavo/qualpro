@@ -24,11 +24,11 @@ var achievementFormTranslation = {
     noTranslation: ' لا يوجد ترجمة',
     files        : 'الملفات',
     all          : 'استمارة الإنجازات',
-    goToBtn : '', //todo
+    goToBtn : 'الذهاب الى',
     edit         : 'تعديل بيانات',
-    delete: '', // todo
-    additionalComment: '', // todo
-    achievementFormEditTitle: '', // todo
+    delete: 'حذف',
+    additionalComment: 'تعليق إضافي',
+    achievementFormEditTitle: 'تعديل نموذج الانجازات',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);

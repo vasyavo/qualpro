@@ -8,7 +8,7 @@ var priceSurveyTranslation = {
     mid: ' منتصف',
     min: 'الأدنى',
     avg: ' متوسط ',
-    median: '', // todo
+    median: 'متوسط السعر',
 
     // header
     total   : 'المجموع الكلى',
@@ -28,7 +28,10 @@ var priceSurveyTranslation = {
     value    : 'القيمة',
     employee : 'الموظف',
     options  : 'الخيارات',
+    okBtn: 'موافق',
     saveBtn       : 'حفظ',
+    delete: 'حذف',
+    edit: 'تعديل',
 
     // topBar
     all: ' الدراسة الاستقصائية للأسعار'

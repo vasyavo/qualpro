@@ -382,6 +382,7 @@ const Personnel = function () {
                     lasMonthEvaluate: '$lasMonthEvaluate',
                     covered         : '$covered',
                     token           : '$token',
+                    imageSrc        : '$imageSrc',
                 },
 
                 covered: {$push: '$covered'}
@@ -418,7 +419,7 @@ const Personnel = function () {
                 beforeAccess    : '$_id.beforeAccess',
                 lasMonthEvaluate: '$_id.lasMonthEvaluate',
                 token           : '$_id.token',
-
+                imageSrc        : '$_id.imageSrc',
                 covered: 1
             }
         }, {
@@ -465,37 +466,8 @@ const Personnel = function () {
             },
         }, {
             $addFields: {
-                cover: {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: '$cover',
-                            }, 0],
-                        },
-                        then: {
-                            $let: {
-                                vars: {
-                                    cover: {
-                                        $arrayElemAt: ['$cover', 0],
-                                    },
-                                },
-                                in: {
-                                    _id: '$$cover._id',
-                                    firstName: '$$cover.firstName',
-                                    lastName: '$$cover.lastName',
-                                    position: '$$cover.position',
-                                    accessRole: '$$cover.accessRole',
-                                    onLeave: '$$cover.vacation.onLeave',
-                                },
-                            },
-                        },
-                        else: null,
-                    },
-                },
-            },
-        }, {
-            $addFields: {
                 'vacation.cover': '$cover',
+
             },
         }];
 

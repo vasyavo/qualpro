@@ -21,11 +21,13 @@ var shelfSharesTranslation = {
     value    : 'Value',
     employee : 'Employee',
     options  : 'Options',
-
     saveBtn  : 'Save',
+    okBtn: 'Ok',
+    delete: 'Delete',
+    edit: 'Edit',
 
     // top Bar
-    all: 'Shelf shares'
+    all: 'Shelf shares',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);

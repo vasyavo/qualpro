@@ -12,7 +12,7 @@
         </ol>
     </div>
     <div class="<%= allowEdit ? '' : 'hidden' %>">
-        <button class="edit-answer" data-question-id="<%- question._id %>" data-personnel-id="<%- personnelId %>"><%- translation.editBtn %></button>
-        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.delete %></button>
+        <button class="edit-answer" data-question-id="<%- question._id %>" data-personnel-id="<%- personnelId %>" data-answer-id="<%- answerId %>"><%- translation.editBtn %></button>
+        <button class="delete-answer" data-id="<%- answerId %>"><%- translation.deleteBtn %></button>
     </div>
 </div>

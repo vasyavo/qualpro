@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const async = require('async');
 const Ajv = require('ajv');
 const AccessManager = require('./../../../../helpers/access')();
-const locationFiler = require('./../../utils/locationFilter');
+const locationFilter = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const CompetitorBrandingModel = require('./../../../../types/competitorBranding/model');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
@@ -64,7 +64,7 @@ module.exports = (req, res, next) => {
             }
         });
 
-        locationFiler(pipeline, personnel, queryFilter);
+        locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND, CONTENT_TYPES.DISPLAY_TYPE,
@@ -84,24 +84,16 @@ module.exports = (req, res, next) => {
             });
         }
 
-        const $timeMatch = {};
-        $timeMatch.$or = [];
-
-        if (timeFilter) {
-            timeFilter.map((frame) => {
-                $timeMatch.$or.push({
+        const $timeMatch = {
+            $or: timeFilter.map((frame) => {
+                return {
                     $and: [
-                        {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
-                        },
-                        {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
-                        },
+                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
-                });
-                return frame;
-            });
-        }
+                };
+            }),
+        };
 
         if ($timeMatch.$or.length) {
             pipeline.push({
@@ -438,17 +430,38 @@ module.exports = (req, res, next) => {
             },
             {
                 name: {
-                    en: 'Employee',
+                    en: 'Publisher',
                     ar: '',
                 },
-                value: 'employee',
+                value: 'publisher',
             },
             {
                 name: {
-                    en: 'Position',
+                    en: 'Publisher Position',
                     ar: '',
                 },
-                value: 'position',
+                value: 'publisherPosition',
+            },
+            {
+                name: {
+                    en: 'Category',
+                    ar: '',
+                },
+                value: 'category',
+            },
+            {
+                name: {
+                    en: 'Brand',
+                    ar: '',
+                },
+                value: 'brand',
+            },
+            {
+                name: {
+                    en: 'Display Type',
+                    ar: '',
+                },
+                value: 'displayType',
             },
         ];
 

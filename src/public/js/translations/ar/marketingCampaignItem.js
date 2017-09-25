@@ -11,8 +11,8 @@ var translation = {
     // body
     createdBy: ' تم إنشاؤها بواسطة',
     edit         : 'تعديل بيانات',
-    delete: '', // todo
-    editCommentViewTitle: '', // todo
+    delete: 'حذف',
+    editCommentViewTitle: 'تعديل التعليقات الخاصة بحملة العلالي التسويقية والدعائية',
 };
 
-return _.extend({}, paginationTranslation, filtersTranslation, translation);
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);
