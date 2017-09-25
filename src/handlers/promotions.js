@@ -597,6 +597,9 @@ var Promotions = function () {
                     limit            : limit
                 });
             } else {
+                queryObject.status = {
+                    $nin: ['draft', 'expired'],
+                };
                 pipeLine = [
                     {
                         $match: queryObject,
