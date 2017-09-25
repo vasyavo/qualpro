@@ -159,7 +159,19 @@ var VisibilityForm = function () {
             }
         });
 
-        pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
+        pipeline.push({
+            $addFields: {
+                createdBy: '$createdBy.user'
+            }
+        });
+    
+        pipeline.push({
+            $addFields: {
+                editedBy: '$editedBy.user'
+            }
+        });
+
+        /*pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
             from           : 'personnels',
             key            : 'createdBy.user',
             isArray        : false,
@@ -200,9 +212,9 @@ var VisibilityForm = function () {
                     }
                 }
             }
-        }));
+        }));*/
 
-        if (isMobile) {
+    /*    if (isMobile) {
             pipeline = _.union(pipeline, aggregateHelper.aggregationPartMaker({
                 from           : 'personnels',
                 key            : 'editedBy.user',
@@ -245,7 +257,7 @@ var VisibilityForm = function () {
                     }
                 }
             }));
-        }
+        }*/
 
         pipeline.push({
             $unwind: {
