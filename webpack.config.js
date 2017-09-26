@@ -1,6 +1,21 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const config = require('./src/config');
+
+const plugins = [
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
+    new HtmlWebpackPlugin({
+        template: './src/public/templates/index.html',
+        inject: 'body',
+    }),
+];
+
+if (config.env === 'production') {
+    plugins.push(new webpack.optimize.UglifyJsPlugin({
+        minimize: true,
+    }));
+}
 
 module.exports = {
     entry: './src/public/js/main.js',
@@ -58,12 +73,5 @@ module.exports = {
         ],
     },
 
-    plugins: [
-        new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
-        //new webpack.optimize.UglifyJsPlugin({ minimize: true }),
-        new HtmlWebpackPlugin({
-            template: './src/public/templates/index.html',
-            inject: 'body',
-        }),
-    ],
+    plugins: plugins,
 };
