@@ -64,6 +64,9 @@ module.exports = {
     },
 
     plugins: [
+        new webpack.ProvidePlugin({
+            jQuery: 'jquery',
+        }),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
         //new webpack.optimize.UglifyJsPlugin({ minimize: true }),
         new HtmlWebpackPlugin({
