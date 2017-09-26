@@ -1,6 +1,6 @@
 var Backbone = require('backbone');
 var $ = require('jquery');
-var _ = require('Underscore');
+var _ = require('underscore');
 var lodash = require('lodash');
 var Cookies = require('js-cookie');
 var mainView = require('./views/main/main');

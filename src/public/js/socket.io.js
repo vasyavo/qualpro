@@ -1,4 +1,4 @@
-var Backbone = require('Backbone');
+var Backbone = require('backbone');
 var io = require('socket.io-client');
 var PersonnelModel = require('./models/personnel');
 var ERROR_MESSAGES = require('./constants/errorMessages');

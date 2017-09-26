@@ -1,4 +1,4 @@
-var _ = require('Underscore');
+var _ = require('underscore');
 var otherConstants = require('../constants/otherConstants');
 var App = require('../appState');
 

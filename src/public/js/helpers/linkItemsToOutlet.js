@@ -1,4 +1,4 @@
-var _ = require('Underscore');
+var _ = require('underscore');
 var categoryTemplate = require('../../templates/itemsPrices/itemsToOutlet/categoryRowTemplate.html');
 var variantTemplate = require('../../templates/itemsPrices/itemsToOutlet/variantRowTemplate.html');
 

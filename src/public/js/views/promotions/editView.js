@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var Backbone = require('Backbone');
+var Backbone = require('backbone');
 var moment = require('moment');
 var EditTemplate = require('../../../templates/promotions/edit.html');
 var FileTemplate = require('../../../templates/file/preView.html');

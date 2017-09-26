@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var _ = require('Underscore');
+var _ = require('underscore');
 var Cookies = require('js-cookie');
 var dataService = require('./dataService');
 var contentTypes = require('./helpers/contentTypesHelper');

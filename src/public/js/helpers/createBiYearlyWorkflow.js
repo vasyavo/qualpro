@@ -1,4 +1,4 @@
-var _ = require('Underscore');
+var _ = require('underscore');
 var professionalSkillsTemplate = require('../../templates/personnel/form/professionalSkillsTemplate.html');
 var personalSkillsTemplate = require('../../templates/personnel/form/personalSkillsTemplate.html');
 var summaryTemplate = require('../../templates/personnel/form/summaryTemplate.html');

@@ -13,7 +13,7 @@ module.exports = {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
-            imageCrop: 'jcrop-0.9.12',
+            imageCrop: path.resolve(__dirname, 'src/public/js/libs/Jcrop/js/jquery.Jcrop.js'),
         },
         extensions: ['.js', '.jsx'],
         modules: ['node_modules', 'bower_components'],
@@ -28,7 +28,11 @@ module.exports = {
                 use: 'imports-loader?backbone,jqueryui,imageCrop',
             },
             {
-                test: /lightSlider/,
+                test: /imageCrop/,
+                use: 'imports-loader?jQuery=jquery',
+            },
+            {
+                test: /lightslider/,
                 use: 'imports-loader?jQuery=jquery',
             },
             {

@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var _ = require('Underscore');
+var _ = require('underscore');
 var moment = require('moment');
 var Cookies = require('js-cookie');
 var contentTypes = require('../helpers/contentTypesHelper');

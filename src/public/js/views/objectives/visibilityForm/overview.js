@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var shortId = require('shortId');
+var shortId = require('shortid');
 var async = require('async');
 var Backbone = require('backbone');
 var FileDialogPreview = require('../../../views/fileDialog/fileDialog');
@@ -13,7 +13,7 @@ var NewFileThumbnailTemplate = require('../../../../templates/objectives/visibil
 var Template = require('../../../../templates/objectives/visibilityForm/preview.html');
 var App = require('../../../appState');
 
-require('lightSlider');
+require('lightslider');
 
 module.exports = Backbone.View.extend({
 
