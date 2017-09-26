@@ -2,6 +2,7 @@ const async = require('async');
 const CONSTANTS = require('../../../constants/mainConstants');
 const FilterMapper = require('../../../helpers/filterMapper');
 const ACL_MODULES = require('../../../constants/aclModulesNames');
+const aclRolesNames = require('../../../constants/aclRolesNames');
 const CONTENT_TYPES = require('../../../public/js/constants/contentType.js');
 const AggregationHelper = require('../../../helpers/aggregationCreater');
 const access = require('../../../helpers/access')();
@@ -100,8 +101,9 @@ module.exports = (req, res, next) => {
         });
 
         const aggregateHelper = new AggregationHelper($defProjection);
+        const isMasterAdmin = [aclRolesNames.MASTER_ADMIN].includes(personnel.accessRole.level);
 
-        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id));
+        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id, isMasterAdmin));
 
         if (personnelFilter) {
             pipeline.push({
