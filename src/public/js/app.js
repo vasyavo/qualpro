@@ -1,5 +1,5 @@
 var _ = require('underscore');
-var $ = require('jquery');
+var $ = window.jQuery = require('jquery');
 var Router = require('./router');
 var Communication = require('./communication');
 var Custom = require('./custom');

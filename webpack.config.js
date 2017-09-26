@@ -1,9 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const extractEnCSS = new ExtractTextPlugin('main_en.css');
-const extractArCSS = new ExtractTextPlugin('main_ar.css');
 
 module.exports = {
     entry: './src/public/js/main.js',
@@ -16,7 +13,7 @@ module.exports = {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
-            imageCrop: 'jquery-jcrop',
+            imageCrop: 'jcrop-0.9.12',
         },
         extensions: ['.js', '.jsx'],
         modules: ['node_modules', 'bower_components'],
