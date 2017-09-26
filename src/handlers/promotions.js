@@ -2,6 +2,7 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const extractBody = require('./../utils/extractBody');
 const ReportUtils = require('./../stories/test-utils').ReportUtils;
 const aclRolesNames = require('./../constants/aclRolesNames');
+const moment = require('moment');
 
 var Promotions = function () {
     var async = require('async');
@@ -338,7 +339,10 @@ var Promotions = function () {
                     ar: _.escape(body.promotionType.ar),
                 };
                 body.displayType = body.displayType.split(',');
-
+                body.dateStart = moment(body.dateStart);
+                body.dateStart = body.dateStart.utc().add(4, 'h').startOf('day').toDate();
+                body.dateEnd = moment(body.dateEnd);
+                body.dateEnd = body.dateEnd.utc().add(4, 'h').endOf('day').toDate();
                 const model = new PromotionModel();
 
                 model.set(body);
