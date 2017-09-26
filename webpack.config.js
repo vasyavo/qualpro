@@ -13,7 +13,7 @@ module.exports = {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
-            imageCrop: path.resolve(__dirname, 'src/public/js/libs/Jcrop/js/jquery.Jcrop.js'),
+            imageCrop: path.resolve(__dirname, 'src/public/js/libs-extended/jcrop.js'),
         },
         extensions: ['.js', '.jsx'],
         modules: ['node_modules', 'bower_components'],
