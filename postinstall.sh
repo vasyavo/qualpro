@@ -2,7 +2,7 @@
 # Install Bower components
 bower install
 
-curl https://s3.amazonaws.com/quotaguard/qgtunnel-latest.tar.gz | tar xz
+npm run start:builder
 
 # Generate API docs
 npm i aglio
