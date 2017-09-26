@@ -1,4 +1,4 @@
-var $ = require('jquery');
+var $ = window.jQuery;
 
 $.Jcrop = function (obj, opt) {
     var options = $.extend({}, $.Jcrop.defaults),

@@ -13,7 +13,6 @@ module.exports = {
             locales: 'moment/min/locales',
             'jquery.inputmask': 'jquery.inputmask/dist/jquery.inputmask.bundle',
             fancytree: 'jquery.fancytree/dist/jquery.fancytree.min',
-            imageCrop: path.resolve(__dirname, 'src/public/js/libs-extended/jcrop.js'),
         },
         extensions: ['.js', '.jsx'],
         modules: ['node_modules', 'bower_components'],
@@ -25,11 +24,7 @@ module.exports = {
         loaders: [
             {
                 test: /app/,
-                use: 'imports-loader?backbone,jqueryui,imageCrop',
-            },
-            {
-                test: /imageCrop/,
-                use: 'imports-loader?jQuery=jquery',
+                use: 'imports-loader?backbone',
             },
             {
                 test: /lightslider/,
@@ -37,7 +32,7 @@ module.exports = {
             },
             {
                 test: /fancytree/,
-                use: 'imports-loader?jQuery=jquery',
+                use: 'imports-loader?jQuery=jquery,jqueryui',
             },
             {
                 test: /jquery.inputmask/,
@@ -64,9 +59,6 @@ module.exports = {
     },
 
     plugins: [
-        new webpack.ProvidePlugin({
-            jQuery: 'jquery',
-        }),
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // saves ~100k from build
         //new webpack.optimize.UglifyJsPlugin({ minimize: true }),
         new HtmlWebpackPlugin({

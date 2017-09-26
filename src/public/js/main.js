@@ -6,6 +6,8 @@ var app = require('./app');
 var PopUpView = require('./views/popUp');
 var App = require('./appState');
 
+require('./libs-extended/jcrop');
+
 require('./socket.io');
 
 var Store = function () {
