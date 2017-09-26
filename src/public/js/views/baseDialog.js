@@ -218,33 +218,7 @@ module.exports = Backbone.View.extend({
     },
 
     pageAnimation: function (direction, $holder) {
-        var $absolute = $holder.find('.absoluteContent');
-
-        if ($absolute.length) {
-            $holder = $absolute;
-        }
-
-        if (!direction) {
-            $holder.removeClass('contentFadeInLeft');
-            $holder.removeClass('contentFadeInRight');
-            $holder.removeClass('contentFadeOutLeft');
-            $holder.addClass('contentFadeOutRight');
-        } else {
-            $holder.removeClass('contentFadeInLeft');
-            $holder.removeClass('contentFadeInRight');
-            $holder.removeClass('contentFadeOutRight');
-            $holder.addClass('contentFadeOutLeft');
-        }
-
-        setTimeout(function () {
-            if (!direction) {
-                $holder.addClass('contentFadeInLeft');
-                $holder.removeClass('contentFadeOutRight');
-            } else {
-                $holder.addClass('contentFadeInRight');
-                $holder.removeClass('contentFadeOutLeft');
-            }
-        }, 300);
+        // do not remove this function
     },
 
     setCanvasSize: function (width, height) {

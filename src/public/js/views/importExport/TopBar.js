@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var _ = require('underscore');
 var Marionette = require('backbone.marionette');
 var Template = require('../../../templates/importExport/top-bar.html');

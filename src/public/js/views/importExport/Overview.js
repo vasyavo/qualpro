@@ -1,3 +1,4 @@
+var $ = require('jquery');
 var Marionette = require('backbone.marionette');
 var ImportErrorsView = require('../../views/importExport/ImportErrors');
 var Template = require('../../../templates/importExport/overview.html');

@@ -5,6 +5,7 @@ var PreView = require('../../../views/newProductLaunch/preView/preView');
 var paginator = require('../../../views/paginator');
 var CONTENT_TYPES = require('../../../constants/contentType');
 var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
 module.exports = paginator.extend({
     contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
@@ -79,6 +80,7 @@ module.exports = paginator.extend({
             collection : jsonCollection,
             translation: this.translation,
             newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
+            App: App,
         }));
 
         return this;

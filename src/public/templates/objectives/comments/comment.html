@@ -7,7 +7,7 @@
                 <div class="fontSmall"><%= comment.createdBy.user.firstName.currentLanguage +
                     comment.createdBy.user.lastName.currentLanguage %>
                 </div>
-                <div class="fontMicro"><%= comment.createdBy.user.accessRole.name.currentLanguage %></div>
+                <div class="fontMicro"><%= comment.createdBy.user.accessRole ? comment.createdBy.user.accessRole.name.currentLanguage : '' %></div>
             </div>
         </div>
     </div>

@@ -1,6 +1,9 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const extractEnCSS = new ExtractTextPlugin('main_en.css');
+const extractArCSS = new ExtractTextPlugin('main_ar.css');
 
 module.exports = {
     entry: './src/public/js/main.js',

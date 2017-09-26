@@ -11,7 +11,7 @@
                                 <span><%= translation.title %></span>
                             </div>
                             <div class="cell">
-                                <span id="title" class="textEllipsis hoverFullText"><%= jsonModel.title.currentLanguage || 'No translation' %></span>
+                                <span id="title" class="textEllipsis hoverFullText"><%= jsonModel.title && jsonModel.title.currentLanguage || 'No translation' %></span>
                             </div>
                         </div>
                         <div class="row">

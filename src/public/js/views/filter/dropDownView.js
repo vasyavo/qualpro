@@ -474,7 +474,8 @@ module.exports = Backbone.View.extend({
         });
 
         $dropDownList.html(this.contentTemplate({
-            dropDownList: displayCollection
+            dropDownList: displayCollection,
+            App: App,
         }));
 
         paginationBool = (this.filteredCollectionLength - this.elementToShow > 0);

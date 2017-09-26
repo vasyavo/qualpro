@@ -571,14 +571,6 @@ var CompetitorItem = function () {
                     },
 
                     {
-                        $skip: skip,
-                    },
-
-                    {
-                        $limit: limit,
-                    },
-
-                    {
                         $lookup: {
                             from: 'competitorItems',
                             localField: 'root',

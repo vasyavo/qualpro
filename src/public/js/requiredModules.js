@@ -325,6 +325,18 @@ module.exports = function () {
                 ar: require('./translations/ar/shelfShares'),
             },
         },
+        importExport: {
+            translation: {
+                en: require('./translations/en/importExport'),
+                ar: require('./translations/ar/importExport'),
+            },
+        },
+        documents: {
+            translation: {
+                en: require('./translations/en/documents'),
+                ar: require('./translations/ar/documents'),
+            },
+        },
         domain: {
             views: {
                 list: require('./views/domain/list'),
@@ -416,9 +428,11 @@ module.exports = function () {
         },
         variant: {
             collection: require('./collections/variant/collection'),
+            model: require('./models/variant'),
         },
         item: {
             collection: require('./collections/item/collection'),
+            model: require('./models/item'),
         },
         competitorVariant: {
             collection: require('./collections/competitorVariant/collection'),

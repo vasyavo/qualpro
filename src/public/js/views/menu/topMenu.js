@@ -122,10 +122,10 @@ module.exports = Backbone.View.extend({
 
     changeStyle: function (language) {
         var lang = language || App.currentUser.currentLanguage;
-        var $scrollableElements = $('.scrollable.mCustomScrollbar, .scrollable-yx.mCustomScrollbar, .scrollable-xy.mCustomScrollbar')
+        var $scrollableElements = $('.scrollable.mCustomScrollbar, .scrollable-yx.mCustomScrollbar, .scrollable-xy.mCustomScrollbar');
 
         $('html').attr('dir', lang === 'ar' ? 'rtl' : 'ltr');
-        $('#mainStyle').attr('href', 'css/main_' + lang + '.css');
+        $('#mainStyle').attr('href', 'src/public/css/main_' + lang + '.css');
 
         if ($scrollableElements.length) {
             $scrollableElements

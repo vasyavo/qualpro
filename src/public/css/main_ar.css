@@ -10123,11 +10123,53 @@ lesshat-selector {
     animation-name: contentFadeOutRight;
 }
 lesshat-selector {
-    -lh-property: 0; }
-@-webkit-keyframes contentFadeInLeft{ from{opacity: 0; -webkit-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-moz-keyframes contentFadeInLeft{ from{opacity: 0; -moz-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-o-keyframes contentFadeInLeft{ from{opacity: 0; -o-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@keyframes contentFadeInLeft{ from{opacity: 0;-webkit-transform: translate3d(-100%, 0, 0);-moz-transform: translate3d(-100%, 0, 0);-ms-transform: translate3d(-100%, 0, 0);transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);};
+    -lh-property: 0;
+}
+@-webkit-keyframes contentFadeInLeft {
+    from {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+}
+@-moz-keyframes contentFadeInLeft {
+    from {
+        opacity: 0;
+        -moz-transform: translate3d(-100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -moz-transform: translate3d(0, 0, 0);
+    }
+}
+@-o-keyframes contentFadeInLeft {
+    from {
+        opacity: 0;
+        -o-transform: translate3d(-100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -o-transform: translate3d(0, 0, 0);
+    }
+}
+@keyframes contentFadeInLeft {
+    from {
+        opacity: 0;
+        -webkit-transform: translate3d(-100%, 0, 0);
+        -moz-transform: translate3d(-100%, 0, 0);
+        -ms-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: translate3d(-100%, 0, 0);
+        -moz-transform: translate3d(-100%, 0, 0);
+        -ms-transform: translate3d(-100%, 0, 0);
+        transform: translate3d(-100%, 0, 0);
+    }
 }
 .contentFadeInLeft {
     -webkit-animation-duration: 0.5s;
@@ -10147,12 +10189,59 @@ lesshat-selector {
     -o-animation-name: contentFadeInLeft;
     animation-name: contentFadeInLeft;
 }
+
 lesshat-selector {
-    -lh-property: 0; }
-@-webkit-keyframes contentFadeInRight{ from{opacity: 0; -webkit-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-moz-keyframes contentFadeInRight{ from{opacity: 0; -moz-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-o-keyframes contentFadeInRight{ from{opacity: 0; -o-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@keyframes contentFadeInRight{ from{opacity: 0;-webkit-transform: translate3d(100%, 0, 0);-moz-transform: translate3d(100%, 0, 0);-ms-transform: translate3d(100%, 0, 0);transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);};
+    -lh-property: 0;
+}
+
+@-webkit-keyframes contentFadeInRight {
+    from {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: translate3d(0, 0, 0);
+    }
+}
+
+@-moz-keyframes contentFadeInRight {
+    from {
+        opacity: 0;
+        -moz-transform: translate3d(100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -moz-transform: translate3d(0, 0, 0);
+    }
+}
+
+@-o-keyframes contentFadeInRight {
+    from {
+        opacity: 0;
+        -o-transform: translate3d(100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -o-transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes contentFadeInRight {
+    from {
+        opacity: 0;
+        -webkit-transform: translate3d(100%, 0, 0);
+        -moz-transform: translate3d(100%, 0, 0);
+        -ms-transform: translate3d(100%, 0, 0);
+        transform: translate3d(100%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        -webkit-transform: translate3d(100%, 0, 0);
+        -moz-transform: translate3d(100%, 0, 0);
+        -ms-transform: translate3d(100%, 0, 0);
+        transform: translate3d(100%, 0, 0);
+    }
 }
 .contentFadeInRight {
     -webkit-animation-duration: 0.5s;

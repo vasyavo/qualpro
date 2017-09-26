@@ -692,7 +692,8 @@ module.exports = BaseView.extend({
             objective    : jsonModel,
             assign       : this.assign,
             objectiveType: _.findWhere(CONSTANTS.OBJECTIVES_TYPE, {_id: jsonModel.objectiveType}).name[currentLanguage],
-            translation  : this.translation
+            translation  : this.translation,
+            App: App,
         });
 
         this.$el = $(formString).dialog({
