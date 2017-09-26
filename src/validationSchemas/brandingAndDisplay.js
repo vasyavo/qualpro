@@ -55,7 +55,7 @@ const create = Joi.object().keys({
     description : Joi.object().keys({
         en : Joi.string().allow(''),
         ar : Joi.string().allow('')
-    }).or('en', 'or'),
+    }).or('en', 'ar'),
     dateStart : Joi.string().allow(''),
     dateEnd : Joi.string().allow(''),
     createdAt : Joi.date().default(currentDate, 'current date'),
