@@ -477,7 +477,7 @@ define([
 
             $thumbnail.remove();
             --this.updateCount;
-debugger;
+
             this.attachments = _.without(this.attachments, fileId);
             if (!file.get('uploaded')) {
                 this.files.remove(file, {silent: true});
@@ -668,7 +668,7 @@ debugger;
             var files;
             var change;
             this.checkForEmptyInput(this.files, this.$el);
-debugger;
+
             files = this.files.toJSON();
             attachments = _.pluck(model.attachments, '_id');
             selectedFiles = _.where(files, {selected: true});
