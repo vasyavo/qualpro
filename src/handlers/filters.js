@@ -2012,26 +2012,29 @@ const Filters = function () {
             }
         });
 
-        const pipeline = [];
+        const pipeline = [
+            {
+                $project: {
+                    _id: 1,
+                    country: 1,
+                    region: 1,
+                    subRegion: 1,
+                    branch: 1,
+                    createdAt: '$createdBy.date',
+                },
+            },
+        ];
 
         const scopeFilter = {};
 
         locationFilter(pipeline, user, queryFilter, scopeFilter);
 
-        pipeline.push({
-            $project: {
-                _id: 1,
-                country: 1,
-                archived: 1,
-            },
-        });
-
         if (timeFilter) {
             pipeline.push({
                 $match: {
                     $and: [
-                        { 'createdBy.date': { $gt: moment(timeFilter.values[0])._d } },
-                        { 'createdBy.date': { $lt: moment(timeFilter.values[1])._d } },
+                        { createdAt: { $gt: moment(timeFilter.values[0])._d } },
+                        { createdAt: { $lt: moment(timeFilter.values[1])._d } },
                     ],
                 },
             });
@@ -2041,38 +2044,20 @@ const Filters = function () {
             {
                 $project: {
                     _id: 1,
-                    country: {
-                        $ifNull: [['$country'], []],
-                    },
+                    country: 1,
                 },
             },
             {
                 $group: {
                     _id: null,
-                    country: { $push: '$country' },
+                    country: { $addToSet: '$country' },
                     items: { $push: '$$ROOT._id' },
                 },
             },
             {
                 $project: {
                     _id: '$items',
-                    country: {
-                        $reduce: {
-                            input: '$country',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
+                    country: 1,
                 },
             },
             {
@@ -2126,28 +2111,10 @@ const Filters = function () {
             {
                 $project: {
                     _id: '$priceSurvey._id',
-                    country: { $ifNull: ['$country', []] },
-                    region: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: [['$priceSurvey.region'], []] } }, 0] },
-                            then: { selected: ['$priceSurvey.region'] },
-                            else: { all: 'region' },
-                        },
-                    },
-                    subRegion: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: [['$priceSurvey.subRegion'], []] } }, 0] },
-                            then: { selected: ['$priceSurvey.subRegion'] },
-                            else: { all: 'subRegion' },
-                        },
-                    },
-                    branch: {
-                        $cond: {
-                            if: { $gt: [{ $size: { $ifNull: [['$priceSurvey.branch'], []] } }, 0] },
-                            then: { selected: ['$priceSurvey.branch'] },
-                            else: { all: 'branch' },
-                        },
-                    },
+                    country: 1,
+                    region: '$priceSurvey.region',
+                    subRegion: '$priceSurvey.subRegion',
+                    branch: '$priceSurvey.branch',
                     product: '$priceSurvey.product',
                     publisher: '$priceSurvey.publisher',
                 },
@@ -2184,9 +2151,9 @@ const Filters = function () {
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'region.selected',
+                localField: 'region',
                 foreignField: '_id',
-                as: 'region.selected',
+                as: 'region',
             },
         });
 
@@ -2194,7 +2161,7 @@ const Filters = function () {
             const $addFields = {};
 
             if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
-                $addFields['region.selected'] = {
+                $addFields.region = {
                     $let: {
                         vars: {
                             filters: {
@@ -2205,7 +2172,7 @@ const Filters = function () {
                             $map: {
                                 input: {
                                     $filter: {
-                                        input: '$region.selected',
+                                        input: '$region',
                                         as: 'region',
                                         cond: {
                                             $and: [
@@ -2222,11 +2189,11 @@ const Filters = function () {
                     },
                 };
             } else {
-                $addFields['region.selected'] = {
+                $addFields.region = {
                     $map: {
                         input: {
                             $filter: {
-                                input: '$region.selected',
+                                input: '$region',
                                 as: 'region',
                                 cond: {
                                     $eq: ['$$region.archived', false],
@@ -2235,91 +2202,6 @@ const Filters = function () {
                         },
                         as: 'region',
                         in: '$$region._id',
-                    },
-                };
-            }
-
-            pipeline.push({ $addFields });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'region.all',
-                foreignField: 'type',
-                as: 'region.all',
-            },
-        });
-
-        {
-            const $addFields = {};
-
-            if (_.get(queryFilter, `${CONTENT_TYPES.COUNTRY}.length`)) {
-                $addFields.region = {
-                    $let: {
-                        vars: {
-                            filters: {
-                                country: queryFilter[CONTENT_TYPES.COUNTRY],
-                            },
-                        },
-                        in: {
-                            $cond: {
-                                if: {
-                                    $gt: [{
-                                        $size: {
-                                            $ifNull: ['$region.selected', []],
-                                        },
-                                    }, 0],
-                                },
-                                then: '$region.selected',
-                                else: {
-                                    $map: {
-                                        input: {
-                                            $filter: {
-                                                input: '$region.all',
-                                                as: 'region',
-                                                cond: {
-                                                    $and: [
-                                                        { $eq: ['$$region.archived', false] },
-                                                        { $setIsSubset: [['$$region.parent'], '$$filters.country'] },
-                                                    ],
-                                                },
-                                            },
-                                        },
-                                        as: 'region',
-                                        in: '$$region._id',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                };
-            } else {
-                $addFields.region = {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: {
-                                    $ifNull: ['$region.selected', []],
-                                },
-                            }, 0],
-                        },
-                        then: '$region.selected',
-                        else: {
-                            $map: {
-                                input: {
-                                    $filter: {
-                                        input: '$region.all',
-                                        as: 'region',
-                                        cond: {
-                                            $eq: ['$$region.archived', false],
-                                        },
-                                    },
-                                },
-                                as: 'region',
-                                in: '$$region._id',
-                            },
-                        },
                     },
                 };
             }
@@ -2388,9 +2270,9 @@ const Filters = function () {
         pipeline.push({
             $lookup: {
                 from: 'domains',
-                localField: 'subRegion.selected',
+                localField: 'subRegion',
                 foreignField: '_id',
-                as: 'subRegion.selected',
+                as: 'subRegion',
             },
         });
 
@@ -2398,7 +2280,7 @@ const Filters = function () {
             const $addFields = {};
 
             if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
-                $addFields['subRegion.selected'] = {
+                $addFields.subRegion = {
                     $let: {
                         vars: {
                             filters: {
@@ -2409,7 +2291,7 @@ const Filters = function () {
                             $map: {
                                 input: {
                                     $filter: {
-                                        input: '$subRegion.selected',
+                                        input: '$subRegion',
                                         as: 'subRegion',
                                         cond: {
                                             $and: [
@@ -2426,11 +2308,11 @@ const Filters = function () {
                     },
                 };
             } else {
-                $addFields['subRegion.selected'] = {
+                $addFields.subRegion = {
                     $map: {
                         input: {
                             $filter: {
-                                input: '$subRegion.selected',
+                                input: '$subRegion',
                                 as: 'subRegion',
                                 cond: {
                                     $and: [
@@ -2442,94 +2324,6 @@ const Filters = function () {
                         },
                         as: 'subRegion',
                         in: '$$subRegion._id',
-                    },
-                };
-            }
-
-            pipeline.push({ $addFields });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'domains',
-                localField: 'subRegion.all',
-                foreignField: 'type',
-                as: 'subRegion.all',
-            },
-        });
-
-        {
-            const $addFields = {};
-
-            if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
-                $addFields.subRegion = {
-                    $let: {
-                        vars: {
-                            filters: {
-                                region: queryFilter[CONTENT_TYPES.REGION],
-                            },
-                        },
-                        in: {
-                            $cond: {
-                                if: {
-                                    $gt: [{
-                                        $size: {
-                                            $ifNull: ['$subRegion.selected', []],
-                                        },
-                                    }, 0],
-                                },
-                                then: '$subRegion.selected',
-                                else: {
-                                    $map: {
-                                        input: {
-                                            $filter: {
-                                                input: '$subRegion.all',
-                                                as: 'subRegion',
-                                                cond: {
-                                                    $and: [
-                                                        { $eq: ['$$subRegion.archived', false] },
-                                                        { $setIsSubset: [['$$subRegion.parent'], '$$filters.region'] },
-                                                    ],
-                                                },
-                                            },
-                                        },
-                                        as: 'subRegion',
-                                        in: '$$subRegion._id',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                };
-            } else {
-                $addFields.subRegion = {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: {
-                                    $ifNull: ['$subRegion.selected', []],
-                                },
-                            }, 0],
-                        },
-                        then: '$subRegion.selected',
-                        else: {
-                            $map: {
-                                input: {
-                                    $filter: {
-                                        input: '$subRegion.all',
-                                        as: 'subRegion',
-                                        cond: {
-                                            $and: [
-                                                { $eq: ['$$subRegion.archived', false] },
-                                                { $setIsSubset: [['$$subRegion.parent'], '$region'] },
-                                            ],
-                                        },
-                                    },
-                                },
-                                as: 'subRegion',
-                                in: '$$subRegion._id',
-                            },
-                        },
                     },
                 };
             }
@@ -2597,16 +2391,16 @@ const Filters = function () {
         pipeline.push({
             $lookup: {
                 from: 'branches',
-                localField: 'branch.selected',
+                localField: 'branch',
                 foreignField: '_id',
-                as: 'branch.selected',
+                as: 'branch',
             },
         });
         {
             const $addFields = {};
 
             if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
-                $addFields['branch.selected'] = {
+                $addFields.branch = {
                     $let: {
                         vars: {
                             filters: {
@@ -2617,7 +2411,7 @@ const Filters = function () {
                             $map: {
                                 input: {
                                     $filter: {
-                                        input: '$branch.selected',
+                                        input: '$branch',
                                         as: 'branch',
                                         cond: {
                                             $and: [
@@ -2638,11 +2432,11 @@ const Filters = function () {
                     },
                 };
             } else {
-                $addFields['branch.selected'] = {
+                $addFields.branch = {
                     $map: {
                         input: {
                             $filter: {
-                                input: '$branch.selected',
+                                input: '$branch',
                                 as: 'branch',
                                 cond: {
                                     $and: [
@@ -2668,199 +2462,7 @@ const Filters = function () {
         pipeline.push({
             $addFields: {
                 retailSegment: {
-                    $setUnion: ['$branch.selected.retailSegment', []],
-                },
-            },
-        });
-
-        if (_.get(queryFilter, `${CONTENT_TYPES.RETAILSEGMENT}.length`)) {
-            pipeline.push({
-                $addFields: {
-                    'branch.selected': {
-                        $let: {
-                            vars: {
-                                filters: {
-                                    retailSegment: queryFilter[CONTENT_TYPES.RETAILSEGMENT],
-                                },
-                            },
-                            in: {
-                                $map: {
-                                    input: {
-                                        $filter: {
-                                            input: '$branch.selected',
-                                            as: 'branch',
-                                            cond: {
-                                                $setIsSubset: [['$$branch.retailSegment'], '$$filters.retailSegment'],
-                                            },
-                                        },
-                                    },
-                                    as: 'branch',
-                                    in: {
-                                        _id: '$$branch._id',
-                                        retailSegment: '$$branch.retailSegment',
-                                        outlet: '$$branch.outlet',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
-        pipeline.push({
-            $addFields: {
-                outlet: {
-                    $setUnion: ['$branch.selected.outlet', []],
-                },
-            },
-        });
-
-        if (_.get(queryFilter, `${CONTENT_TYPES.OUTLET}.length`)) {
-            pipeline.push({
-                $addFields: {
-                    'branch.selected': {
-                        $let: {
-                            vars: {
-                                filters: {
-                                    outlet: queryFilter[CONTENT_TYPES.OUTLET],
-                                },
-                            },
-                            in: {
-                                $map: {
-                                    input: {
-                                        $filter: {
-                                            input: '$branch.selected',
-                                            as: 'branch',
-                                            cond: {
-                                                $setIsSubset: [['$$branch.outlet'], '$$filters.outlet'],
-                                            },
-                                        },
-                                    },
-                                    as: 'branch',
-                                    in: {
-                                        _id: '$$branch._id',
-                                        retailSegment: '$$branch.retailSegment',
-                                        outlet: '$$branch.outlet',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
-        pipeline.push({
-            $lookup: {
-                from: 'branches',
-                localField: 'subRegion',
-                foreignField: 'subRegion',
-                as: 'branch.all',
-            },
-        });
-
-        {
-            const $addFields = {};
-
-            if (_.get(queryFilter, `${CONTENT_TYPES.SUBREGION}.length`)) {
-                $addFields.branch = {
-                    $let: {
-                        vars: {
-                            filters: {
-                                subRegion: queryFilter[CONTENT_TYPES.SUBREGION],
-                            },
-                        },
-                        in: {
-                            $cond: {
-                                if: {
-                                    $gt: [{
-                                        $size: {
-                                            $ifNull: ['$branch.selected', []],
-                                        },
-                                    }, 0],
-                                },
-                                then: '$branch.selected',
-                                else: {
-                                    $map: {
-                                        input: {
-                                            $filter: {
-                                                input: '$branch.all',
-                                                as: 'branch',
-                                                cond: {
-                                                    $and: [
-                                                        { $eq: ['$$branch.archived', false] },
-                                                        { $setIsSubset: [['$$branch.subRegion'], '$$filters.subRegion'] },
-                                                    ],
-                                                },
-                                            },
-                                        },
-                                        as: 'branch',
-                                        in: {
-                                            _id: '$$branch._id',
-                                            retailSegment: '$$branch.retailSegment',
-                                            outlet: '$$branch.outlet',
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                };
-            } else {
-                $addFields.branch = {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: {
-                                    $ifNull: ['$branch.selected', []],
-                                },
-                            }, 0],
-                        },
-                        then: '$branch.selected',
-                        else: {
-                            $map: {
-                                input: {
-                                    $filter: {
-                                        input: '$branch.all',
-                                        as: 'branch',
-                                        cond: {
-                                            $and: [
-                                                { $eq: ['$$branch.archived', false] },
-                                                { $setIsSubset: [['$$branch.subRegion'], '$subRegion'] },
-                                            ],
-                                        },
-                                    },
-                                },
-                                as: 'branch',
-                                in: {
-                                    _id: '$$branch._id',
-                                    retailSegment: '$$branch.retailSegment',
-                                    outlet: '$$branch.outlet',
-                                },
-                            },
-                        },
-                    },
-                };
-            }
-
-            pipeline.push({ $addFields });
-        }
-
-        pipeline.push({
-            $addFields: {
-                retailSegment: {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: '$retailSegment',
-                            }, 0],
-                        },
-                        then: '$retailSegment',
-                        else: {
-                            $setUnion: ['$branch.retailSegment', []],
-                        },
-                    },
+                    $setUnion: ['$branch.retailSegment', []],
                 },
             },
         });
@@ -2903,17 +2505,7 @@ const Filters = function () {
         pipeline.push({
             $addFields: {
                 outlet: {
-                    $cond: {
-                        if: {
-                            $gt: [{
-                                $size: '$outlet',
-                            }, 0],
-                        },
-                        then: '$outlet',
-                        else: {
-                            $setUnion: ['$branch.outlet', []],
-                        },
-                    },
+                    $setUnion: ['$branch.outlet', []],
                 },
             },
         });
@@ -3044,11 +2636,11 @@ const Filters = function () {
                 $project: {
                     _id: 1,
                     country: 1,
-                    region: 1,
-                    subRegion: 1,
-                    branch: 1,
-                    retailSegment: 1,
-                    outlet: 1,
+                    region: { $arrayElemAt: ['$region', 0] },
+                    subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                    branch: { $arrayElemAt: ['$branch', 0] },
+                    retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                    outlet: { $arrayElemAt: ['$outlet', 0] },
                     product: 1,
                     publisher: 1,
                 },
@@ -3057,106 +2649,13 @@ const Filters = function () {
                 $group: {
                     _id: null,
                     country: { $first: '$country' },
-                    region: { $push: '$region' },
-                    subRegion: { $push: '$subRegion' },
-                    branch: { $push: '$branch' },
-                    retailSegment: { $push: '$retailSegment' },
-                    outlet: { $push: '$outlet' },
+                    region: { $addToSet: '$region' },
+                    subRegion: { $addToSet: '$subRegion' },
+                    branch: { $addToSet: '$branch' },
+                    retailSegment: { $addToSet: '$retailSegment' },
+                    outlet: { $addToSet: '$outlet' },
                     products: { $addToSet: '$product' },
                     publishers: { $addToSet: '$publisher' },
-                },
-            },
-            {
-                $project: {
-                    _id: false,
-                    country: 1,
-                    region: {
-                        $reduce: {
-                            input: '$region',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
-                    subRegion: {
-                        $reduce: {
-                            input: '$subRegion',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
-                    branch: {
-                        $reduce: {
-                            input: '$branch',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
-                    retailSegment: {
-                        $reduce: {
-                            input: '$retailSegment',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
-                    outlet: {
-                        $reduce: {
-                            input: '$outlet',
-                            initialValue: [],
-                            in: {
-                                $cond: {
-                                    if: {
-                                        $ne: ['$$this', []],
-                                    },
-                                    then: {
-                                        $setUnion: ['$$this', '$$value'],
-                                    },
-                                    else: '$$value',
-                                },
-                            },
-                        },
-                    },
-                    products: 1,
-                    publishers: 1,
                 },
             },
             {

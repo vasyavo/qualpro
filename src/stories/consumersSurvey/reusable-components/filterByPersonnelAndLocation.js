@@ -1,4 +1,4 @@
-module.exports = function (filter, personnelId) {
+module.exports = function (filter, personnelId, isMasterAdmin) {
     const pipeline = [];
 
     pipeline.push({
@@ -41,54 +41,90 @@ module.exports = function (filter, personnelId) {
         },
     ];
 
-    const $project = {
-        result: {
-            $filter: {
-                input: '$setConsumerSurvey',
-                as: 'consumerSurvey',
-                cond: {
-                    $or: [
-                        {
-                            $eq: [
-                                '$$consumerSurvey.createdBy.user',
-                                personnelId,
-                            ],
-                        },
-                        {
-                            $and: [
-                                {
-                                    $ne: [
-                                        '$$consumerSurvey.createdBy.user',
-                                        personnelId,
-                                    ],
-                                },
-                                {
-                                    $ne: [
-                                        {
-                                            $filter: {
-                                                input: '$$consumerSurvey.personnel',
-                                                as: 'personnel',
-                                                cond: {
-                                                    $eq: [
-                                                        '$$personnel',
-                                                        personnelId,
-                                                    ],
-                                                },
-                                            },
-                                        },
-                                        [],
-                                    ],
-                                },
-                            ],
-                        },
-                        {
-                            $and: $locationsFilterConditions,
-                        },
-                    ],
+    let $project;
+
+    if (isMasterAdmin) {
+        $project = {
+            result: {
+                $filter: {
+                    input: '$setConsumerSurvey',
+                    as: 'consumerSurvey',
+                    cond: {
+                        $or: [
+                            {
+                                $eq: [
+                                    '$$consumerSurvey.createdBy.user',
+                                    personnelId,
+                                ],
+                            },
+                            {
+                                $and: [
+                                    {
+                                        $ne: [
+                                            '$$consumerSurvey.createdBy.user',
+                                            personnelId,
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                $and: $locationsFilterConditions,
+                            },
+                        ],
+                    },
                 },
             },
-        },
-    };
+        };
+    } else {
+        $project = {
+            result: {
+                $filter: {
+                    input: '$setConsumerSurvey',
+                    as: 'consumerSurvey',
+                    cond: {
+                        $or: [
+                            {
+                                $eq: [
+                                    '$$consumerSurvey.createdBy.user',
+                                    personnelId,
+                                ],
+                            },
+                            {
+                                $and: [
+                                    {
+                                        $ne: [
+                                            '$$consumerSurvey.createdBy.user',
+                                            personnelId,
+                                        ],
+                                    },
+                                    {
+                                        $ne: [
+                                            {
+                                                $filter: {
+                                                    input: '$$consumerSurvey.personnel',
+                                                    as: 'personnel',
+                                                    cond: {
+                                                        $eq: [
+                                                            '$$personnel',
+                                                            personnelId,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            [],
+                                        ],
+                                    },
+                                ],
+                            },
+                            {
+                                $and: $locationsFilterConditions,
+                            },
+                        ],
+                    },
+                },
+            },
+        };
+    }
 
     const locations = ['country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch'];
 
