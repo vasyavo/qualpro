@@ -569,15 +569,12 @@ var CompetitorItem = function () {
                     {
                         $unwind: '$root',
                     },
-
                     {
                         $skip: skip,
                     },
-
                     {
                         $limit: limit,
                     },
-
                     {
                         $lookup: {
                             from: 'competitorItems',
