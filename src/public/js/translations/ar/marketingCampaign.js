@@ -4,7 +4,7 @@ var filtersTranslation = require('./filters');
 
 var brandingAndDisplayTranslation = {
     // top bar
-    all                : ' العلامات التجارية وتقارير العرض الخاصة بالعلالي ',
+    all                : 'حملة العلالي التسويقية والدعائية ',
     newBranding        : 'نشاط تسويقي جديد',
     // list
     startDate          : ' تاريخ البدء: ',

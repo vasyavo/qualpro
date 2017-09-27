@@ -1,4 +1,7 @@
-<% optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex] %>
+<%
+    var optionIndex = answer.optionIndex && answer.optionIndex.length ? answer.optionIndex : [answer.optionIndex];
+    var answerText = answer && answer.text && answer.text[currentLanguage] || answer.text && answer.text[anotherLanguage] || optionIndex.join(', ');
+%>
 <div id="respondent-answer-container-<%- answer._id %>" class="questionsList flexRowStretch noShrink borderBottom">
     <div class="questionsUser">
         <img src="/preview/<%= answer.personnel.imageSrc %>" alt="user logo" class="questionsUserImage"/>
@@ -12,7 +15,7 @@
     </div>
     <div class="questionsStatusBlock questionnaireMultiEllipsis noShrink">
         <div class="questionsStatus <%= question.type._id === 'fullAnswer' ? fullAnswerLabelClass : question.type._id === 'singleChoice' ? 'question' : ''%>">
-            <span id="answer-area-<%- answer._id %>" class="questionsCount"><%= answer && answer.text && answer.text[currentLanguage] || answer.text && answer.text[anotherLanguage] || optionIndex.join(', ') %></span>
+            <span id="answer-area-<%- answer._id %>" class="questionsCount" title="<%= answerText %>"><%= answerText %></span>
         </div>
     </div>
     <div class="<%= allowEdit ? '' : 'hidden' %>">
