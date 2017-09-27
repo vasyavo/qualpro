@@ -219,12 +219,6 @@ define([
 
                     App.filterCollections[self.parentContentType] = result;
 
-                    if (self.parentContentType === CONSTANTS.PERSONNELTASKS && keys.indexOf('time') !== -1) {
-                        var timePosition = keys.indexOf('time');
-                        if (timePosition !== -1) {
-                            keys.splice(timePosition, 1);
-                        }
-                    }
                     self.getValuesCollection(keys, selectedFilterName);
 
                     if (self.useFilterEventState) {
