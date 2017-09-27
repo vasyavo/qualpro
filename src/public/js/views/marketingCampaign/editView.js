@@ -42,7 +42,13 @@ define([
         fileTemplate         : _.template(FileTemplate),
         imageSrc             : '',
         updateCount          : 0,
-        ALLOWED_CONTENT_TYPES: _.union(CONSTANTS.IMAGE_CONTENT_TYPES, CONSTANTS.MS_WORD_CONTENT_TYPES, CONSTANTS.MS_EXCEL_CONTENT_TYPES, CONSTANTS.OTHER_FORMATS),
+        ALLOWED_CONTENT_TYPES: _.union(
+            CONSTANTS.IMAGE_CONTENT_TYPES,
+            CONSTANTS.MS_WORD_CONTENT_TYPES,
+            CONSTANTS.MS_EXCEL_CONTENT_TYPES,
+            CONSTANTS.MS_POWERPOINT_CONTENT_TYPES,
+            CONSTANTS.OTHER_FORMATS
+        ),
 
         events: {
             'click #assignDd'        : 'showPersonnelView',
