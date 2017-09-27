@@ -77,6 +77,7 @@ module.exports = function(app) {
     }
 
     app.use(express.static(path.join(config.workingDirectory, 'src/public/dist')));
+    app.use(express.static(path.join(config.workingDirectory, 'src/public/js/libs/malihu-custom-scrollbar-plugin')));
 
     // endpoint for handling api documents
     app.get('/docs', (req, res, next) => {

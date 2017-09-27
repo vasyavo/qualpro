@@ -16,9 +16,6 @@ require('malihu-custom-scrollbar-plugin');
 
 require('./requiredModules');
 
-//require styles for webpack build
-require('../styles');
-
 var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
 _.templateHelpers = {
