@@ -160,9 +160,12 @@ define([
                 currentConfig = LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level] ? LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level].preview : [];
             }
 
+            var newLabelClass = App.currentUser.currentLanguage === 'en' ? 'newBrand' : 'newBrandAr';
             formString = this.$el.html(this.template({
                 model      : jsonModel,
-                translation: this.translation
+                translation: this.translation,
+                brandNewLabelClass: jsonModel.brand.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
+                variantNewLabelClass: jsonModel.variant.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
             }));
 
             this.$el = formString.dialog({

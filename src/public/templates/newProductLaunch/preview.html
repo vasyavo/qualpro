@@ -25,7 +25,7 @@
                                 <span><%= translation.variant %></span>
                             </div>
                             <div class="cell">
-                                <span id="variant" <%= model.variant.name.currentLanguage ? '' : 'class="newBrand"' %>><%=  model.variant.name.currentLanguage || model.variant.name %></span>
+                                <span id="variant" <%= variantNewLabelClass %>><%=  model.variant.name.currentLanguage || model.variant.name %></span>
                             </div>
                         </div>
                         <div class="row">
@@ -33,7 +33,7 @@
                                 <span><%= translation.brand %></span>
                             </div>
                             <div class="cell">
-                                <span id="brand" <%= model.brand.name.currentLanguage ? '' : 'class="newBrand"' %>><%=  model.brand.name.currentLanguage || model.brand.name %></span>
+                                <span id="brand" <%= brandNewLabelClass %>><%=  model.brand.name.currentLanguage || model.brand.name %></span>
                             </div>
                         </div>
                         <div class="row">
