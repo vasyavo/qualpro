@@ -663,7 +663,7 @@ module.exports = BaseView.extend({
         var files;
         var change;
         this.checkForEmptyInput(this.files, this.$el);
-debugger;
+
         files = this.files.toJSON();
         attachments = _.pluck(model.attachments, '_id');
         selectedFiles = _.where(files, {selected: true});

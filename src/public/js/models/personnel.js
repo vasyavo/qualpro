@@ -72,9 +72,6 @@ module.exports = parent.extend({
             if (this.translatedFields.phoneNumber) {
                 validation.checkPhoneField(errors, true, attrs.phoneNumber, this.translatedFields.phoneNumber);
             }
-            /*if (this.translatedFields.email) {
-                validation.checkEmailField(errors, true, attrs.email, this.translatedFields.email);
-            }*/
         }
 
         if (!tempEmployee) {

@@ -207,16 +207,23 @@ var checkNameField = function (errorArray, required, fieldValue, fieldName) {
             return;
         }
         keys.forEach(function (key) {
+            if (!fieldValue[key]) {
+                errorArray.push([fieldName, errorMessages[languageKey].requiredMsg].join(' '));
+                return;
+            }
             if (hasInvalidChars(fieldValue[key])) {
                 nameErrors.push([fieldName, errorMessages[languageKey].invalidCharsMsg].join(' '));
+                errorArray.push([fieldName, errorMessages[languageKey].invalidCharsMsg].join(' '));
                 return;
             }
             if (fieldValue[key].length < MIN_LENGTH) {
                 nameErrors.push([fieldName, errorMessages[languageKey].minLengthMsg(MIN_LENGTH)].join(' '));
+                errorArray.push([fieldName, errorMessages[languageKey].minLengthMsg(MIN_LENGTH)].join(' '));
                 return;
             }
             if (!validateName(fieldValue[key])) {
                 nameErrors.push([fieldName, errorMessages[languageKey].userName].join(' '));
+                errorArray.push([fieldName, errorMessages[languageKey].userName].join(' '));
             }
         });
 
