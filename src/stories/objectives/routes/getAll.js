@@ -2570,7 +2570,7 @@ module.exports = (req, res, next) => {
                 let pipeline;
 
                 if (isMobile) {
-                    const pipeline = [
+                    pipeline = [
                         {
                             $match: queryObject,
                         },
