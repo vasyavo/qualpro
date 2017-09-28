@@ -324,11 +324,11 @@ var ShelfShareHandler = function () {
 
             delete filter.globalSearch;
 
-            queryObject = query.filter ? filterMapper.mapFilter({
+            queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.SHELFSHARES,
                 filter     : filter,
                 personnel  : personnel
-            }) : {};
+            });
 
             if (queryObject.brand) {
                 brandFilter = queryObject.brand;

@@ -136,7 +136,7 @@ var Contract = function () {
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'documents',
             key          : 'documents',
-            addProjection: ['createdBy', 'title', 'attachment', 'preview']
+            addProjection: ['title', 'attachment', 'preview']
         }));
 
         pipeLine.push({
@@ -149,7 +149,6 @@ var Contract = function () {
         pipeLine.push({
             $addFields: {
                 documents : {
-                    createdBy: '$documents.createdBy.user',
                     title: '$documents.title',
                     attachment: '$documents.attachment',
                     preview: '$documents.preview',
@@ -174,7 +173,6 @@ var Contract = function () {
                     _id        : 1,
                     title      : 1,
                     contentType: 1,
-                    createdBy  : 1,
                     preview: 1,
                 }
             }

@@ -22,22 +22,11 @@ module.exports = (options) => {
     const coveredIds = options.coveredIds;
     const pipeline = [];
     const currentUserLevel = options.currentUserLevel;
+    const locations = ['country', 'region', 'subRegion', 'branch'];
 
-    const matchForLocation = () => {
-        let locations = _.pick(personelObj, ['country', 'region', 'subRegion', 'branch']);
-        let locationKeys = Object.keys(locations);
-        let matchForLocation = {};
-
-        locationKeys.forEach(function (key) {
-            if (locations[key] && locations[key].length) {
-                const locationArray = locations[key].map((id) => ObjectId(id));
-
-                matchForLocation[key] = {$in: locationArray};
-            }
-        });
-
-        return matchForLocation;
-    };
+    if (personelObj.accessRole.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
+        locations.pop();
+    }
 
     if (parentIds && parentIds.length) {
         pipeline.push({
@@ -95,6 +84,40 @@ module.exports = (options) => {
         });
     }
 
+    const $locationMatch = {
+        $and: [],
+    };
+
+    locations.forEach((location) => {
+        if (personelObj[location] && personelObj[location].length && !queryObject[location]) {
+            $locationMatch.$and.push({
+                $or: [
+                    {
+                        [location]: { $in: personelObj[location] },
+                    },
+                    {
+                        [location]: { $eq: [] },
+                    },
+                    {
+                        [location]: { $eq: null },
+                    },
+                    {
+                        assignedTo: { $in: subordinates },
+                    },
+                    {
+                        'createdBy.user': { $eq: personelObj._id },
+                    },
+                ],
+            });
+        }
+    });
+
+    if ($locationMatch.$and.length) {
+        pipeline.push({
+            $match: $locationMatch,
+        });
+    }
+
     pipeline.push({
         $match: {
             $or: [
@@ -102,10 +125,6 @@ module.exports = (options) => {
                 {archived: {$exists: false}},
             ],
         },
-    });
-
-    pipeline.push({
-        $match: matchForLocation(),
     });
 
     if (isMobile) {

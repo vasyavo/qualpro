@@ -19,30 +19,19 @@ module.exports = (options) => {
     const filterSearch = options.filterSearch;
     const currentUserLevel = options.currentUserLevel;
     const personelObj = options.personnel;
+    const locations = ['country', 'region', 'subRegion', 'branch'];
+
+    if (personelObj.accessRole.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
+        locations.pop();
+    }
 
     let pipeLine = [];
-
-    const matchForLocation = () => {
-        let locations = _.pick(personelObj, ['country', 'region', 'subRegion', 'branch']);
-        let locationKeys = Object.keys(locations);
-        let matchForLocation = {};
-
-        locationKeys.forEach(function (key) {
-            if (locations[key] && locations[key].length) {
-                const locationArray = locations[key].map((id) => ObjectId(id));
-
-                matchForLocation[key] = {$in: locationArray};
-            }
-        });
-
-        return matchForLocation;
-    };
 
     pipeLine.push({
         $match: queryObject,
     });
 
-    if (currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+    /*if (currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
         const allowedAccessRoles = [
             ACL_CONSTANTS.COUNTRY_ADMIN,
             ACL_CONSTANTS.AREA_MANAGER,
@@ -72,7 +61,7 @@ module.exports = (options) => {
                 $match: {
                     $or: [
                         {
-                            assignedTo: {$in: coveredIds},
+                            assignedTo: {$in/!**!/: coveredIds},
                             status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
                         },
                         {
@@ -86,7 +75,7 @@ module.exports = (options) => {
                 },
             });
         }
-    }
+    }*/
 
     pipeLine.push({
         $match: {
@@ -97,9 +86,39 @@ module.exports = (options) => {
         },
     });
 
-    pipeLine.push({
-        $match: matchForLocation(),
+    const $locationMatch = {
+        $and: [],
+    };
+
+    locations.forEach((location) => {
+        if (personelObj[location] && personelObj[location].length && !queryObject[location]) {
+            $locationMatch.$and.push({
+                $or: [
+                    {
+                        [location]: {$in: personelObj[location]},
+                    },
+                    {
+                        [location]: {$eq: []},
+                    },
+                    {
+                        [location]: {$eq: null},
+                    },
+                    {
+                        assignedTo: {$in: subordinates},
+                    },
+                    {
+                        'createdBy.user': {$eq: personelObj._id},
+                    },
+                ],
+            });
+        }
     });
+
+    if ($locationMatch.$and.length) {
+        pipeLine.push({
+            $match: $locationMatch,
+        });
+    }
 
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from         : 'personnels',
