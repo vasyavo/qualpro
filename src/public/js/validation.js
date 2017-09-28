@@ -872,6 +872,31 @@ var checkMultiLanguageField = function (errorArray, required, enFieldValue, arFi
     }
 };
 
+var checkQuestionOptionField = function (errorArray, required, fieldValue, fieldName) {
+    var languageKey = App.currentUser.currentLanguage;
+    var isObject = typeof fieldValue === 'object';
+    var keys = fieldValue && isObject ? Object.keys(fieldValue) : [];
+    var titleErrors = [];
+    if (required && isObject) {
+        if (!fieldValue || !keys.length) {
+            errorArray.push([fieldName, errorMessages[languageKey].requiredMsg].join(' '));
+            return;
+        }
+        keys.forEach(function (key) {
+            if (fieldValue[key].length < MIN_LENGTH) {
+                titleErrors.push(2);
+            }
+        });
+        if (titleErrors.length === 2) {
+            errorArray.push([fieldName, errorMessages[languageKey].requiredMsg].join(' '));
+        }
+    } else {
+        if (!fieldValue) {
+            errorArray.push([fieldName, errorMessages[languageKey].requiredMsg].join(' '));
+        }
+    }
+};
+
 module.exports = {
     comparePasswords          : comparePasswords,
     checkPasswordField        : checkPasswordField,
@@ -908,5 +933,6 @@ module.exports = {
     checkForValuePresence     : checkForValuePresence,
     checkForValidMongoId      : checkForValidMongoId,
     checkTitleField           : checkTitleField,
+    checkQuestionOptionField: checkQuestionOptionField,
     hasInvalidChars : hasInvalidChars
 };

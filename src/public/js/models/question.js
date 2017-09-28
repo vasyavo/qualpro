@@ -1,6 +1,5 @@
 var parent = require('./parrent');
 var validation = require('../validation');
-var App = require('../appState');
 
 module.exports = parent.extend({
 
@@ -15,7 +14,7 @@ module.exports = parent.extend({
     },
 
     validate: function (attrs, cb) {
-        var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
+        var that = this;
         var errors = [];
         var optionsRequired = (attrs.type !== 'fullAnswer' && attrs.type !== 'NPS');
 
@@ -26,12 +25,15 @@ module.exports = parent.extend({
             validation.checkForValuePresence(errors, true, attrs.type, this.translatedFields.type);
         }
         if (this.translatedFields.options && optionsRequired) {
-            validation.checkForValuePresence(errors, true, attrs.options.length, this.translatedFields.options);
+            attrs.options.forEach(function (value) {
+                validation.checkTitleField(errors, true, value, that.translatedFields.options);
+            });
         }
 
         if (errors.length > 0) {
             return cb(errors);
         }
+
         return cb(null);
     }
 });
