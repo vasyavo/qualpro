@@ -7,6 +7,7 @@ const addRequestId = require('express-request-id')();
 const config = require('./../config');
 const express = require('express');
 const proxy = require('http-proxy-middleware');
+const storePersonnelInMiddleware = require('../reusableComponents/storePersonnelInMiddleware');
 
 module.exports = function(app) {
     app.set('csrfProtection', csrfProtection);
@@ -89,7 +90,7 @@ module.exports = function(app) {
     app.post('/scheduler', require('./../stories/scheduler/middleware'));
 
     app.use(require('./../stories/user-registration'));
-
+    app.use(storePersonnelInMiddleware);
     app.use('/customReports', require('../stories/customReports/router'));
     app.use('/activityList', require('../stories/activityList/router'));
     app.use('/preview', require('../stories/preview/router'));

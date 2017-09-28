@@ -374,23 +374,6 @@ module.exports = function (currentUserId) {
             $and: {
                 type  : 'collection',
                 values: [{
-                    '$or'   : {
-                        type  : 'collection',
-                        values: [
-                            {
-                                'assignedTo': {
-                                    type  : 'ObjectId',
-                                    values: [currentUserId]
-                                }
-                            },
-                            {
-                                'createdBy.user': {
-                                    type  : 'ObjectId',
-                                    values: [currentUserId]
-                                }
-                            }
-                        ]
-                    },
                     'status': {
                         type  : 'string',
                         values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
@@ -400,22 +383,22 @@ module.exports = function (currentUserId) {
             }
         },
 
-        myCC : {
+        myCC: {
             $and: {
                 type  : 'collection',
                 values: [{
-                    'assignedTo': {
+                    'assignedTo'    : {
                         type  : 'ObjectId',
                         values: [currentUserId]
                     },
                     'createdBy.user': {
-                        type: 'ObjectId',
-                        values: [currentUserId],
+                        type   : 'ObjectId',
+                        values : [currentUserId],
                         options: {
                             $nin: 'true'
                         }
                     },
-                    'status': {
+                    'status'        : {
                         type   : 'string',
                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED, OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                         names  : ['Closed', 'Draft'],
@@ -609,14 +592,10 @@ module.exports = function (currentUserId) {
             $and: {
                 type  : 'collection',
                 values: [{
-                    'createdBy.user': {
-                        type  : 'ObjectId',
-                        values: [currentUserId]
-                    },
-                    'status'        : {
-                        type   : 'string',
-                        values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                        names  : ['Closed']
+                    'status': {
+                        type  : 'string',
+                        values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                        names : ['Closed']
                     }
                 }]
             }
@@ -626,23 +605,6 @@ module.exports = function (currentUserId) {
             $and: {
                 type  : 'collection',
                 values: [{
-                    '$or'   : {
-                        type  : 'collection',
-                        values: [
-                            {
-                                'assignedTo': {
-                                    type  : 'ObjectId',
-                                    values: [currentUserId]
-                                }
-                            },
-                            {
-                                'createdBy.user': {
-                                    type  : 'ObjectId',
-                                    values: [currentUserId]
-                                }
-                            }
-                        ]
-                    },
                     'status': {
                         type  : 'string',
                         values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
@@ -654,15 +616,15 @@ module.exports = function (currentUserId) {
 
         myCC: {
             $and: {
-                type: 'collection',
+                type  : 'collection',
                 values: [{
-                    'assignedTo': {
+                    'assignedTo'    : {
                         type  : 'ObjectId',
                         values: [currentUserId]
                     },
                     'createdBy.user': {
-                        type: 'ObjectId',
-                        values: [currentUserId],
+                        type   : 'ObjectId',
+                        values : [currentUserId],
                         options: {
                             $nin: 'true'
                         }
