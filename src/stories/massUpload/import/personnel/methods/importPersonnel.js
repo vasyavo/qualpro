@@ -291,17 +291,23 @@ function* createOrUpdate(payload) {
         throw new Error('Please specify email or phone number to identify personnel');
     }
 
-    if (email) {
-        if (!emailRegExp.test(email)) {
-            throw new Error(`Validation failed, email is not valid.`);
-        }
-
-        rawOpt.email = email;
-        query.email = email;
-    }
-
     if (phoneNumber && !phoneRegExp.test(phoneNumber)) {
         throw new Error(`Validation failed, phone number is not valid.`);
+    }
+
+    if (email && !emailRegExp.test(email)) {
+        throw new Error(`Validation failed, email is not valid.`);
+    }
+
+    if (email && phoneNumber) {
+        rawOpt.email = email;
+        rawOpt.phoneNumber = phoneNumber;
+        query.$or = [{ email }, { phoneNumber }];
+    }
+
+    if (email && !phoneNumber) {
+        rawOpt.email = email;
+        query.email = email;
     }
 
     if (!email && phoneNumber) {
