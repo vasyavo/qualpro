@@ -9,8 +9,6 @@ module.exports = function() {
     var csrfProtection = require('./../utils/csrfProtection');
     var checkAuth = access.checkAuth;
 
-    router.use(storePersonnelInMiddleware);
-
     router.use(require('../utils/redirectFilterMiddleware'));
 
     router.get('/priceSurvey', checkAuth,  handler.priceSurveyFilters);
