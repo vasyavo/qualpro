@@ -64,6 +64,7 @@ module.exports = paginator.extend({
             collection : jsonCollection,
             translation: this.translation,
             newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
+            App: App,
         }));
     },
 
