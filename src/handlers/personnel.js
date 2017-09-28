@@ -2538,7 +2538,7 @@ const Personnel = function () {
                 }
 
                 body.data.forEach((el) => {
-                    if (el.status !== 'onLeave' && ~onlineUsers.indexOf(el._id.toString())) {
+                    if (el.status !== 'onLeave' && ~onlineUsers.indexOf(el._id.toString()) && !el.archived) {
                         el.status = 'online';
                     }
                 });

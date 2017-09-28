@@ -134,14 +134,6 @@ var Contract = function () {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings: {createdBy: {date: 1}}
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from         : 'documents',
             key          : 'documents',
             addProjection: ['createdBy', 'title', 'attachment', 'preview']
@@ -154,30 +146,23 @@ var Contract = function () {
             }
         });
 
-        if (positionFilter) {
-            pipeLine.push({
-                $match: positionFilter
-            });
-        }
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'documents.createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'],
-            includeSiblings: {
-                documents: {
-                    _id        : 1,
-                    title      : 1,
-                    attachment : 1,
-                    contentType: 1,
-                    createdBy  : {
-                        date: 1
-                    },
-                    preview: 1,
+        pipeLine.push({
+            $addFields: {
+                documents : {
+                    createdBy: '$documents.createdBy.user',
+                    title: '$documents.title',
+                    attachment: '$documents.attachment',
+                    preview: '$documents.preview',
                 }
             }
-        }));
+        });
+
+        pipeLine.push({
+            $addFields: {
+                createdBy : '$createdBy.user',
+                editedBy : '$editedBy.user'
+            }
+        });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from           : 'files',
@@ -189,10 +174,7 @@ var Contract = function () {
                     _id        : 1,
                     title      : 1,
                     contentType: 1,
-                    createdBy  : {
-                        date: 1,
-                        user: 1
-                    },
+                    createdBy  : 1,
                     preview: 1,
                 }
             }
@@ -203,91 +185,6 @@ var Contract = function () {
                 documents: {$addToSet: '$documents'}
             })
         });
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id      : 1,
-                        position : 1,
-                        firstName: 1,
-                        lastName : 1,
-                        imageSrc: 1,
-                    }
-                }
-            }
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
-            includeSiblings: {
-                createdBy: {
-                    date: 1,
-                    user: {
-                        _id       : 1,
-                        accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1,
-                        imageSrc: 1,
-                    }
-                }
-            }
-        }));
-
-        if (isMobile) {
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-                includeSiblings: {editedBy: {date: 1}}
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id      : 1,
-                            position : 1,
-                            firstName: 1,
-                            lastName : 1,
-                            imageSrc: 1,
-                        }
-                    }
-                }
-            }));
-
-            pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
-                includeSiblings: {
-                    editedBy: {
-                        date: 1,
-                        user: {
-                            _id       : 1,
-                            accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1,
-                            imageSrc: 1,
-                        }
-                    }
-                }
-            }));
-        }
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
             isMobile         : isMobile,
