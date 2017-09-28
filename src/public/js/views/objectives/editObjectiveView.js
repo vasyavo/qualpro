@@ -1184,12 +1184,6 @@ module.exports = BaseView.extend({
                     }
                 }
             },
-            cancel : {
-                text : 'Cancel',
-                click : function () {
-                    self.remove();
-                }
-            }
         };
 
         if (this.duplicate) {

@@ -508,7 +508,6 @@ module.exports = BaseView.extend({
 
     editObjective: function () {
         this.off('change');
-        this.$el.dialog('destroy');
         this.trigger('showEditObjectiveDialog', this.model);
     },
 

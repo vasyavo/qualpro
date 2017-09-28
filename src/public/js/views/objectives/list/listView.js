@@ -101,7 +101,6 @@ module.exports = paginator.extend({
                     self.collection.add(model, {merge: true});
                     self.addReplaceRow(model);
                 });
-
             });
         }
     },
