@@ -20,7 +20,6 @@ module.exports = parent.extend({
 
     validate: function (attrs, cb) {
         var errors = [];
-        var currentLanguage = App && App.currentUser && App.currentUser.currentLanguage ? App.currentUser.currentLanguage : 'en';
 
         if (this.translatedFields.title) {
             validation.checkTitleField(errors, true, attrs.title, this.translatedFields.title);
