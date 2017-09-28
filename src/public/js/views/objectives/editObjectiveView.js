@@ -1206,7 +1206,8 @@ module.exports = BaseView.extend({
         formString = this.template({
             jsonModel: jsonModel,
             linkedForm: this.linkedForm,
-            translation: this.translation
+            translation: this.translation,
+            App: App,
         });
 
         this.$el = $(formString).dialog({
