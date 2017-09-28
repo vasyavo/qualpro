@@ -101,9 +101,9 @@ module.exports = (req, res, next) => {
         });
 
         const aggregateHelper = new AggregationHelper($defProjection);
-        const isMasterAdmin = [aclRolesNames.MASTER_ADMIN].includes(personnel.accessRole.level);
+        const isAdmin = [aclRolesNames.MASTER_ADMIN, aclRolesNames.TRADE_MARKETER].includes(personnel.accessRole.level);
 
-        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id, isMasterAdmin));
+        pipeline.push(...filterByPersonnelAndLocation(queryObject, personnel._id, isAdmin));
 
         if (personnelFilter) {
             pipeline.push({
