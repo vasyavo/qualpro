@@ -7,11 +7,10 @@ var DomainThumbnailsView = require('../views/domain/thumbnailsForSelection');
 var CONTENT_TYPES = require('../constants/contentType');
 var PERSONNEL_LOCATION_FLOW = require('../constants/personnelLocationFlow');
 var STATUSES = require('../constants/personnelStatuses');
-var dataService = require('../dataService');
 var custom = require('../custom');
 var ERROR_MESSAGES = require('../constants/errorMessages');
-var ACL_ROLE_INDEXES = require('../constants/aclRoleIndexes');
 var App = require('../appState');
+var requireContent = require('../helpers/requireContent');
 
 var types = [
     CONTENT_TYPES.COUNTRY,
@@ -300,11 +299,8 @@ var createPersonnelViewLogic = function (context) {
             var view = self.view;
             var $currentDomainA = this['$' + domainType];
             var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
-            var translationsUrl = '../translations/' + currentLanguage + '/' + domainType;
-            var url = '../collections/' + domainType + '/collection';
             var dataId = $currentDomainA.attr('data-id');
             var currentDomains = dataId !== '' ? dataId.split(',') : [];
-            var collection;
             var $prevDomainA;
             var parentId;
             var locationFlow = PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel];
@@ -327,8 +323,8 @@ var createPersonnelViewLogic = function (context) {
                 parentId = $prevDomainA.attr('data-id');
             }
 
-            var Collection = require(url);
-            var translation = require(translationsUrl);
+            var Collection = requireContent(domainType + '.collection');
+            var translation = requireContent(domainType + '.translation.' + currentLanguage);
 
             var subRegionsId;
             var creationOptions = {
