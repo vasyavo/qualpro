@@ -211,7 +211,10 @@ module.exports = Backbone.View.extend({
         }
         $curEl.find('#currentLanguageInput').prop('checked', state);
 
-        $holder.html(this.descriptionTemplate(currentUser));
+        $holder.html(this.descriptionTemplate({
+            user: currentUser,
+            currentLanguage: currentLanguage,
+        }));
     },
 
     render: function () {

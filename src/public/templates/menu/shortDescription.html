@@ -1,7 +1,7 @@
 <div class="avatarHeader">
-    <img class="avatarImage" src="/preview/<%= imageSrc %>" />
+    <img class="avatarImage" src="/preview/<%= user.imageSrc %>" />
 </div>
 <div id="personnelDescription" class="personnelDescription">
-    <span id="personnelName" class="personnelName"><%= firstName.currentLanguage + ' ' + lastName.currentLanguage %></span><br/>
-    <span id="personnelJobposition" class="personnelJobposition"><%= (position && position.name) ? (position.name.currentLanguage || '') : '' %></span>
+    <span id="personnelName" class="personnelName"><%= user.firstName[currentLanguage] + ' ' + user.lastName[currentLanguage] %></span><br/>
+    <span id="personnelJobposition" class="personnelJobposition"><%= (user.position && user.position.name) ? user.position.name[currentLanguage] : '' %></span>
 </div>
