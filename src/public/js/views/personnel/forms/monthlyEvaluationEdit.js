@@ -8,6 +8,7 @@ var custom = require('../../../custom');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var validation = require('../../../validation');
 var App = require('../../../appState');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseDialog.extend({
     contentType  : 'monthly',
@@ -42,9 +43,6 @@ module.exports = BaseDialog.extend({
         var context = $(e.currentTarget).attr('data-content');
 
         var missingPreviews = ['branch', 'competitorsList', 'country', 'itemsPrices', 'outlet', 'region', 'retailSegment', 'subRegion'];
-        var translationUrl;
-        var targetModelUrl;
-        var preViewUrl;
 
         if (object) {
             if (!object.type) {
@@ -57,13 +55,9 @@ module.exports = BaseDialog.extend({
         e.stopPropagation();
 
         if (object && (missingPreviews.indexOf(object.context) === -1)) {
-            translationUrl = '../../../translations/' + App.currentUser.currentLanguage + '/' + object.context;
-            targetModelUrl = '../../../models/' + object.context;
-            preViewUrl = '../../../views/' + object.context + '/preView/preView';
-
-            var translation = require(translationUrl);
-            var TargetModel = require(targetModelUrl);
-            var PreView = require(preViewUrl);
+            var translation = requireContent(object.context + '.translation.' + App.currentUser.currentLanguage);
+            var TargetModel = requireContent(object.context + '.model');
+            var PreView = requireContent(object.context + '.views.preview');
 
             var itemModel = new TargetModel({_id: modelId});
             itemModel.on('sync', function (prettyModel) {
