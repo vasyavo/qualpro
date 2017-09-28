@@ -14,10 +14,10 @@ define([
             var result = self[contentType][tabsName];
             var level = App.currentUser.accessRole.level;
             const isAdmin = [
-                ACL_INDEXES.COUNTRY_ADMIN,
-                ACL_INDEXES.AREA_MANAGER,
-                ACL_INDEXES.AREA_IN_CHARGE
-            ].indexOf(level) !== -1;
+                    ACL_INDEXES.COUNTRY_ADMIN,
+                    ACL_INDEXES.AREA_MANAGER,
+                    ACL_INDEXES.AREA_IN_CHARGE
+                ].indexOf(level) !== -1;
 
             var condition = level === 1
                 && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS)
@@ -27,7 +27,7 @@ define([
                 result = self[contentType][tabsName + 'MA'];
             }
 
-            if (isAdmin && tabsName === 'all' && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS) ) {
+            if (isAdmin && tabsName === 'all' && (contentType === CONTENT_TYPES.OBJECTIVES || contentType === CONTENT_TYPES.INSTORETASKS)) {
                 result = {
                     tabName: 'all'
                 };
@@ -225,12 +225,12 @@ define([
                     type  : 'collection',
                     values: [{
                         /*status: {
-                            type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
-                            options: {$nin: 'true'}
-                        },*/
-                        $nor  : {
+                         type   : 'string',
+                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                         names  : ['Closed'],
+                         options: {$nin: 'true'}
+                         },*/
+                        $nor: {
                             type  : 'collection',
                             values: [{
                                 'createdBy.user': {
@@ -254,12 +254,12 @@ define([
                     type  : 'collection',
                     values: [{
                         /*status: {
-                            type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
-                            options: {$nin: 'true'}
-                        },*/
-                        $or   : {
+                         type   : 'string',
+                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                         names  : ['Closed'],
+                         options: {$nin: 'true'}
+                         },*/
+                        $or: {
                             type  : 'collection',
                             values: [
                                 {
@@ -377,23 +377,6 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        '$or'   : {
-                            type  : 'collection',
-                            values: [
-                                {
-                                    'assignedTo': {
-                                        type  : 'ObjectId',
-                                        values: [currentUserId]
-                                    }
-                                },
-                                {
-                                    'createdBy.user': {
-                                        type  : 'ObjectId',
-                                        values: [currentUserId]
-                                    }
-                                }
-                            ]
-                        },
                         'status': {
                             type  : 'string',
                             values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
@@ -403,22 +386,22 @@ define([
                 }
             },
 
-            myCC : {
+            myCC: {
                 $and: {
                     type  : 'collection',
                     values: [{
-                        'assignedTo': {
+                        'assignedTo'    : {
                             type  : 'ObjectId',
                             values: [currentUserId]
                         },
                         'createdBy.user': {
-                            type: 'ObjectId',
-                            values: [currentUserId],
+                            type   : 'ObjectId',
+                            values : [currentUserId],
                             options: {
                                 $nin: 'true'
                             }
                         },
-                        'status': {
+                        'status'        : {
                             type   : 'string',
                             values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED, OTHER_CONSTANTS.OBJECTIVE_STATUSES.DRAFT],
                             names  : ['Closed', 'Draft'],
@@ -436,12 +419,12 @@ define([
                     type  : 'collection',
                     values: [{
                         /*status: {
-                            type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
-                            options: {$nin: 'true'}
-                        },*/
-                        $nor  : {
+                         type   : 'string',
+                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                         names  : ['Closed'],
+                         options: {$nin: 'true'}
+                         },*/
+                        $nor: {
                             type  : 'collection',
                             values: [
                                 {
@@ -467,12 +450,12 @@ define([
                     type  : 'collection',
                     values: [{
                         /*status: {
-                            type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed'],
-                            options: {$nin: 'true'}
-                        },*/
-                        $or   : {
+                         type   : 'string',
+                         values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                         names  : ['Closed'],
+                         options: {$nin: 'true'}
+                         },*/
+                        $or: {
                             type  : 'collection',
                             values: [
                                 {
@@ -612,14 +595,10 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        'createdBy.user': {
-                            type  : 'ObjectId',
-                            values: [currentUserId]
-                        },
-                        'status'        : {
-                            type   : 'string',
-                            values : [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
-                            names  : ['Closed']
+                        'status': {
+                            type  : 'string',
+                            values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
+                            names : ['Closed']
                         }
                     }]
                 }
@@ -629,23 +608,6 @@ define([
                 $and: {
                     type  : 'collection',
                     values: [{
-                        '$or'   : {
-                            type  : 'collection',
-                            values: [
-                                {
-                                    'assignedTo': {
-                                        type  : 'ObjectId',
-                                        values: [currentUserId]
-                                    }
-                                },
-                                {
-                                    'createdBy.user': {
-                                        type  : 'ObjectId',
-                                        values: [currentUserId]
-                                    }
-                                }
-                            ]
-                        },
                         'status': {
                             type  : 'string',
                             values: [OTHER_CONSTANTS.OBJECTIVE_STATUSES.CLOSED],
@@ -657,15 +619,15 @@ define([
 
             myCC: {
                 $and: {
-                    type: 'collection',
+                    type  : 'collection',
                     values: [{
-                        'assignedTo': {
+                        'assignedTo'    : {
                             type  : 'ObjectId',
                             values: [currentUserId]
                         },
                         'createdBy.user': {
-                            type: 'ObjectId',
-                            values: [currentUserId],
+                            type   : 'ObjectId',
+                            values : [currentUserId],
                             options: {
                                 $nin: 'true'
                             }
