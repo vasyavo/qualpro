@@ -548,7 +548,7 @@ var CompetitorItem = function () {
                 'variant.name.en',
                 'variant.name.ar',
             ];
-            if (isMobile || limit === -1) {
+            if (isMobile) {
                 pipeLine = [
                     {
                         $match: queryObject,
