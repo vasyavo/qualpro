@@ -113,7 +113,8 @@ module.exports = baseDialog.extend({
                     fromTopMenu : self.fromTopMenu,
                     translation : self.translation,
                     hideButtons : self.hideButtons,
-                    activityList: self.activityList
+                    activityList: self.activityList,
+                    App: App,
                 }));
 
                 common.canvasDrawing({

@@ -5,7 +5,6 @@ var Communication = require('./communication');
 var Custom = require('./custom');
 var App = require('./appState');
 
-require('./helpers/underscoreTemplateHelper');
 require('ckeditor');
 require('ckeditor/adapters/jquery');
 require('jquery-mousewheel');
@@ -17,10 +16,6 @@ require('malihu-custom-scrollbar-plugin');
 
 // import all dependencies - required by webpack
 require('./requiredModules');
-
-_.addTemplateHelpers({
-    App: App,
-});
 
 var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
 
