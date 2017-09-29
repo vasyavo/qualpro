@@ -412,7 +412,7 @@ module.exports = BaseView.extend({
 
         if (form.contentType === 'distribution') {
             this.distributionForm = new DistributionForm({
-                id: id,
+                id: form._id,
                 translation: this.translation
             });
         } else {

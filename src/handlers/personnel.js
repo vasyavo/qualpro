@@ -1504,6 +1504,7 @@ const Personnel = function () {
                     ACL_CONSTANTS.SALES_MAN,
                     ACL_CONSTANTS.MERCHANDISER,
                     ACL_CONSTANTS.CASH_VAN,
+                    ACL_CONSTANTS.PROMOTER,
                 ];
                 const notAllowedLevelsMobile = [
                 ];
