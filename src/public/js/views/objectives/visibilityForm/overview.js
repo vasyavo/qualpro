@@ -445,7 +445,7 @@ module.exports = Backbone.View.extend({
             enableDrag: false,
             adaptiveHeight: true,
             enableTouch: true,
-            rtl: true
+            rtl: App.currentUser.currentLanguage === 'en',
         });
 
         this.delegateEvents(this.events);
