@@ -1,6 +1,8 @@
 var $ = require('jquery');
 var _ = require('underscore');
 var d3 = require('d3');
+var randomColor = require('randomcolor');
+var DiagramHolderTemplate = require('../../../../templates/questionnary/diagram-holder.html');
 var PreViewTemplate = require('../../../../templates/questionnary/preview.html');
 var QuestionListTemplate = require('../../../../templates/questionnary/questionList.html');
 var RespondentsListTemplate = require('../../../../templates/questionnary/respondentsList.html');
@@ -18,6 +20,8 @@ var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
 var requireContent = require('../../../helpers/requireContent');
+
+require('chart.js');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.QUESTIONNARIES,
@@ -134,36 +138,33 @@ module.exports = BaseView.extend({
     },
 
     renderDiagram: function (questionId) {
+        var questionsDiagramHolder = this.$el.find('#questionsDiagram');
         var question = _.findWhere(this.model.get('questions'), {_id: questionId});
-        var options;
-        var optionsCountArray = [];
-        var displayText = [];
-        var outerRadius = 80;
-        var innerRadius = 45;
-        var pie = d3.layout.pie();
-        var color = d3.scale.category20c();
-        var percentArray = [];
-        var horizontalLinePoints = [];
-        var self = this;
-        var svg;
-        var arc;
-        var arcs;
-        var sum = 0;
-        var outerArc;
-        var $questionsDiagram = this.$el.find('#questionsDiagram');
-
-        $questionsDiagram.html('');
 
         if (['fullAnswer', 'multiChoice'].indexOf(question.type._id) !== -1) {
+            questionsDiagramHolder.html('');
             return false;
         }
 
-        options = question.options;
+        var that = this;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var backgroundColors = [];
+        var answersCount = [];
+        var labels = [];
+        var sum = 0;
+
+        var options = question.options;
         options.forEach(function (option, index) {
-            var answerCount = self.answersCollection.getAnswerCount(questionId, index);
+            var answerCount = that.answersCollection.getAnswerCount(questionId, index);
             if (answerCount != 0) {
-                optionsCountArray.push(answerCount);
-                displayText.push(option.currentLanguage);
+                answersCount.push(answerCount);
+                labels.push(option[currentLanguage]);
+                backgroundColors.push(
+                    randomColor({
+                        luminosity: 'bright',
+                        format: 'rgb',
+                    })
+                );
                 sum += answerCount;
             }
         });
@@ -172,247 +173,21 @@ module.exports = BaseView.extend({
             return false;
         }
 
-        optionsCountArray.forEach(function (optionCount) {
-            percentArray.push((optionCount * 100 / sum).toFixed(2));
+        questionsDiagramHolder.html(DiagramHolderTemplate);
+
+        var diagramCanvasElement = questionsDiagramHolder.find('#diagram');
+
+        new Chart(diagramCanvasElement, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: answersCount,
+                    backgroundColor: backgroundColors,
+                    label: 'Dataset',
+                }],
+            },
         });
-
-        svg = d3.select($questionsDiagram[0]).append('svg').attr({
-            width : '160px',
-            height: '160px'
-        }).style({
-            margin  : '0 auto',
-            display : 'block',
-            overflow: 'visible'
-        });
-
-        outerArc = d3.svg.arc()
-            .innerRadius(outerRadius + 30)
-            .outerRadius(outerRadius + 30);
-
-        arc = d3.svg.arc()
-            .innerRadius(innerRadius)
-            .outerRadius(outerRadius);
-
-        arcs = svg.selectAll('g.arc')
-            .data(pie(optionsCountArray))
-            .enter()
-            .append('g')
-            .attr({
-                class    : 'arc',
-                transform: 'translate(' + outerRadius + ',' + outerRadius + ')'
-            });
-
-        arcs.append('path')
-            .attr({
-                fill: function (d, i) {
-                    return color(i);
-                },
-                d   : arc
-            });
-
-        rect = arcs.append("rect").attr({
-            x: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                x = Math.cos(midAngle) * 110;
-                sign = (x > 0) ? 1 : -1;
-                labelX = x + (5 * sign);
-                if(centroid[0] > 0) {
-                    return labelX;
-                }
-                return labelX - 140;
-            },
-            y: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                y = Math.sin(midAngle) * 110 -30;
-                return y + 12;
-            },
-            width    : 16,
-            height   : 16,
-            fill     : function (d, i) {
-                return color(i);
-            }
-        });
-
-        rectNumber = arcs.append('text').attr({
-            x: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                x = Math.cos(midAngle) * 110;
-                sign = (x > 0) ? 1 : -1;
-                labelX = x + (5 * sign);
-                if(centroid[0] > 0) {
-                    return labelX + 8;
-                }
-                return labelX - 140 + 8;
-            },
-            y: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                y = Math.sin(midAngle) * 110 -30;
-                return y + 22;
-            },
-            "text-anchor": 'middle',
-            "font-size"  : '12px',
-            "fill"       : "#fff"
-        }).text(function (d, i) {
-            return i + 1;
-        });
-
-        percent = arcs.append('text').attr({
-            x: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                x = Math.cos(midAngle) * 110;
-                sign = (x > 0) ? 1 : -1;
-                labelX = x + (5 * sign);
-                if(centroid[0] > 0) {
-                    return labelX + 40;
-                }
-                return labelX - 140 + 40;
-            },
-            y: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                y = Math.sin(midAngle) * 110 -30;
-                return y + 22;
-            },
-            "text-anchor": 'middle',
-            "font-size"  : '12px',
-            "font-weight": 'bold'
-        }).text(function (d, i) {
-            return percentArray[i] + '%';
-        });
-
-        optionsCount = arcs.append('text').attr({
-            x: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                x = Math.cos(midAngle) * 110;
-                sign = (x > 0) ? 1 : -1;
-                labelX = x + (5 * sign);
-                if(centroid[0] > 0) {
-                    return labelX + 72;
-                }
-                return labelX - 140 + 72;
-            },
-            y: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                y = Math.sin(midAngle) * 110 -30;
-                return y + 22;
-            },
-            "text-anchor": 'middle',
-            "font-size"  : '12px'
-        }).text(function (d, i) {
-            return ' ( ' + optionsCountArray[i] + ' )';
-        });
-
-        textLabels = arcs.append("text").attr({
-            x: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                x = Math.cos(midAngle) * 110;
-                sign = (x > 0) ? 1 : -1;
-                labelX = x + (5 * sign);
-                if(centroid[0] > 0) {
-                    return labelX;
-                }
-                return labelX - 145;
-            },
-            y: function (d) {
-                centroid = arc.centroid(d);
-                midAngle = Math.atan2(centroid[1], centroid[0]);
-                y = Math.sin(midAngle) * 110;
-                return y + 10;
-            },
-            'text-anchor': 'start',
-            "font-size"  : '12px',
-            'font-style' : 'italic'
-        }).text(function (d, i) {
-            return displayText[i].capitalizer('firstCaps');
-        });
-
-        textLines = arcs.append("polyline")
-            .style({
-                fill          : 'none',
-                stroke        : 'black',
-                'stroke-width': 1
-            }).attr({
-            points: function (d, i) {
-                var startPoint = arc.centroid(d);
-                var endPoint = outerArc.centroid(d);
-                var horizontalLinePoint;
-
-                if (endPoint[0] > 0) {
-                    horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
-                } else {
-                    horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
-                }
-
-                horizontalLinePoints.push(horizontalLinePoint);
-
-                return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
-            },
-            'class': "label-line",
-            "fill" : "#000",
-            "stroke": '#393939'
-        });
-
-        alpha = 0.5;
-        spacing = 40;
-
-        function push() {
-            again = false;
-            textLabels.each(function (d) {
-                a = this;
-                da = d3.select(a);
-                y1 = da.attr("y");
-                textLabels.each(function (d) {
-                    b = this;
-                    if (a == b) return;
-                    db = d3.select(b);
-                    if (da.attr("text-anchor") != db.attr("text-anchor")) return;
-                    if (da.attr("x") < 0 && db.attr("x") > 0 || da.attr("x") > 0 && db.attr("x") < 0) return;
-                    y2 = db.attr("y");
-                    deltaY = y1 - y2;
-
-                    if (Math.abs(deltaY) > spacing) return;
-
-                    again = true;
-                    sign = deltaY > 0 ? 1 : -1;
-                    adjust = sign * alpha;
-                    da.attr("y",+y1 + adjust);
-                    db.attr("y",+y2 - adjust);
-                });
-            });
-            if(again) {
-                labelElements = textLabels[0];
-                textLines.attr("y2",function(d, i) {
-                    labelForLine = d3.select(labelElements[i]);
-                    return labelForLine.attr("y");
-                });
-                rect.attr("y", function (d, i) {
-                    labelForLine = d3.select(labelElements[i]);
-                    return labelForLine.attr("y") - 28;
-                });
-                rectNumber.attr("y", function (d, i) {
-                    labelForLine = d3.select(labelElements[i]);
-                    return labelForLine.attr("y") - 16;
-                });
-                percent.attr("y", function (d, i) {
-                    labelForLine = d3.select(labelElements[i]);
-                    return labelForLine.attr("y") - 16;
-                });
-                optionsCount.attr("y", function (d, i) {
-                    labelForLine = d3.select(labelElements[i]);
-                    return labelForLine.attr("y") - 16;
-                });
-                setTimeout(push, 10)
-            }
-        }
-        push();
     },
 
     renderFullRespondentsList: function () {
