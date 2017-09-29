@@ -315,12 +315,12 @@ module.exports = BaseView.extend({
         this.body.startDate = startDate ? moment.utc(startDate, 'DD.MM.YYYY').toISOString() : null;
         this.body.questions = $questionsRows.length;
         this.setLocations();
-        if (this.edit && this.model) {
+        /*if (this.edit && this.model) {
             this.body.location = {
                 en: 'Location',
                 ar: 'Location'
             };
-        }
+        }*/
         this.model.setFieldsNames(this.translation, this.body);
         this.model.validate(this.body, function (err) {
             if (err && err.length) {
@@ -382,9 +382,9 @@ module.exports = BaseView.extend({
                 if (self.body.title === model.title) {
                     delete self.body.title;
                 }
-                if (self.edit && model) {
+                /*if (self.edit && model) {
                     delete self.body.location;
-                }
+                }*/
             }
 
             if (!Object.keys(self.body).length && !options.send) {
