@@ -191,6 +191,8 @@ module.exports = BaseView.extend({
 
         $checkbox.remove();
 
+        this.changeValue();
+
         this.showHideButtons({
             add   : true,
             delete: false
@@ -343,9 +345,6 @@ module.exports = BaseView.extend({
                 }
                 if (editDate === model.dueDate) {
                     delete self.body.dueDate;
-                }
-                if (self.body.title === model.title) {
-                    delete self.body.title;
                 }
                 if (self.edit && model) {
                     delete self.body.location;
