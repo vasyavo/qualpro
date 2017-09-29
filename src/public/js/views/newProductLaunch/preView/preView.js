@@ -163,6 +163,7 @@ module.exports = BaseView.extend({
             translation: this.translation,
             brandNewLabelClass: jsonModel.brand.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
             variantNewLabelClass: jsonModel.variant.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
+            App: App,
         }));
 
         this.$el = formString.dialog({
