@@ -128,10 +128,9 @@ module.exports = paginator.extend({
         });
 
         this.createSubObjectivesView.on('modelSaved', function () {
-            self.collection.fetch({
-                success : function () {
-                    self.showMoreContent(self.collection);
-                }
+            self.collection.getPage(self.collection.currentPage, {
+                filter: self.filter,
+                reset: true,
             });
         });
     },
