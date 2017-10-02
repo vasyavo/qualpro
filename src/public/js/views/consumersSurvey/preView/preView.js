@@ -2,6 +2,8 @@ var $ = require('jquery');
 var _ = require('underscore');
 var lodash = require('lodash');
 var d3 = require('d3');
+var randomColor = require('randomcolor');
+var DiagramHolderTemplate = require('../../../../templates/consumersSurvey/diagram-holder.html');
 var PreViewTemplate = require('../../../../templates/consumersSurvey/preview.html');
 var npsQuestionTemplate = require('../../../../templates/consumersSurvey/npmQuestion.html');
 var QuestionListTemplate = require('../../../../templates/consumersSurvey/questionList.html');
@@ -20,6 +22,8 @@ var EditAnswerView = require('../../../views/questionnary/editAnswer');
 var INFO_MESSAGES = require('../../../constants/infoMessages');
 var App = require('../../../appState');
 var requireContent = require('../../../helpers/requireContent');
+
+require('chart.js');
 
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.CONSUMER_SURVEY,
@@ -134,35 +138,33 @@ module.exports = BaseView.extend({
     },
 
     renderDiagram: function (questionId) {
+        var questionsDiagramHolder = this.$el.find('#questionsDiagram');
         var question = _.findWhere(this.model.get('questions'), {_id: questionId});
-        var options;
-        var optionsCountArray = [];
-        var displayText = [];
-        var outerRadius = 80;
-        var innerRadius = 45;
-        var pie = d3.layout.pie();
-        var color = d3.scale.category20c();
-        var percentArray = [];
-        var horizontalLinePoints = [];
-        var self = this;
-        var svg;
-        var arc;
-        var arcs;
-        var sum = 0;
-        var outerArc;
-
-        this.$el.find('#questionsDiagram').html('');
 
         if (['fullAnswer', 'multiChoice'].indexOf(question.type._id) !== -1) {
+            questionsDiagramHolder.html('');
             return false;
         }
 
-        options = question.options;
+        var that = this;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var backgroundColors = [];
+        var answersCount = [];
+        var labels = [];
+        var sum = 0;
+
+        var options = question.options;
         options.forEach(function (option, index) {
-            var answerCount = self.answersCollection.getAnswerCount(questionId, index);
+            var answerCount = that.answersCollection.getAnswerCount(questionId, index);
             if (answerCount != 0) {
-                optionsCountArray.push(answerCount);
-                displayText.push(option.currentLanguage);
+                answersCount.push(answerCount);
+                labels.push(option[currentLanguage]);
+                backgroundColors.push(
+                    randomColor({
+                        luminosity: 'bright',
+                        format: 'rgb',
+                    })
+                );
                 sum += answerCount;
             }
         });
@@ -171,163 +173,23 @@ module.exports = BaseView.extend({
             return false;
         }
 
-        optionsCountArray.forEach(function (optionCount) {
-            percentArray.push((optionCount * 100 / sum).toFixed(2));
-        });
+        questionsDiagramHolder.html(DiagramHolderTemplate);
 
-        svg = d3.select('div#questionsDiagram').append('svg').attr({
-            width : '160px',
-            height: '160px'
-        }).style({
-            margin  : '0 auto',
-            display : 'block',
-            overflow: 'visible'
-        });
+        var diagramCanvasContext = questionsDiagramHolder.find('#diagram');
 
-        outerArc = d3.svg.arc()
-            .innerRadius(outerRadius + 30)
-            .outerRadius(outerRadius + 30);
-
-        arc = d3.svg.arc()
-            .innerRadius(innerRadius)
-            .outerRadius(outerRadius);
-
-        arcs = svg.selectAll('g.arc')
-            .data(pie(optionsCountArray))
-            .enter()
-            .append('g')
-            .attr({
-                class    : 'arc',
-                transform: 'translate(' + outerRadius + ',' + outerRadius + ')'
-            });
-
-        arcs.append('path')
-            .attr({
-                fill: function (d, i) {
-                    return color(i);
-                },
-                d   : arc
-            });
-
-        arcs.append('polyline')
-            .style({
-                fill          : 'none',
-                stroke        : 'black',
-                'stroke-width': 1
-            })
-            .attr({
-                points: function (d, i) {
-                    var startPoint = arc.centroid(d);
-                    var endPoint = outerArc.centroid(d);
-                    var horizontalLinePoint;
-
-                    if (endPoint[0] > 0) {
-                        horizontalLinePoint = [endPoint[0] + 150, endPoint[1]];
-                    } else {
-                        horizontalLinePoint = [endPoint[0] - 150, endPoint[1]];
-                    }
-
-                    horizontalLinePoints.push(horizontalLinePoint);
-
-                    return startPoint.join(', ') + ' ' + endPoint.join(', ') + ' ' + horizontalLinePoint.join(', ');
-                }
-            });
-
-        arcs.append('rect')
-            .attr({
-                transform: function (d, i) {
-                    var translate = horizontalLinePoints[i];
-
-                    if (translate[0] > 0) {
-                        translate[0] -= 140;
-                    }
-
-                    translate[1] -= 20;
-
-                    return 'translate(' + translate + ')';
-                },
-                width    : 16,
-                height   : 16,
-                fill     : function (d, i) {
-                    return color(i);
-                }
-            });
-
-        arcs
-            .append('text')
-            .attr({
-                transform    : function (d, i) {
-                    var translate = horizontalLinePoints[i];
-
-                    translate[0] += 8;
-                    translate[1] += 12;
-
-                    return 'translate(' + translate + ')';
-                },
-                "text-anchor": 'middle',
-                "font-size"  : '12px',
-                "fill"       : "#fff"
-            }).text(function (d, i) {
-                return i + 1;
-            });
-
-        arcs
-            .append('text')
-            .attr({
-                transform    : function (d, i) {
-                    var translate = horizontalLinePoints[i];
-
-                    if (translate[0] > 0) {
-                        translate[0] += 32;
-                    } else {
-                        translate[0] += 30;
-                    }
-
-                    return 'translate(' + translate + ')';
-                },
-                "text-anchor": 'middle',
-                "font-size"  : '12px',
-                "font-weight": 'bold'
-            }).text(function (d, i) {
-                return percentArray[i] + '%';
-            });
-
-        arcs
-            .append('text')
-            .attr({
-                transform    : function (d, i) {
-                    var translate = horizontalLinePoints[i];
-
-                    if (translate[0] > 0) {
-                        translate[0] += 35;
-                    } else {
-                        translate[0] += 35;
-                    }
-
-                    return 'translate(' + translate + ')';
-                },
-                "text-anchor": 'middle',
-                "font-size"  : '12px'
-            }).text(function (d, i) {
-                return ' ( ' + optionsCountArray[i] + ' )';
-            });
-
-        arcs
-            .append('text')
-            .attr({
-                transform    : function (d, i) {
-                    var translate = horizontalLinePoints[i];
-
-                    translate[0] -= 50;
-                    translate[1] += 20;
-
-                    return 'translate(' + translate + ')';
-                },
-                "text-anchor": 'middle',
-                "font-size"  : '12px',
-                'font-style' : 'italic'
-            }).text(function (d, i) {
-            return displayText[i].capitalizer('firstCaps');
+        new Chart(diagramCanvasContext, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: answersCount,
+                    backgroundColor: backgroundColors,
+                    label: 'Dataset',
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+            },
         });
     },
 

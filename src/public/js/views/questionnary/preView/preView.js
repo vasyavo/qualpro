@@ -175,9 +175,9 @@ module.exports = BaseView.extend({
 
         questionsDiagramHolder.html(DiagramHolderTemplate);
 
-        var diagramCanvasElement = questionsDiagramHolder.find('#diagram');
+        var diagramCanvasContext = questionsDiagramHolder.find('#diagram');
 
-        new Chart(diagramCanvasElement, {
+        new Chart(diagramCanvasContext, {
             type: 'pie',
             data: {
                 labels: labels,
@@ -186,6 +186,9 @@ module.exports = BaseView.extend({
                     backgroundColor: backgroundColors,
                     label: 'Dataset',
                 }],
+            },
+            options: {
+                maintainAspectRatio: false,
             },
         });
     },
