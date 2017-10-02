@@ -10092,6 +10092,8 @@ table.fancytree-ext-table {
   background-color: #e8e8e8 !important;
 }
 
+::-webkit-file-upload-button { cursor:pointer; }
+
 @-webkit-keyframes rotate{ from{-webkit-transform: rotate(0deg)}  to{-webkit-transform: rotate(180deg);}}
 @-moz-keyframes rotate{ from{-moz-transform: rotate(0deg)}  to{-moz-transform: rotate(180deg);}}
 @-o-keyframes rotate{ from{-o-transform: rotate(0deg)}  to{-o-transform: rotate(180deg);}}
