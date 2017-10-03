@@ -458,15 +458,130 @@ var Promotions = function () {
             }
 
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
-
-            pipeLine = getAllPipeline({
-                personnel      : personnel,
-                aggregateHelper: aggregateHelper,
-                queryObject    : queryObject,
-                positionFilter : positionFilter,
-                isMobile       : req.isMobile,
-                forSync        : true
-            });
+    
+            queryObject.status = {
+                $nin: ['draft', 'expired'],
+            };
+            pipeLine = [
+                {
+                    $match: queryObject,
+                },
+                {
+                    $group: {
+                        _id: null,
+                        root: { $push: '$_id' },
+                        total: { $sum: 1 },
+                    },
+                },
+                {
+                    $unwind: '$root',
+                },
+                {
+                    $lookup: {
+                        from: 'promotions',
+                        localField: 'root',
+                        foreignField: '_id',
+                        as: '_id',
+                    },
+                },
+                {
+                    $addFields: {
+                        _id: {
+                            $let: {
+                                vars: {
+                                    root: {
+                                        $arrayElemAt: [
+                                            '$_id',
+                                            0,
+                                        ],
+                                    },
+                                },
+                                in: {
+                                    _id: '$$root._id',
+                                    promotionType: '$$root.promotionType',
+                                    category: '$$root.category',
+                                    country: '$$root.country',
+                                    region: '$$root.region',
+                                    subRegion: '$$root.subRegion',
+                                    retailSegment: '$$root.retailSegment',
+                                    outlet: '$$root.outlet',
+                                    branch: '$$root.branch',
+                                    displayType: '$$root.displayType',
+                                    barcode: '$$root.barcode',
+                                    packing: '$$root.packing',
+                                    ppt: '$$root.ppt',
+                                    quantity: '$$root.quantity',
+                                    dateStart: '$$root.dateStart',
+                                    dateEnd: '$$root.dateEnd',
+                                    attachments: '$$root.attachments',
+                                    rsp: '$$root.rsp',
+                                    currency: '$$root.currency',
+                                    status: '$$root.status',
+                                    total: '$total',
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $replaceRoot: {
+                        newRoot: '$_id',
+                    },
+                },
+                {
+                    $addFields: {
+                        region: { $filter: {
+                            input: '$region',
+                            as: 'item',
+                            cond: { $or: [
+                                { $in: ['$$item', []] },
+                                { $in: ['$$item', queryObject.region && queryObject.region.$in ? queryObject.region.$in : []] },
+                            ] },
+                        } },
+                        subRegion: { $filter: {
+                            input: '$subRegion',
+                            as: 'item',
+                            cond: { $or: [
+                                { $in: ['$$item', []] },
+                                { $in: ['$$item', queryObject.subRegion && queryObject.subRegion.$in ? queryObject.subRegion.$in : []] },
+                            ] },
+                        } },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'files',
+                        localField: 'attachments',
+                        foreignField: '_id',
+                        as: 'attachments',
+                    },
+                },
+                {
+                    $addFields: {
+                        attachments: {
+                            $map: {
+                                input: '$attachments',
+                                as: 'attachment',
+                                in: {
+                                    _id: '$$attachment._id',
+                                    name: '$$attachment.name',
+                                    contentType: '$$attachment.contentType',
+                                    originalName: '$$attachment.originalName',
+                                    extension: '$$attachment.extension',
+                                    preview: '$$attachment.preview',
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$total',
+                        data: {
+                            $push: '$$ROOT',
+                        },
+                    },
+                },
 
             aggregation = PromotionModel.aggregate(pipeLine);
 
