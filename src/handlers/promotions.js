@@ -581,7 +581,7 @@ var Promotions = function () {
                             $push: '$$ROOT',
                         },
                     },
-                },
+                }];
 
             aggregation = PromotionModel.aggregate(pipeLine);
 
