@@ -31,95 +31,99 @@ module.exports = (options) => {
         $match: queryObject,
     });
 
-    /*if (currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
-        const allowedAccessRoles = [
-            ACL_CONSTANTS.COUNTRY_ADMIN,
-            ACL_CONSTANTS.AREA_MANAGER,
-            ACL_CONSTANTS.AREA_IN_CHARGE,
-        ];
+    if (isMobile) {
+        if (currentUserLevel && currentUserLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+            const allowedAccessRoles = [
+                ACL_CONSTANTS.COUNTRY_ADMIN,
+                ACL_CONSTANTS.AREA_MANAGER,
+                ACL_CONSTANTS.AREA_IN_CHARGE,
+            ];
 
-        if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            assignedTo: {$in: subordinates},
-                            status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
-                        },
-                        {
-                            'history.assignedTo': {$in: coveredIds},
-                            status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
-                        },
-                        {
-                            'createdBy.user': {$in: coveredIds},
-                        },
-                    ],
-                },
-            });
-        } else {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            assignedTo: {$in/!**!/: coveredIds},
-                            status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
-                        },
-                        {
-                            'history.assignedTo': {$in: coveredIds},
-                            status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
-                        },
-                        {
-                            'createdBy.user': {$in: coveredIds},
-                        },
-                    ],
-                },
-            });
+            if (allowedAccessRoles.indexOf(currentUserLevel) > -1 && queryObject) {
+                pipeLine.push({
+                    $match: {
+                        $or: [
+                            {
+                                assignedTo: {$in: subordinates},
+                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
+                            },
+                            {
+                                'history.assignedTo': {$in: coveredIds},
+                                status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
+                            },
+                            {
+                                'createdBy.user': {$in: coveredIds},
+                            },
+                        ],
+                    },
+                });
+            } else {
+                pipeLine.push({
+                    $match: {
+                        $or: [
+                            {
+                                assignedTo: {$in/**/: coveredIds},
+                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
+                            },
+                            {
+                                'history.assignedTo': {$in: coveredIds},
+                                status              : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
+                            },
+                            {
+                                'createdBy.user': {$in: coveredIds},
+                            },
+                        ],
+                    },
+                });
+            }
         }
-    }*/
-
-    pipeLine.push({
-        $match: {
-            $or: [
-                {archived: false},
-                {archived: {$exists: false}},
-            ],
-        },
-    });
-
-    const $locationMatch = {
-        $and: [],
-    };
-
-    locations.forEach((location) => {
-        if (personelObj[location] && personelObj[location].length && !queryObject[location]) {
-            $locationMatch.$and.push({
-                $or: [
-                    {
-                        [location]: {$in: personelObj[location]},
-                    },
-                    {
-                        [location]: {$eq: []},
-                    },
-                    {
-                        [location]: {$eq: null},
-                    },
-                    {
-                        assignedTo: {$in: subordinates},
-                    },
-                    {
-                        'createdBy.user': {$eq: personelObj._id},
-                    },
-                ],
-            });
-        }
-    });
-
-    if ($locationMatch.$and.length) {
-        pipeLine.push({
-            $match: $locationMatch,
-        });
     }
 
+    if (!isMobile) {
+        pipeLine.push({
+            $match: {
+                $or: [
+                    {archived: false},
+                    {archived: {$exists: false}},
+                ],
+            },
+        });
+
+        const $locationMatch = {
+            $and: [],
+        };
+
+        locations.forEach((location) => {
+            if (personelObj[location] && personelObj[location].length && !queryObject[location]) {
+                $locationMatch.$and.push({
+                    $or: [
+                        {
+                            [location]: {$in: personelObj[location]},
+                        },
+                        {
+                            [location]: {$eq: []},
+                        },
+                        {
+                            [location]: {$eq: null},
+                        },
+                        {
+                            assignedTo: {$in: subordinates},
+                        },
+                        {
+                            'createdBy.user': {$eq: personelObj._id},
+                        },
+                    ],
+                });
+            }
+        });
+
+        if ($locationMatch.$and.length) {
+            pipeLine.push({
+                $match: $locationMatch,
+            });
+        }
+
+    }
     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
         from         : 'personnels',
         key          : 'assignedTo',
