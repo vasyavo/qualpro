@@ -1,17 +1,11 @@
-define([
-        'text!templates/inStoreTasks/topBarTemplate.html',
-        'text!templates/pagination/pagination.html',
-        'views/baseTopBar',
-        'constants/contentType'
-    ],
-    function (topBarTemplate, pagination, baseTopBar, CONTENT_TYPES) {
-        'use strict';
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/inStoreTasks/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-        var TopBarView = baseTopBar.extend({
-            contentType       : CONTENT_TYPES.INSTORETASKS,
-            template          : _.template(topBarTemplate),
-            paginationTemplate: _.template(pagination)
-        });
-
-        return TopBarView;
-    });
+module.exports = baseTopBar.extend({
+    contentType       : CONTENT_TYPES.INSTORETASKS,
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination)
+});

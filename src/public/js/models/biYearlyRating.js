@@ -1,57 +1,53 @@
-define([
-        'backbone',
-        'Underscore',
-        'helpers/createDefaultBiYearlyRatingDetails'
-    ],
-    function (Backbone, _, createDefaultBiYearlyRatingDetails) {
-        var Model = Backbone.Model.extend({
-            idAttribute: '_id',
+var _ = require('underscore');
+var Backbone = require('backbone');
+var createDefaultBiYearlyRatingDetails = require('../helpers/createDefaultBiYearlyRatingDetails');
 
-            initialize: function (options) {
-                options = options || {};
+module.exports = Backbone.Model.extend({
+    idAttribute: '_id',
 
-                var translation = options.translation || {};
+    initialize: function (options) {
+        options = options || {};
 
-                this.set({details: createDefaultBiYearlyRatingDetails(translation), rating: 0});
-            },
+        var translation = options.translation || {};
 
-            setRatingsToModel: function (modelWithRatings) {
-                var modelJson = modelWithRatings.toJSON();
-                var details = this.get('details');
-                var option;
+        this.set({details: createDefaultBiYearlyRatingDetails(translation), rating: 0});
+    },
 
-                for (var key in details) {
+    setRatingsToModel: function (modelWithRatings) {
+        var modelJson = modelWithRatings.toJSON();
+        var details = this.get('details');
+        var option;
 
-                    if (details[key].type === 'text') {
-                        details[key].result = modelJson[key];
-                    }
+        for (var key in details) {
 
-                    if (details[key].type === 'table') {
-                        details[key].result = modelJson[key].result;
-
-                        _.map(details[key].groups, function (group, firstIndex) {
-                            _.map(group, function (rateObject, secondIndex) {
-                                rateObject.value = modelJson[key][rateObject.id];
-                            });
-                        });
-                    }
-
-                    if (details[key].type === 'singleSelect') {
-                        option = _.where(details[key].options, {value: modelJson[key]});
-                        option.value = modelJson[key];
-                        details[key].result = option && option[0];
-                    }
-                }
-
-                this.set({
-                    _id    : modelJson._id,
-                    details: details
-                });
-            },
-
-            urlRoot: function () {
-                return '/rating/biYearly';
+            if (details[key].type === 'text') {
+                details[key].result = modelJson[key];
             }
+
+            if (details[key].type === 'table') {
+                details[key].result = modelJson[key].result;
+
+                _.map(details[key].groups, function (group, firstIndex) {
+                    _.map(group, function (rateObject, secondIndex) {
+                        rateObject.value = modelJson[key][rateObject.id];
+                    });
+                });
+            }
+
+            if (details[key].type === 'singleSelect') {
+                option = _.where(details[key].options, {value: modelJson[key]});
+                option.value = modelJson[key];
+                details[key].result = option && option[0];
+            }
+        }
+
+        this.set({
+            _id    : modelJson._id,
+            details: details
         });
-        return Model;
-    });
+    },
+
+    urlRoot: function () {
+        return '/rating/biYearly';
+    }
+});

@@ -1,35 +1,31 @@
-define(function (require) {
+var $ = require('jquery');
+var _ = require('underscore');
+var Backbone = require('backbone');
+var Template = require('../../../templates/importExport/import-errors.html');
 
-    var $ = require('jquery');
-    var _ = require('underscore');
-    var Backbone = require('backbone');
-    var Template = require('text!templates/importExport/import-errors.html');
+module.exports = Backbone.View.extend({
 
-    return Backbone.View.extend({
+    initialize: function (options) {
+        this.translation = options.translation;
+        this.models = options.models;
 
-        initialize: function (options) {
-            this.translation = options.translation;
-            this.models = options.models;
+        this.render();
+    },
 
-            this.render();
-        },
+    template: _.template(Template),
 
-        template: _.template(Template),
+    render: function () {
+        var that = this;
 
-        render: function () {
-            var that = this;
+        var layout = $(this.template({
+            translation: this.translation,
+            models: this.models,
+        }));
 
-            var layout = $(this.template({
-                translation: this.translation,
-                models: this.models,
-            }));
-
-            this.$el = layout.dialog({
-                width : 'auto',
-                dialogClass : 'create-dialog full-height-dialog',
-            });
-        }
-
-    });
+        this.$el = layout.dialog({
+            width : 'auto',
+            dialogClass : 'create-dialog full-height-dialog',
+        });
+    }
 
 });

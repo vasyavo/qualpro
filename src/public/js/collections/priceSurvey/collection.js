@@ -1,27 +1,22 @@
-define([
-    'collections/parrent',
-    'models/priceSurvey',
-    'constants/contentType'
-],
-function (parrent, Model, contentType) {
-    var Collection = parrent.extend({
-        model      : Model,
-        contentType: contentType.PRICESURVEY,
-        pageSize   : 4,
-        url        : function () {
-            return '/' + this.contentType;
-        },
+var parrent = require('../parrent');
+var Model = require('../../models/priceSurvey');
+var contentType = require('../../constants/contentType');
 
-        initialize: function (options) {
-            var page;
+module.exports = parrent.extend({
+    model      : Model,
+    contentType: contentType.PRICESURVEY,
+    pageSize   : 4,
+    url        : function () {
+        return '/' + this.contentType;
+    },
 
-            options = options || {};
-            page = options.page;
-            options.reset = true;
+    initialize: function (options) {
+        var page;
 
-            this.getPage(page, options);
-        }
-    });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-    return Collection;
+        this.getPage(page, options);
+    }
 });

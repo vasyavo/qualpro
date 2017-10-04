@@ -1,20 +1,19 @@
-// Filename: communication.js
-define(function () {
-    var checkLogin = function (callback) {
-        var url = "/authenticated";
-        $.ajax({
-            url: url,
-            type: "GET",
-            success: function () {
-                return callback(true);
-            },
-            error: function (data) {
-                return callback(false);
-            }
-        });
-    };
+var $ = require('jquery');
 
-    return {
-        checkLogin: checkLogin
-    };
-});
+var checkLogin = function (callback) {
+    var url = "/authenticated";
+    $.ajax({
+        url: url,
+        type: "GET",
+        success: function () {
+            return callback(true);
+        },
+        error: function (data) {
+            return callback(false);
+        }
+    });
+};
+
+module.exports = {
+    checkLogin: checkLogin
+};

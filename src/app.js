@@ -38,18 +38,20 @@ const setCacheControl = (req, res, next) => {
 };
 
 app.use(compress());
+
 app.engine('html', consolidate.swig);
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, '/views'));
+app.set('view cache');
+
 app.use(morgan('dev'));
 app.use(bodyParser.json({
     strict: false,
-    limit : '10mb',
+    limit: '10mb',
 }));
 app.use(bodyParser.urlencoded({
     extended: false,
 }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('./utils/sessionMiddleware'));
 

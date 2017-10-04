@@ -5,7 +5,7 @@
         <div class="userBlock flexColumn">
             <div class="top flexRowStart bottomLine">
                 <div class="left flexColumn">
-                    <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                    <img src="/preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
                 </div>
                 <div class="right flexColumn">
                        <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></div>
@@ -14,7 +14,7 @@
                 </div>
             </div>
             <div class="middle flexRowStart">
-                <img src="preview/<%= task.assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                <img src="/preview/<%= task.assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                 <div class="description fontGray"><%= task.assignedTo.firstName.currentLanguage + ' ' + task.assignedTo.lastName.currentLanguage %></div>
             </div>
             <div class="bottom flexRowStart">

@@ -1,34 +1,30 @@
-define([
-    'collections/parrent',
-    'models/marketingCampaignItem',
-    'constants/contentType'
-], function (Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
-        model      : Model,
-        url        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
-        viewType   : null,
-        contentType: null,
+var Parent = require('../parrent');
+var Model = require('../../models/marketingCampaignItem');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-        initialize: function (options) {
-            var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM,
+    viewType   : null,
+    contentType: null,
 
-            options = options || {};
-            page = options.page;
-            options.reset = true;
+    initialize: function (options) {
+        var page;
 
-            if (options.fetch) {
-                this.getPage(page, options);
-            }
-        },
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        parse: function (response) {
-            this.totalRecords = response.total;
-            this.itemCount = response.count;
-            this.itemsNumber = this.pageSize;
-
-            return response.data;
+        if (options.fetch) {
+            this.getPage(page, options);
         }
-    });
+    },
 
-    return Collection;
+    parse: function (response) {
+        this.totalRecords = response.total;
+        this.itemCount = response.count;
+        this.itemsNumber = this.pageSize;
+
+        return response.data;
+    }
 });

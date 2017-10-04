@@ -1,17 +1,13 @@
-define([
-    'jQuery'
-], function ($) {
-    var implementShowHideArabicInputIn = function (view) {
-        var $curEl = view.$el;
-        $curEl.find('.showHideAr, .showHideTranslation').on('click', function (e) {
-            e.preventDefault();
+var $ = require('jquery');
 
-            var id = '#' + $(e.target).data().id;
-            var arabicInput = view.$el.find(id);
+module.exports = function (view) {
+    var $curEl = view.$el;
+    $curEl.find('.showHideAr, .showHideTranslation').on('click', function (e) {
+        e.preventDefault();
 
-            arabicInput.toggle();
-        });
-    };
+        var id = '#' + $(e.target).data().id;
+        var arabicInput = view.$el.find(id);
 
-    return implementShowHideArabicInputIn;
-});
+        arabicInput.toggle();
+    });
+};

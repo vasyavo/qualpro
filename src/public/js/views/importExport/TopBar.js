@@ -1,53 +1,50 @@
-define(function (require) {
+var $ = require('jquery');
+var _ = require('underscore');
+var Marionette = require('backbone.marionette');
+var Template = require('../../../templates/importExport/top-bar.html');
 
-    var _ = require('underscore');
-    var Marionette = require('marionette');
-    var Template = require('text!templates/importExport/top-bar.html');
+module.exports = Marionette.View.extend({
 
-    return Marionette.View.extend({
+    initialize: function (options) {
+        this.translation = options.translation;
+    },
 
-        initialize: function (options) {
-            this.translation = options.translation;
-        },
+    className: 'import-export-topbar',
 
-        className: 'import-export-topbar',
+    template: function (ops) {
+        return _.template(Template)(ops);
+    },
 
-        template: function (ops) {
-            return _.template(Template)(ops);
-        },
+    templateContext: function () {
+        return {
+            translation: this.translation,
+        };
+    },
 
-        templateContext: function () {
-            return {
-                translation: this.translation,
-            };
-        },
+    ui: {
+        radioInputs: 'input[type="radio"]',
+    },
 
-        ui: {
-            radioInputs: 'input[type="radio"]',
-        },
+    events: {
+        'change @ui.radioInputs': 'actionTypeChanged',
+    },
 
-        events: {
-            'change @ui.radioInputs': 'actionTypeChanged',
-        },
+    actionTypeChanged: function (event) {
+        this.model.set('action', event.target.value);
+        this.model.trigger('action:changed');
+    },
 
-        actionTypeChanged: function (event) {
-            this.model.set('action', event.target.value);
-            this.model.trigger('action:changed');
-        },
+    changeTranslatedFields: function (translation) {
+        var that = this;
+        var $elementsForTranslation = this.$el.find('[data-translation]');
 
-        changeTranslatedFields: function (translation) {
-            var that = this;
-            var $elementsForTranslation = this.$el.find('[data-translation]');
+        this.translation = translation;
+        $elementsForTranslation.each(function (index, el) {
+            var $element = $(el);
+            var property = $element.attr('data-translation');
 
-            this.translation = translation;
-            $elementsForTranslation.each(function (index, el) {
-                var $element = $(el);
-                var property = $element.attr('data-translation');
-
-                $element.html(that.translation[property]);
-            });
-        },
-
-    });
+            $element.html(that.translation[property]);
+        });
+    },
 
 });

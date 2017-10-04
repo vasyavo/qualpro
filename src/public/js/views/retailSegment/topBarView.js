@@ -1,14 +1,10 @@
-define([
-        'text!templates/retailSegment/topBarTemplate.html',
-        'text!templates/pagination/pagination.html',
-        'views/baseTopBar'
-    ],
-    function (topBarTemplate, pagination, baseTopBar) {
-        var TopBarView = baseTopBar.extend({
-            contentType       : "retailSegment",
-            template          : _.template(topBarTemplate),
-            paginationTemplate: _.template(pagination)
-        });
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/retailSegment/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
 
-        return TopBarView;
-    });
+module.exports = baseTopBar.extend({
+    contentType       : "retailSegment",
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination)
+});

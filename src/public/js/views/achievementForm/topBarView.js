@@ -1,14 +1,11 @@
-define([
-    'text!templates/achievementForm/topBarTemplate.html',
-    'text!templates/pagination/pagination.html',
-    'views/baseTopBar',
-    'constants/contentType'
-], function (topBarTemplate, pagination, baseTopBar, CONTENT_TYPES) {
-    var TopBarView = baseTopBar.extend({
-        contentType       : CONTENT_TYPES.ACHIEVEMENTFORM,
-        template          : _.template(topBarTemplate),
-        paginationTemplate: _.template(pagination)
-    });
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/achievementForm/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-    return TopBarView;
+module.exports = baseTopBar.extend({
+    contentType       : CONTENT_TYPES.ACHIEVEMENTFORM,
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination)
 });

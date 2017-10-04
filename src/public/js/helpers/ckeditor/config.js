@@ -1,8 +1,8 @@
 CKEDITOR.editorConfig = function (config) {
     'use strict';
 
-    config.skin = 'minimalist,' + '../../helpers/ckeditor/skins/minimalist/';
-    config.contentsCss = 'js/helpers/ckeditor/contents.css';
+    config.skin = 'minimalist,' + '/src/public/js/helpers/ckeditor/skins/minimalist/';
+    config.contentsCss = '/src/public/js/helpers/ckeditor/contents.css';
     config.toolbarGroups = [
         {name: 'styles', groups: ['styles']},
         {name: 'document', groups: ['mode', 'document', 'doctools']},

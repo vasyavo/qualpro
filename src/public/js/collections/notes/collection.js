@@ -1,27 +1,20 @@
-define([
-        'collections/parrent',
-        'models/notes',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        'use strict';
+var Parent = require('../parrent');
+var Model = require('../../models/notes');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.NOTES,
-            viewType   : null,
-            contentType: null,
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.NOTES,
+    viewType   : null,
+    contentType: null,
 
-            initialize: function (options) {
-                var page;
+    initialize: function (options) {
+        var page;
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-                this.getPage(page, options);
-            }
-        });
-
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});

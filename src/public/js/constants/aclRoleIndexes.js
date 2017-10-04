@@ -1,4 +1,4 @@
-define({
+module.exports = {
     SUPER_ADMIN   : 0,
     MASTER_ADMIN  : 1,
     COUNTRY_ADMIN : 2,
@@ -11,5 +11,5 @@ define({
     COUNTRY_UPLOADER : 9,
     TRADE_MARKETER : 10,
     PROMOTER : 11,
-    VIRTUAL : 12
-});
+    VIRTUAL : 12,
+};

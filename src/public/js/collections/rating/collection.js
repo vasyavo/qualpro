@@ -1,30 +1,24 @@
-define([
-    'backbone',
-    'models/rating'
-], function (Backbone,Model) {
-    var Collection = Backbone.Collection.extend({
-        model: Model,
+var Backbone = require('backbone');
+var Model = require('../../models/rating');
 
-        initialize: function (options) {
-            this.contentType = options.contentType;
+module.exports = Backbone.Collection.extend({
+    model: Model,
 
-            this.fetch({
-                data   : {
-                    personnel : options.personnel,
-                    recentsNum: options.recentsNum
-                },
-                reset  : true,
-                success: function () {
-                },
-                error  : function () {
-                }
-            });
-        },
+    initialize: function (options) {
+        this.contentType = options.contentType;
 
-        url: function () {
-            return '/rating/' + this.contentType;
-        }
-    });
+        this.fetch({
+            data   : {
+                personnel : options.personnel,
+                recentsNum: options.recentsNum
+            },
+            reset  : true,
+            success: function () {},
+            error  : function () {}
+        });
+    },
 
-    return Collection;
+    url: function () {
+        return '/rating/' + this.contentType;
+    }
 });

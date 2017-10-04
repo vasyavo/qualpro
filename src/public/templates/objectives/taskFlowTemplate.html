@@ -7,7 +7,7 @@
                 <div class="userBlock flexColumn">
                     <div class="top flexRowStart bottomLine">
                         <div class="left flexColumn">
-                            <img src="preview/<%= item.createdBy.user.imageSrc %>" class="imgCircle userImgBig createdByImage">
+                            <img src="/preview/<%= item.createdBy.user.imageSrc %>" class="imgCircle userImgBig createdByImage">
                         </div>
                         <div class="right flexColumn">
                             <div class="userName createdByName"><%= (item.createdBy.user &&
@@ -27,7 +27,7 @@
                     <div class="middle flexColumn assignedTo">
                         <% item.assignedTo.forEach( function(assignedTo) { %>
                         <div class="flexRowStart">
-                            <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                            <img src="/preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                             <div class="description fontGray">
                                 <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
                                 <%= assignedTo.firstName.currentLanguage + ' ' + assignedTo.lastName.currentLanguage %>
@@ -92,7 +92,7 @@
                         <div class="userBlock flexColumn">
                             <div class="top flexRowStart bottomLine">
                                 <div class="left flexColumn">
-                                    <img src="preview/<%= item2.createdBy.user.imageSrc %>"
+                                    <img src="/preview/<%= item2.createdBy.user.imageSrc %>"
                                          class="imgCircle userImgBig createdByImage">
                                 </div>
                                 <div class="right flexColumn">
@@ -113,7 +113,7 @@
                             <div class="middle flexColumn assignedTo">
                                 <% item2.assignedTo.forEach( function(assignedTo) { %>
                                 <div class="flexRowStart">
-                                    <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <img src="/preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                                     <div class="description fontGray">
                                         <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
                                         <%= assignedTo.firstName.currentLanguage + ' ' +
@@ -180,7 +180,7 @@
                         <div class="userBlock flexColumn">
                             <div class="top flexRowStart bottomLine">
                                 <div class="left flexColumn">
-                                    <img src="preview/<%= item3.createdBy.user.imageSrc %>"
+                                    <img src="/preview/<%= item3.createdBy.user.imageSrc %>"
                                          class="imgCircle userImgBig createdByImage">
                                 </div>
                                 <div class="right flexColumn">
@@ -201,7 +201,7 @@
                             <div class="middle flexColumn assignedTo">
                                 <% item3.assignedTo.forEach( function(assignedTo) { %>
                                 <div class="flexRowStart">
-                                    <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <img src="/preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                                     <div class="description fontGray">
                                         <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
                                         <%= assignedTo.firstName.currentLanguage + ' ' +
@@ -269,7 +269,7 @@
                         <div class="userBlock flexColumn">
                             <div class="top flexRowStart bottomLine">
                                 <div class="left flexColumn">
-                                    <img src="preview/<%= item4.createdBy.user.imageSrc %>"
+                                    <img src="/preview/<%= item4.createdBy.user.imageSrc %>"
                                          class="imgCircle userImgBig createdByImage">
                                 </div>
                                 <div class="right flexColumn">
@@ -290,7 +290,7 @@
                             <div class="middle flexColumn assignedTo">
                                 <% item4.assignedTo.forEach( function(assignedTo) { %>
                                 <div class="flexRowStart">
-                                    <img src="preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
+                                    <img src="/preview/<%= assignedTo.imageSrc %>" class="imgCircle userImgSmall">
                                     <div class="description fontGray">
                                         <% if (assignedTo && assignedTo.firstName && assignedTo.lastName) { %>
                                         <%= assignedTo.firstName.currentLanguage + ' ' +

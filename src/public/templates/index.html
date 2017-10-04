@@ -6,30 +6,18 @@
     <script type="text/javascript">
         var PUBNUB_SUBSCRIBE_KEY = "{{ pubnubSubscribeKey }}";
         var PREVIEW_URL_ROOT = "{{ previewUrlRoot }}";
+        var CKEDITOR_BASEPATH = '//cdn.ckeditor.com/4.7.3/full/';
     </script>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title id="mainTitle">Al Alali</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="icon"
-          type="image/png"
-          href="favicon.ico">
-    <link rel="stylesheet"
-          href="js/libs/Jcrop/css/jquery.Jcrop.min.css"
-          type="text/css"/>
-    <link rel="stylesheet"
-          href="js/libs/jquery-ui/themes/base/jquery-ui.min.css"
-          type="text/css"/>
-    <link rel="stylesheet"
-          href="js/libs/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css"
-          type="text/css"/>
-    <link id="mainStyle"
-          rel="stylesheet"
-          href="css/main_en.css"
-          type="text/css"/>
-    <link rel="stylesheet" href="js/libs/lightslider/dist/css/lightslider.css">
-    <script data-main="js/main" src="js/libs/requirejs/require.js"></script>
+    <link rel="icon" type="image/png" href="../favicon.ico">
+    {{#each styles}}
+        <style type="text/css">{{ body }}</style>
+    {{/each}}
+    <link id="mainStyle" rel="stylesheet" href="src/public/css/main_en.css">
 </head>
 <body>
 <div id="loader" class="loader">
@@ -43,14 +31,14 @@
 <div id="alaliLogo" class="ellipseAnimated">
     <div class="alaliPreloader">
         <a href="#qualPro/activityList" title="Return to the al alali homepage">
-            <img src="../../images/main-logo-animate2.png" alt="logo"/>
+            <img src="../images/main-logo-animate2.png" alt="logo"/>
             <div class="alaliPreloaderGradient">
                 <div class="gradient animated"></div>
             </div>
         </a>
     </div>
     <div class="logoTop">
-        <img src="../../images/main-logo-stroke.png" alt="logo"/>
+        <img src="../images/main-logo-stroke.png" alt="logo"/>
     </div>
 </div>
 <div id="wrapper" class="wrapper"></div>

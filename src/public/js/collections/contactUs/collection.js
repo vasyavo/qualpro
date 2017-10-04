@@ -1,25 +1,21 @@
-define([
-        'collections/parrent',
-        'models/contactUs',
-        'constants/contentType'
-    ],
-    function (Parent, Model, CONTENT_TYPES) {
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.CONTACT_US,
-            viewType   : null,
-            contentType: null,
+var _ = require('underscore');
+var Parent = require('../parrent');
+var Model = require('../../models/contactUs');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.CONTACT_US,
+    viewType   : null,
+    contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});

@@ -1,46 +1,45 @@
-define([
-    'Underscore',
-    'translations/ar/pagination',
-    'translations/ar/filters'
-], function (_, paginationTranslation, filtersTranslation) {
-    var translation = {
-        // list view
-        brand      : 'المنافس',
-        category   : 'الفئة',
-        displayType: 'نوع العرض',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-        startDate: 'تاريخ البدء',
-        endDate  : 'تاريخ الانتهاء',
-        location : 'الموقع',
+var translation = {
+    // list view
+    brand      : 'المنافس',
+    category   : 'الفئة',
+    displayType: 'نوع العرض',
 
-        // preview
-        titlePreview : 'عرض بيانات النشاط التسويقي',
-        country      : 'الدولة',
-        region       : 'المنطقة',
-        subRegion    : 'المنطقة الفرعية',
-        retailSegment: 'الفئة التجارية',
-        outlet       : 'العميل',
-        branch       : 'الفرع',
-        description  : 'الوصف',
-        attachments  : 'الملفات المرفقة',
-        files        : 'الملفات',
-        attachBtn    : 'ارفاق',
-        sendBtn      : 'ارسال',
-        noTranslation: ' لا يوجد ترجمة ',
-        skipped      : 'تخطي',
-        commentText  : 'التعليق',
-        missedData   : 'البيانات المفقودة',
-        edit         : 'تعديل بيانات',
-        delete: 'حذف',
+    startDate: 'تاريخ البدء',
+    endDate  : 'تاريخ الانتهاء',
+    location : 'الموقع',
 
-        // edit
-        saveBtn: 'حفظ',
-        brandingAndMonthlyDisplayEditTitle: 'تعديل العلامات التجارية وتقارير العرض',
+    // preview
+    titlePreview : 'عرض بيانات النشاط التسويقي',
+    country      : 'الدولة',
+    region       : 'المنطقة',
+    subRegion    : 'المنطقة الفرعية',
+    retailSegment: 'الفئة التجارية',
+    outlet       : 'العميل',
+    branch       : 'الفرع',
+    description  : 'الوصف',
+    attachments  : 'الملفات المرفقة',
+    files        : 'الملفات',
+    attachBtn    : 'ارفاق',
+    sendBtn      : 'ارسال',
+    noTranslation: ' لا يوجد ترجمة ',
+    skipped      : 'تخطي',
+    commentText  : 'التعليق',
+    missedData   : 'البيانات المفقودة',
+    edit         : 'تعديل بيانات',
+    delete: 'حذف',
 
-        // topBar
-        all: ' العلامات التجارية وتقارير العرض للمنافسين',
-        okBtn: 'موافق',
-        dialogTitle: ' التعليقات والمرفقات',
-    };
-    return _.extend({}, paginationTranslation, filtersTranslation, translation);
-});
+    // edit
+    saveBtn: 'حفظ',
+    brandingAndMonthlyDisplayEditTitle: 'تعديل العلامات التجارية وتقارير العرض',
+
+    // topBar
+    all: ' العلامات التجارية وتقارير العرض للمنافسين',
+    okBtn: 'موافق',
+    dialogTitle: ' التعليقات والمرفقات',
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, translation);

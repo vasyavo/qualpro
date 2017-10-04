@@ -1,4 +1,4 @@
-define({
+module.exports = {
     fileSuccessfullyImported: {
         en: 'File successfully imported',
         ar: 'تم تحميل الملف الى النظام بنجاح',
@@ -43,4 +43,4 @@ define({
         en: 'Are you sure you want to delete this branding and monthly display report?',
         ar: 'هل تريد حذف نموذج العلامات التجارية وتقارير العرض الخاصة بالعلالي'
     }
-});
+};

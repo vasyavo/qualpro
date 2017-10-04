@@ -1,25 +1,19 @@
-define([
-        'models/parrent',
-        'validation',
-        'constants/contentType'
+var parent = require('./parrent');
+var CONTENT_TYPES = require('../constants/contentType');
+
+module.exports = parent.extend({
+    defaults: {
+        name    : '',
+        selected: false
+    },
+
+    multilanguageFields: [
+        'name'
     ],
-    function (parent, validation, CONTENT_TYPES) {
-        var Model = parent.extend({
-            defaults: {
-                name    : '',
-                selected: false
-            },
 
-            multilanguageFields: [
-                'name'
-            ],
+    idAttribute: '_id',
 
-            idAttribute: '_id',
-
-            urlRoot: function () {
-                return CONTENT_TYPES.ORIGIN;
-            }
-        });
-
-        return Model;
-    });
+    urlRoot: function () {
+        return CONTENT_TYPES.ORIGIN;
+    }
+});

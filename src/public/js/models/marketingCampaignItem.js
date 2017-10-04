@@ -1,37 +1,30 @@
-define([
-    'Underscore',
-    'models/parrent',
-    'custom',
-    'constants/otherConstants',
-    'constants/contentType'
-], function (_, parent, custom, CONSTANTS, CONTENT_TYPES) {
-    var Model = parent.extend({
-        defaults      : {},
-        attachmentsKey: 'comment.attachments',
+var parent = require('./parrent');
+var CONTENT_TYPES = require('../constants/contentType');
 
-        multilanguageFields: [
-            'name',
-            'branches.branch.name',
-            'branches.createdBy.user.lastName',
-            'branches.createdBy.user.firstName',
-            'branches.comment.createdBy.user.firstName',
-            'branches.comment.createdBy.user.lastName',
-            'branches.comment.editedBy.user.firstName',
-            'branches.comment.editedBy.user.lastName'
-        ],
+module.exports = parent.extend({
+    defaults      : {},
+    attachmentsKey: 'comment.attachments',
 
-        validate: function () {
-            var errors = [];
+    multilanguageFields: [
+        'name',
+        'branches.branch.name',
+        'branches.createdBy.user.lastName',
+        'branches.createdBy.user.firstName',
+        'branches.comment.createdBy.user.firstName',
+        'branches.comment.createdBy.user.lastName',
+        'branches.comment.editedBy.user.firstName',
+        'branches.comment.editedBy.user.lastName'
+    ],
 
-            if (errors.length > 0) {
-                return errors;
-            }
-        },
+    validate: function () {
+        var errors = [];
 
-        urlRoot: function () {
-            return CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM;
+        if (errors.length > 0) {
+            return errors;
         }
-    });
+    },
 
-    return Model;
+    urlRoot: function () {
+        return CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM;
+    }
 });

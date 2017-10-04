@@ -1,13 +1,10 @@
-define([
-    'text!templates/competitorsList/topBarTemplate.html',
-    'text!templates/pagination/pagination.html',
-    'views/baseTopBar'
-], function (topBarTemplate, pagination, baseTopBar) {
-    var TopBarView = baseTopBar.extend({
-        contentType       : 'competitorsList',
-        template          : _.template(topBarTemplate),
-        paginationTemplate: _.template(pagination),
-    });
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/competitorsList/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
 
-    return TopBarView;
+module.exports = baseTopBar.extend({
+    contentType       : 'competitorsList',
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 });

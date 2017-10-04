@@ -1,506 +1,499 @@
-define([
-    'backbone',
-    'Underscore',
-    'jQuery',
-    'helpers/contentTypesHelper',
-    'views/domain/thumbnailsForSelection',
-    'js-cookie',
-    'constants/contentType',
-    'constants/personnelLocationFlow',
-    'moment',
-    'constants/personnelStatuses',
-    'dataService',
-    'custom',
-    'constants/errorMessages',
-    'constants/aclRoleIndexes'
-], function (Backbone, _, $, contentTypes, DomainThumbnailsView, Cookies, CONTENT_TYPES, PERSONNEL_LOCATION_FLOW,
-             moment, STATUSES, dataService, custom, ERROR_MESSAGES, ACL_ROLE_INDEXES) {
-    'use strict';
-    var types = [
-        CONTENT_TYPES.COUNTRY,
-        CONTENT_TYPES.REGION,
-        CONTENT_TYPES.SUBREGION,
-        CONTENT_TYPES.BRANCH
-    ];
+var $ = require('jquery');
+var _ = require('underscore');
+var moment = require('moment');
+var Cookies = require('js-cookie');
+var contentTypes = require('../helpers/contentTypesHelper');
+var DomainThumbnailsView = require('../views/domain/thumbnailsForSelection');
+var CONTENT_TYPES = require('../constants/contentType');
+var PERSONNEL_LOCATION_FLOW = require('../constants/personnelLocationFlow');
+var STATUSES = require('../constants/personnelStatuses');
+var custom = require('../custom');
+var ERROR_MESSAGES = require('../constants/errorMessages');
+var App = require('../appState');
+var requireContent = require('../helpers/requireContent');
 
-    var createPersonnelViewLogic = function (context) {
-        var logic = {
-            view: context,
+var types = [
+    CONTENT_TYPES.COUNTRY,
+    CONTENT_TYPES.REGION,
+    CONTENT_TYPES.SUBREGION,
+    CONTENT_TYPES.BRANCH
+];
 
-            cacheDomainFields: function (element) {
-                var $currEl = element || this.view.$el;
+var createPersonnelViewLogic = function (context) {
+    var logic = {
+        view: context,
 
-                this.$country = $currEl.find('#countryDiag');
-                this.$region = $currEl.find('#regionDiag');
-                this.$subRegion = $currEl.find('#subRegionDiag');
-                this.$retailSegment = $currEl.find('#retailSegmentDiag');
-                this.$outlet = $currEl.find('#outletDiag');
-                this.$branch = $currEl.find('#branchDiag');
-            },
+        cacheDomainFields: function (element) {
+            var $currEl = element || this.view.$el;
 
-            setDomainDataToHtmlFromModel: function (personnelModel) {
-                var self = this;
-                var model = personnelModel.toJSON();
-                var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-                var anotherLanguage = (currentLanguage === 'en') ? 'ar' : 'en';
-                var firstMiss = true;
-                var dataEl;
+            this.$country = $currEl.find('#countryDiag');
+            this.$region = $currEl.find('#regionDiag');
+            this.$subRegion = $currEl.find('#subRegionDiag');
+            this.$retailSegment = $currEl.find('#retailSegmentDiag');
+            this.$outlet = $currEl.find('#outletDiag');
+            this.$branch = $currEl.find('#branchDiag');
+        },
 
-                contentTypes.forEachType(function (type) {
-                    var domains = model[type];
-                    var ids = [];
-                    var names;
-                    var currentName;
-                    var length;
-                    var i;
+        setDomainDataToHtmlFromModel: function (personnelModel) {
+            var self = this;
+            var model = personnelModel.toJSON();
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
+            var anotherLanguage = (currentLanguage === 'en') ? 'ar' : 'en';
+            var firstMiss = true;
+            var dataEl;
 
-                    dataEl = self['$' + type];
+            contentTypes.forEachType(function (type) {
+                var domains = model[type];
+                var ids = [];
+                var names;
+                var currentName;
+                var length;
+                var i;
 
-                    if (domains && domains.length) {
+                dataEl = self['$' + type];
 
-                        length = domains.length;
-                        names = domains[length - 1].name[currentLanguage] || domains[length - 1].name[anotherLanguage];
-                        ids.push(domains[length - 1]._id);
+                if (domains && domains.length) {
 
-                        if (length > 1) {
-                            firstMiss = false;
-                        }
+                    length = domains.length;
+                    names = domains[length - 1].name[currentLanguage] || domains[length - 1].name[anotherLanguage];
+                    ids.push(domains[length - 1]._id);
 
-                        for (i = length - 2;
-                             i >= 0;
-                             i--) {
-                            currentName = domains[i].name[currentLanguage] || domains[i].name[anotherLanguage];
-                            names = currentName + ', ' + names;
-                            ids.push(domains[i]._id);
-                        }
-
-                        if (ids.length) {
-                            dataEl.text(names);
-                            dataEl.addClass('pencil');
-                            dataEl.attr('data-id', ids);
-                            dataEl.attr('data-initial-value', ids);
-                        }
-
-                    } else {
-                        if (firstMiss) {
-                            firstMiss = false;
-                            dataEl.attr('data-id', '');
-                            dataEl.attr('data-initial-value', '');
-                        } else {
-                            self.clearAndHideDomainFields(type);
-                        }
-
+                    if (length > 1) {
+                        firstMiss = false;
                     }
-                });
-            },
 
-            getDataFromHtmlAndSaveModel: function (personnelModel, img, translation, cb) {
-                var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-                var obj;
+                    for (i = length - 2;
+                         i >= 0;
+                         i--) {
+                        currentName = domains[i].name[currentLanguage] || domains[i].name[anotherLanguage];
+                        names = currentName + ', ' + names;
+                        ids.push(domains[i]._id);
+                    }
+
+                    if (ids.length) {
+                        dataEl.text(names);
+                        dataEl.addClass('pencil');
+                        dataEl.attr('data-id', ids);
+                        dataEl.attr('data-initial-value', ids);
+                    }
+
+                } else {
+                    if (firstMiss) {
+                        firstMiss = false;
+                        dataEl.attr('data-id', '');
+                        dataEl.attr('data-initial-value', '');
+                    } else {
+                        self.clearAndHideDomainFields(type);
+                    }
+
+                }
+            });
+        },
+
+        getDataFromHtmlAndSaveModel: function (personnelModel, img, translation, cb) {
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
+            var obj;
+            var value;
+            var self = this;
+            var parentProperties = [];
+            var updateData = {};
+            var propertyName;
+            var keys;
+            var model;
+            var condition;
+
+            var getValueFromInput = function (element) {
                 var value;
-                var self = this;
-                var parentProperties = [];
-                var updateData = {};
-                var propertyName;
-                var keys;
-                var model;
-                var condition;
 
-                var getValueFromInput = function (element) {
-                    var value;
-
-                    if (element.hasClass('dropDown')) {
-                        value = element.attr('data-id');
-                    } else if (element.attr('data-masked') === 'true') {
-                        value = $.trim(element.inputmask('unmaskedvalue'));
-                    } else if (element.attr('type') === 'checkbox') {
-                        value = element.prop('checked');
-                    } else {
-                        value = $.trim(element.val());
-                    }
-
-                    return {value: value, raw: value};
-                };
-
-                var getValueByDataFormat = function (element) {
-                    var dataFormat = element.attr('data-format');
-                    var contentType = element.attr('data-value');
-                    var rawValue = element.attr('data-id');
-                    var value;
-
-                    if (PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel] && PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel].indexOf(contentType) === -1 && contentType !== 'cover') {
-                        return {value: [], raw: rawValue};
-                    }
-
-                    if (dataFormat === 'array') {
-                        value = rawValue ? rawValue.split(',') : [];
-                    } else {
-                        value = rawValue;
-                    }
-
-                    return {value: value, raw: rawValue};
-                };
-
-                $('.formField').each(function () {
-                    var el = $(this);
-                    var tagName = el.prop('tagName');
-                    var initialValue = el.attr('data-value');
-                    var propertyName = el.attr('data-property');
-                    var parentProperty = el.attr('data-parent');
-                    var current = tagName === 'INPUT' ? getValueFromInput(el) : getValueByDataFormat(el);
-
-                    if (parentProperty) {
-                        current.initial = initialValue;
-                        updateData[parentProperty] = updateData[parentProperty] || {};
-                        updateData[parentProperty][propertyName] = current;
-
-                        if (!~parentProperties.indexOf(parentProperty)) {
-                            parentProperties.push(parentProperty);
-                        }
-                    } else if (current.raw !== initialValue) {
-                        updateData[propertyName] = current.value;
-                    }
-                });
-
-                const emptyLocations = _.difference(types, PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel]);
-
-                emptyLocations.forEach((location) => {
-                    updateData[location] = [];
-                });
-
-                for (var i = parentProperties.length - 1; i >= 0; i--) {
-                    propertyName = parentProperties[i];
-                    obj = updateData[propertyName];
-                    keys = Object.keys(obj);
-
-                    if (keys.every(function (key) {
-                            return obj[key].initial === obj[key].raw;
-                        })) {
-                        delete updateData[propertyName];
-                    }
-                    else {
-                        keys.forEach(function (key) {
-                            obj[key] = obj[key].value;
-                        });
-                    }
+                if (element.hasClass('dropDown')) {
+                    value = element.attr('data-id');
+                } else if (element.attr('data-masked') === 'true') {
+                    value = $.trim(element.inputmask('unmaskedvalue'));
+                } else if (element.attr('type') === 'checkbox') {
+                    value = element.prop('checked');
+                } else {
+                    value = $.trim(element.val());
                 }
 
-                //todo check if image changed
-                updateData.imageSrc = img;
+                return {value: value, raw: value};
+            };
 
-                updateData.confirmed = personnelModel.get('confirmed');
-                updateData.lastAccess = personnelModel.get('lastAccess');
-                updateData.temp = personnelModel.get('temp');
+            var getValueByDataFormat = function (element) {
+                var dataFormat = element.attr('data-format');
+                var contentType = element.attr('data-value');
+                var rawValue = element.attr('data-id');
+                var value;
 
-                updateData.dateJoined = moment(updateData.dateJoined, 'DD.MM.YYYY').toISOString();
+                if (PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel] && PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel].indexOf(contentType) === -1 && contentType !== 'cover') {
+                    return {value: [], raw: rawValue};
+                }
 
-                if (cb && typeof(cb) === 'function') {
-                    model = personnelModel.toJSON();
-                    Object.keys(model).forEach(function (key) {
-                        condition = false;
-                        if (Array.isArray(model[key])) {
-                            var ids = _.pluck(model[key], '_id');
-                            if (ids.length) {
-                                if (updateData[key] && updateData[key].length && updateData[key].length !== ids.length) {
-                                    return;
-                                }
-                                var newIdsToSave = _.difference(ids, updateData[key]);
-                                if (!newIdsToSave.length) {
-                                    condition = true;
-                                }
+                if (dataFormat === 'array') {
+                    value = rawValue ? rawValue.split(',') : [];
+                } else {
+                    value = rawValue;
+                }
+
+                return {value: value, raw: rawValue};
+            };
+
+            $('.formField').each(function () {
+                var el = $(this);
+                var tagName = el.prop('tagName');
+                var initialValue = el.attr('data-value');
+                var propertyName = el.attr('data-property');
+                var parentProperty = el.attr('data-parent');
+                var current = tagName === 'INPUT' ? getValueFromInput(el) : getValueByDataFormat(el);
+
+                if (parentProperty) {
+                    current.initial = initialValue;
+                    updateData[parentProperty] = updateData[parentProperty] || {};
+                    updateData[parentProperty][propertyName] = current;
+
+                    if (!~parentProperties.indexOf(parentProperty)) {
+                        parentProperties.push(parentProperty);
+                    }
+                } else if (current.raw !== initialValue) {
+                    updateData[propertyName] = current.value;
+                }
+            });
+
+            const emptyLocations = _.difference(types, PERSONNEL_LOCATION_FLOW[self.personnelAccessRoleLevel]);
+
+            emptyLocations.forEach(function(location) {
+                updateData[location] = [];
+            });
+
+            for (var i = parentProperties.length - 1; i >= 0; i--) {
+                propertyName = parentProperties[i];
+                obj = updateData[propertyName];
+                keys = Object.keys(obj);
+
+                if (keys.every(function (key) {
+                        return obj[key].initial === obj[key].raw;
+                    })) {
+                    delete updateData[propertyName];
+                }
+                else {
+                    keys.forEach(function (key) {
+                        obj[key] = obj[key].value;
+                    });
+                }
+            }
+
+            //todo check if image changed
+            updateData.imageSrc = img;
+
+            updateData.confirmed = personnelModel.get('confirmed');
+            updateData.lastAccess = personnelModel.get('lastAccess');
+            updateData.temp = personnelModel.get('temp');
+
+            updateData.dateJoined = moment(updateData.dateJoined, 'DD.MM.YYYY').toISOString();
+
+            if (cb && typeof(cb) === 'function') {
+                model = personnelModel.toJSON();
+                Object.keys(model).forEach(function (key) {
+                    condition = false;
+                    if (Array.isArray(model[key])) {
+                        var ids = _.pluck(model[key], '_id');
+                        if (ids.length) {
+                            if (updateData[key] && updateData[key].length && updateData[key].length !== ids.length) {
+                                return;
+                            }
+                            var newIdsToSave = _.difference(ids, updateData[key]);
+                            if (!newIdsToSave.length) {
+                                condition = true;
                             }
                         }
-                        else if (['firstName', 'lastName'].indexOf(key) !== -1) {
-                            if (updateData[key].en === model[key].en && updateData[key].ar === model[key].ar) {
-                                condition = true;
-                            }
-                        } else if (key === 'dateJoined') {
-                            var date = custom.dateFormater('DD.MM.YYYY', updateData[key]);
-                            if (date === model[key]) {
-                                condition = true;
-                            }
-                        } else if (['accessRole', 'position', 'vacation'].indexOf(key) !== -1) {
-                            if (key === 'vacation') {
-                                var vacationChange = false;
-                                if (updateData[key].cover) {
-                                    if (updateData[key].cover !== model[key].cover) {
-                                        vacationChange = true;
-                                    }
-                                }
-                                if (updateData[key].onLeave !== model[key].onLeave) {
+                    }
+                    else if (['firstName', 'lastName'].indexOf(key) !== -1) {
+                        if (updateData[key].en === model[key].en && updateData[key].ar === model[key].ar) {
+                            condition = true;
+                        }
+                    } else if (key === 'dateJoined') {
+                        var date = custom.dateFormater('DD.MM.YYYY', updateData[key]);
+                        if (date === model[key]) {
+                            condition = true;
+                        }
+                    } else if (['accessRole', 'position', 'vacation'].indexOf(key) !== -1) {
+                        if (key === 'vacation') {
+                            var vacationChange = false;
+                            if (updateData[key].cover) {
+                                if (updateData[key].cover !== model[key].cover) {
                                     vacationChange = true;
                                 }
-                                if (!vacationChange) {
-                                    condition = true;
-                                }
                             }
-                            if (updateData[key] === model[key]._id) {
-                                condition = true;
+                            if (updateData[key].onLeave !== model[key].onLeave) {
+                                vacationChange = true;
                             }
-                        } else {
-                            if (updateData[key] === model[key]) {
+                            if (!vacationChange) {
                                 condition = true;
                             }
                         }
-
-                        if (condition) {
-                            delete updateData[key];
+                        if (updateData[key] === model[key]._id) {
+                            condition = true;
                         }
-                    });
-                }
-
-                delete updateData.period;
-
-                if (!Object.keys(updateData).length) {
-                    return cb();
-                }
-
-                personnelModel.setFieldsNames(translation);
-
-                updateData.accessRoleLevel = this.personnelAccessRoleLevel || -1;
-
-                personnelModel.save(updateData,
-                    {
-                        patch  : true,
-                        wait   : true,
-                        success: function (model, response) {
-                            var message;
-                            var status = model.get('status');
-
-                            if (status === 'login') {
-                                message = STATUSES[status.toUpperCase()].name[currentLanguage] + ' ' + model.get('lastAccess');
-                            } else {
-                                message = STATUSES[status.toUpperCase()].name[currentLanguage];
-                            }
-
-                            model.set({
-                                status: {
-                                    classCss: status,
-                                    message : message
-                                }
-                            });
-
-                            self.view.trigger('modelSaved', model);
-
-                            if (!cb) {
-                                return self.view.$el.dialog('close').dialog('destroy').remove();
-                            } else {
-                                return cb();
-                            }
-                        },
-                        error  : function (model, xhr) {
-                            App.render({type: 'error', message: xhr.responseText});
-
-                            if (cb && typeof(cb) === 'function') {
-                                return cb();
-                            }
-                        }
-                    });
-            },
-
-            showDomainDialog: function (domainType) {
-                var self = this;
-                var view = self.view;
-                var $currentDomainA = this['$' + domainType];
-                var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
-                var translationsUrl = 'translations/' + currentLanguage + '/' + domainType;
-                var url = 'collections/' + domainType + '/collection';
-                var dataId = $currentDomainA.attr('data-id');
-                var currentDomains = dataId !== '' ? dataId.split(',') : [];
-                var collection;
-                var $prevDomainA;
-                var parentId;
-                var locationFlow = PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel];
-                var multiSelect = domainType === locationFlow[locationFlow.length - 1];
-
-                /*
-                 * @feature
-                 * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-859
-                 * @description Enable the possibility of having multiple regions and subRegions for SM, MC, CV
-                 */
-
-                if (/*[ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 &&*/ domainType !== 'country') {
-                    multiSelect = true;
-                }
-
-                /* QP-859 end */
-
-                if (domainType !== 'country') {
-                    $prevDomainA = this['$' + contentTypes.getPreviousType(domainType)];
-                    parentId = $prevDomainA.attr('data-id');
-                }
-
-                require([url, translationsUrl], function (Collection, translation) {
-                    var subRegionsId;
-                    var creationOptions = {
-                        viewType     : 'thumbnails',
-                        newCollection: true,
-                        count        : -1
-                    };
-
-                    if (parentId && domainType !== 'branch') {
-                        creationOptions.filter = {
-                            parent: {
-                                values: parentId.split(','),
-                                type  : 'ObjectId'
-                            }
-                        };
-                    } else if (parentId) {
-                        subRegionsId = self.$subRegion.attr('data-id').split(',');
-                        creationOptions.filter = {
-                            subRegion: {
-                                values: subRegionsId,
-                                type  : 'ObjectId'
-                            }
-                        };
-                    }
-
-                    if (self.personnelAccessRoleLevel === 2 ||
-                        self.personnelAccessRoleLevel === 3 ||
-                        self.personnelAccessRoleLevel === 4 ||
-                        self.personnelAccessRoleLevel === 9) {
-                        creationOptions.accessRoleLevel = self.personnelAccessRoleLevel;
-                    }
-
-                    view.collection = new Collection(creationOptions);
-
-                    view.collection.on('reset', function () {
-                        var selectView;
-
-                        if (view.collection.length === 0) {
-                            return App.render({
-                                type   : 'error',
-                                message: translation.domainName + ERROR_MESSAGES.noData[currentLanguage]
-                            });
-                        }
-
-                        selectView = new DomainThumbnailsView({
-                            selected   : currentDomains,
-                            contentType: domainType,
-                            collection : view.collection,
-                            multiselect: multiSelect
-                        });
-                        selectView.on('elementsSelected', function (data) {
-                            self.onDomainSelected(data, domainType, self);
-                        });
-                    });
-                });
-            },
-
-            onDomainSelected: function (data, domainType) {
-                var $currentDomainA = this['$' + domainType];
-                var self = this;
-                var showNextField;
-                var text = '';
-                var ids = [];
-                var nextDomainType = contentTypes.getNextType(domainType);
-                var allAfterDomainType = contentTypes.getAllAfter(domainType);
-
-                allAfterDomainType.forEach(function (type) {
-                    self['$' + type].hide();
-                    self['$' + type].attr('data-id', '');
-                    self['$' + type].text('');
-                });
-
-                if (nextDomainType) {
-                    this['$' + nextDomainType].show();
-                }
-
-                if (!this.lastSelectedDomainType && allAfterDomainType && allAfterDomainType.length) {
-                    this.lastSelectedDomainType = allAfterDomainType[allAfterDomainType.length - 1];
-                }
-
-                if (contentTypes.moreThan(this.lastSelectedDomainType, domainType)) {
-                    this.clearAndHideDomainFieldsAfter(domainType);
-                }
-
-                this.lastSelectedDomainType = domainType;
-
-                data.forEach(function (id) {
-                    var model = context.collection.get(id);
-                    if (model) {
-                        text = text + model.get('name').en + ', ';
-                        ids.push(id);
-                    }
-                });
-
-                text = text ? text.slice(0, -2) : text;
-
-                $currentDomainA.attr('data-icon', ids ? 'edit' : 'add');
-                $currentDomainA.text(text);
-                $currentDomainA.attr('data-id', ids);
-
-                showNextField = this.userHasAccessTo(nextDomainType) /*&& (data.length === 1 || [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 )*/;
-
-                this.view.$el.find('.' + nextDomainType + 'Field').toggle(showNextField);
-            },
-
-            showDomainsRows: function (level) {
-                var self = this;
-                var setFirstActive = true;
-
-                this.personnelAccessRoleLevel = level;
-
-                types.forEach(function (contentType) {
-                    var dataEl;
-                    var value;
-                    var $row =  self.view.$el.find('#' + contentType + 'Row');
-                    var $branch = $row.find('.branchField');
-
-                    if (PERSONNEL_LOCATION_FLOW[level].indexOf(contentType) === -1) {
-                        $row.addClass('hidden');
-                        self.clearAndHideDomainFields(contentType);
                     } else {
-                        $row.removeClass('hidden');
-
-                        if (setFirstActive) {
-                            dataEl = self['$' + contentType];
-                            value = dataEl.attr('data-id');
-
-                            if (!value) {
-                                dataEl.show();
-                                setFirstActive = false;
-                            }
+                        if (updateData[key] === model[key]) {
+                            condition = true;
                         }
+                    }
 
-                        level === 4 && contentType === 'branch' ? $branch.removeClass('required mandatory') : $branch.addClass('required mandatory');
+                    if (condition) {
+                        delete updateData[key];
                     }
                 });
-            },
+            }
 
-            clearAndHideDomainFieldsAfter: function (startDomainType) {
-                var types = _.intersection(contentTypes.getAllAfter(startDomainType), PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel]);
+            delete updateData.period;
 
-                for (var i = types.length - 1;
-                     i >= 0;
-                     i--) {
-                    this.clearAndHideDomainFields(types[i]);
+            if (!Object.keys(updateData).length) {
+                return cb();
+            }
+
+            personnelModel.setFieldsNames(translation);
+
+            updateData.accessRoleLevel = this.personnelAccessRoleLevel || -1;
+
+            personnelModel.save(updateData,
+                {
+                    patch  : true,
+                    wait   : true,
+                    success: function (model, response) {
+                        var message;
+                        var status = model.get('status');
+
+                        if (status === 'login') {
+                            message = STATUSES[status.toUpperCase()].name[currentLanguage] + ' ' + model.get('lastAccess');
+                        } else {
+                            message = STATUSES[status.toUpperCase()].name[currentLanguage];
+                        }
+
+                        model.set({
+                            status: {
+                                classCss: status,
+                                message : message
+                            }
+                        });
+
+                        self.view.trigger('modelSaved', model);
+
+                        if (!cb) {
+                            return self.view.$el.dialog('close').dialog('destroy').remove();
+                        } else {
+                            return cb();
+                        }
+                    },
+                    error  : function (model, xhr) {
+                        App.render({type: 'error', message: xhr.responseText});
+
+                        if (cb && typeof(cb) === 'function') {
+                            return cb();
+                        }
+                    }
+                });
+        },
+
+        showDomainDialog: function (domainType) {
+            var self = this;
+            var view = self.view;
+            var $currentDomainA = this['$' + domainType];
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ? App.currentUser.currentLanguage : 'en';
+            var dataId = $currentDomainA.attr('data-id');
+            var currentDomains = dataId !== '' ? dataId.split(',') : [];
+            var $prevDomainA;
+            var parentId;
+            var locationFlow = PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel];
+            var multiSelect = domainType === locationFlow[locationFlow.length - 1];
+
+            /*
+             * @feature
+             * @see https://foxtrapp.myjetbrains.com/youtrack/issue/QP-859
+             * @description Enable the possibility of having multiple regions and subRegions for SM, MC, CV
+             */
+
+            if (/*[ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 &&*/ domainType !== 'country') {
+                multiSelect = true;
+            }
+
+            /* QP-859 end */
+
+            if (domainType !== 'country') {
+                $prevDomainA = this['$' + contentTypes.getPreviousType(domainType)];
+                parentId = $prevDomainA.attr('data-id');
+            }
+
+            var Collection = requireContent(domainType + '.collection');
+            var translation = requireContent(domainType + '.translation.' + currentLanguage);
+
+            var subRegionsId;
+            var creationOptions = {
+                viewType     : 'thumbnails',
+                newCollection: true,
+                count        : -1
+            };
+
+            if (parentId && domainType !== 'branch') {
+                creationOptions.filter = {
+                    parent: {
+                        values: parentId.split(','),
+                        type  : 'ObjectId'
+                    }
+                };
+            } else if (parentId) {
+                subRegionsId = self.$subRegion.attr('data-id').split(',');
+                creationOptions.filter = {
+                    subRegion: {
+                        values: subRegionsId,
+                        type  : 'ObjectId'
+                    }
+                };
+            }
+
+            if (self.personnelAccessRoleLevel === 2 ||
+                self.personnelAccessRoleLevel === 3 ||
+                self.personnelAccessRoleLevel === 4 ||
+                self.personnelAccessRoleLevel === 9) {
+                creationOptions.accessRoleLevel = self.personnelAccessRoleLevel;
+            }
+
+            view.collection = new Collection(creationOptions);
+
+            view.collection.on('reset', function () {
+                var selectView;
+
+                if (view.collection.length === 0) {
+                    return App.render({
+                        type   : 'error',
+                        message: translation.domainName + ERROR_MESSAGES.noData[currentLanguage]
+                    });
                 }
-            },
 
-            clearAndHideDomainFields: function (type) {
-                var $a = this['$' + type];
+                selectView = new DomainThumbnailsView({
+                    selected   : currentDomains,
+                    contentType: domainType,
+                    collection : view.collection,
+                    multiselect: multiSelect
+                });
+                selectView.on('elementsSelected', function (data) {
+                    self.onDomainSelected(data, domainType, self);
+                });
+            });
+        },
 
-                $a.attr('data-id', '');
-                $a.attr('data-icon', 'add');
-                $a.text('');
-                $a.hide();
-            },
+        onDomainSelected: function (data, domainType) {
+            var $currentDomainA = this['$' + domainType];
+            var self = this;
+            var showNextField;
+            var text = '';
+            var ids = [];
+            var nextDomainType = contentTypes.getNextType(domainType);
+            var allAfterDomainType = contentTypes.getAllAfter(domainType);
 
-            userHasAccessTo: function (domainType) {
-                return !!domainType;
-            },
+            allAfterDomainType.forEach(function (type) {
+                self['$' + type].hide();
+                self['$' + type].attr('data-id', '');
+                self['$' + type].text('');
+            });
 
-            allowsMultiselection: function (domainType) {
-                return true;
-            },
+            if (nextDomainType) {
+                this['$' + nextDomainType].show();
+            }
 
-            resetContentTypes: contentTypes.resetContentTypes
-        };
+            if (!this.lastSelectedDomainType && allAfterDomainType && allAfterDomainType.length) {
+                this.lastSelectedDomainType = allAfterDomainType[allAfterDomainType.length - 1];
+            }
 
-        contentTypes.setContentTypes(types);
+            if (contentTypes.moreThan(this.lastSelectedDomainType, domainType)) {
+                this.clearAndHideDomainFieldsAfter(domainType);
+            }
 
-        return logic;
+            this.lastSelectedDomainType = domainType;
+
+            data.forEach(function (id) {
+                var model = context.collection.get(id);
+                if (model) {
+                    text = text + model.get('name').en + ', ';
+                    ids.push(id);
+                }
+            });
+
+            text = text ? text.slice(0, -2) : text;
+
+            $currentDomainA.attr('data-icon', ids ? 'edit' : 'add');
+            $currentDomainA.text(text);
+            $currentDomainA.attr('data-id', ids);
+
+            showNextField = this.userHasAccessTo(nextDomainType) /*&& (data.length === 1 || [ACL_ROLE_INDEXES.SALES_MAN, ACL_ROLE_INDEXES.MERCHANDISER, ACL_ROLE_INDEXES.CASH_VAN].indexOf(this.personnelAccessRoleLevel) !== -1 )*/;
+
+            this.view.$el.find('.' + nextDomainType + 'Field').toggle(showNextField);
+        },
+
+        showDomainsRows: function (level) {
+            var self = this;
+            var setFirstActive = true;
+
+            this.personnelAccessRoleLevel = level;
+
+            types.forEach(function (contentType) {
+                var dataEl;
+                var value;
+                var $row =  self.view.$el.find('#' + contentType + 'Row');
+                var $branch = $row.find('.branchField');
+
+                if (PERSONNEL_LOCATION_FLOW[level].indexOf(contentType) === -1) {
+                    $row.addClass('hidden');
+                    self.clearAndHideDomainFields(contentType);
+                } else {
+                    $row.removeClass('hidden');
+
+                    if (setFirstActive) {
+                        dataEl = self['$' + contentType];
+                        value = dataEl.attr('data-id');
+
+                        if (!value) {
+                            dataEl.show();
+                            setFirstActive = false;
+                        }
+                    }
+
+                    level === 4 && contentType === 'branch' ? $branch.removeClass('required mandatory') : $branch.addClass('required mandatory');
+                }
+            });
+        },
+
+        clearAndHideDomainFieldsAfter: function (startDomainType) {
+            var types = _.intersection(contentTypes.getAllAfter(startDomainType), PERSONNEL_LOCATION_FLOW[this.personnelAccessRoleLevel]);
+
+            for (var i = types.length - 1;
+                 i >= 0;
+                 i--) {
+                this.clearAndHideDomainFields(types[i]);
+            }
+        },
+
+        clearAndHideDomainFields: function (type) {
+            var $a = this['$' + type];
+
+            $a.attr('data-id', '');
+            $a.attr('data-icon', 'add');
+            $a.text('');
+            $a.hide();
+        },
+
+        userHasAccessTo: function (domainType) {
+            return !!domainType;
+        },
+
+        allowsMultiselection: function (domainType) {
+            return true;
+        },
+
+        resetContentTypes: contentTypes.resetContentTypes
     };
-    return createPersonnelViewLogic;
-});
+
+    contentTypes.setContentTypes(types);
+
+    return logic;
+};
+module.exports = createPersonnelViewLogic;

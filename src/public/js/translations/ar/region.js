@@ -1,39 +1,37 @@
-define([
-    'Underscore',
-    'translations/ar/pagination',
-    'translations/ar/cropImages',
-    'translations/ar/filters'
-], function (_, paginationTranslation, cropImagesTranslation, filtersTranslation) {
-    var regionTranslation = {
-        crop           : cropImagesTranslation,
-        // top bar
-        all            : 'المنطقة',
-        archive        : 'الأرشيف',
-        firstBreadCrumb: 'الدول',
-        newDomain      : 'منطقة جديدة',
-        // list
-        flag           : 'العلم',
-        name           : 'الاسم',
-        createdBy      : 'تم أنشأوها بواسطة',
-        // create
-        createTitle    : 'إنشاء منطقة',
-        labelName      : 'اسم المنطقة',
-        addImage       : 'إضافة صورة',
-        addTranslation : {
-            en: 'إضافة الترجمة العربية',
-            ar: 'إضافة الترجمة الانجليزية'
-        },
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
+var cropImagesTranslation = require('./cropImages');
 
-        createBtn   : 'إنشاء',
-        cancelBtn   : 'إلغاء',
-        // edit
-        editTitle   : 'تعديل المنطقة',
-        changeImage : 'تغيير الصورة',
-        saveBtn     : 'حفظ',
-        // preview
-        previewTitle: 'عرض المنطقة',
-        domainName  : 'المنطقة'
-    };
+var regionTranslation = {
+    crop           : cropImagesTranslation,
+    // top bar
+    all            : 'المنطقة',
+    archive        : 'الأرشيف',
+    firstBreadCrumb: 'الدول',
+    newDomain      : 'منطقة جديدة',
+    // list
+    flag           : 'العلم',
+    name           : 'الاسم',
+    createdBy      : 'تم أنشأوها بواسطة',
+    // create
+    createTitle    : 'إنشاء منطقة',
+    labelName      : 'اسم المنطقة',
+    addImage       : 'إضافة صورة',
+    addTranslation : {
+        en: 'إضافة الترجمة العربية',
+        ar: 'إضافة الترجمة الانجليزية'
+    },
 
-    return _.extend({}, paginationTranslation, regionTranslation, filtersTranslation);
-});
+    createBtn   : 'إنشاء',
+    cancelBtn   : 'إلغاء',
+    // edit
+    editTitle   : 'تعديل المنطقة',
+    changeImage : 'تغيير الصورة',
+    saveBtn     : 'حفظ',
+    // preview
+    previewTitle: 'عرض المنطقة',
+    domainName  : 'المنطقة'
+};
+
+module.exports = _.extend({}, paginationTranslation, regionTranslation, filtersTranslation);

@@ -1,34 +1,29 @@
-define([
-    'collections/parrent',
-    'models/activityList',
-    'constants/contentType'
-],
-function (Parrent, Model, CONTENT_TYPES) {
-    var Collection = Parrent.extend({
-        model      : Model,
-        url        : CONTENT_TYPES.ACTIVITYLIST,
-        viewType   : null,
-        contentType: null,
+var Parent = require('../parrent');
+var Model = require('../../models/activityList');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-        initialize: function (options) {
-            var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.ACTIVITYLIST,
+    viewType   : null,
+    contentType: null,
 
-            options = options || {};
-            page = options.page;
+    initialize: function (options) {
+        var page;
 
-            if (!options.hasOwnProperty('reset')) {
-                options.reset = true;
-            }
+        options = options || {};
+        page = options.page;
 
-            if (!options.hasOwnProperty('fetch')) {
-                options.fetch = true;
-            }
-
-            if (options.fetch) {
-                this.getPage(page, options);
-            }
+        if (!options.hasOwnProperty('reset')) {
+            options.reset = true;
         }
-    });
 
-    return Collection;
+        if (!options.hasOwnProperty('fetch')) {
+            options.fetch = true;
+        }
+
+        if (options.fetch) {
+            this.getPage(page, options);
+        }
+    }
 });

@@ -1,47 +1,44 @@
-define([
-        'underscore',
-        'collections/parrent',
-        'models/origin',
-        'constants/contentType'
-    ],
-    function (_, Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.ORIGIN,
-            viewType   : null,
-            contentType: CONTENT_TYPES.ORIGIN,
+var _ = require('underscore');
+var Parent = require('../parrent');
+var Model = require('../../models/origin');
+var CONTENT_TYPES = require('../../constants/contentType');
+var custom = require('../../custom');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.ORIGIN,
+    viewType   : null,
+    contentType: CONTENT_TYPES.ORIGIN,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            },
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-            getSelected: function (options) {
-                var selectedModels = this.where({selected: true});
-                var jsonModels;
+        this.getPage(page, options);
+    },
 
-                options = options || [];
-                jsonModels = _.invoke(selectedModels, 'toJSON');
+    getSelected: function (options) {
+        var selectedModels = this.where({selected: true});
+        var jsonModels;
 
-                if (options.json) {
-                    return jsonModels
-                }
+        options = options || [];
+        jsonModels = _.invoke(selectedModels, 'toJSON');
 
-                if (options.names) {
-                    return _.pluck(jsonModels, 'name');
-                }
+        if (options.json) {
+            return jsonModels
+        }
 
-                if (options.ids) {
-                    return _.pluck(jsonModels, '_id');
-                }
+        if (options.names) {
+            return _.pluck(jsonModels, 'name');
+        }
 
-                return selectedModels;
-            }
-        });
-        return Collection;
-    });
+        if (options.ids) {
+            return _.pluck(jsonModels, '_id');
+        }
+
+        return selectedModels;
+    }
+});

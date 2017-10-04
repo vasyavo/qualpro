@@ -1,11 +1,8 @@
-define([
-        'Underscore',
-        'translations/en/filters'
-    ],
-    function (_, filtersTranslation) {
-        return _.extend({}, {
-            title    : 'Crop Image',
-            cancelBtn: 'Cancel',
-            cropBtn  : 'Crop'
-        }, filtersTranslation);
-    });
+var _ = require('underscore');
+var filtersTranslation = require('./filters');
+
+module.exports = _.extend({}, {
+    title    : 'Crop Image',
+    cancelBtn: 'Cancel',
+    cropBtn  : 'Crop'
+}, filtersTranslation);

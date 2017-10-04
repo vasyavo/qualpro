@@ -1,28 +1,24 @@
-define([
-        'collections/parrent',
-        'models/retailSegment',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.RETAILSEGMENT,
-            viewType   : null,
-            contentType: CONTENT_TYPES.RETAILSEGMENT,
+var Parent = require('../parrent');
+var Model = require('../../models/retailSegment');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.RETAILSEGMENT,
+    viewType   : null,
+    contentType: CONTENT_TYPES.RETAILSEGMENT,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.subRegionId = options.subRegion;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-                if (options.create !== false) {
-                    this.getPage(page, options);
-                }
-            }
-        });
-        return Collection;
-    });
+        this.subRegionId = options.subRegion;
+
+        if (options.create !== false) {
+            this.getPage(page, options);
+        }
+    }
+});

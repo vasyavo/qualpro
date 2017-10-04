@@ -1,30 +1,26 @@
-define([
-        'collections/parrent',
-        'models/region',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.REGION,
-            viewType   : null,
-            contentType: CONTENT_TYPES.REGION,
-            initialize : function (options) {
-                var page;
+var Parent = require('../parrent');
+var Model = require('../../models/region');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-                this.parentCT = CONTENT_TYPES.COUNTRY;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.REGION,
+    viewType   : null,
+    contentType: CONTENT_TYPES.REGION,
+    initialize : function (options) {
+        var page;
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
-                options.parentCT = this.parentCT;
+        this.parentCT = CONTENT_TYPES.COUNTRY;
 
-                this.parent = options.parent;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
+        options.parentCT = this.parentCT;
 
-                if (options.create !== false) {
-                    this.getPage(page, options);
-                }
-            }
-        });
-        return Collection;
-    });
+        this.parent = options.parent;
+
+        if (options.create !== false) {
+            this.getPage(page, options);
+        }
+    }
+});

@@ -1,29 +1,24 @@
-define([
-        'collections/parrent',
-        'models/shelfSharesBrand',
-        'constants/contentType'
-    ],
-    function (parrent, Model, contentType) {
-        var Collection = parrent.extend({
-            model      : Model,
-            contentType: contentType.SHELFSHARES,
+var Parent = require('../parrent');
+var Model = require('../../models/shelfSharesBrand');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            url: function () {
-                return '/' + this.contentType;
-            },
+module.exports = Parent.extend({
+    model      : Model,
+    contentType: CONTENT_TYPES.SHELFSHARES,
 
-            initialize: function (options) {
-                var page;
+    url: function () {
+        return '/' + this.contentType;
+    },
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                if (options.fetch === true) {
-                    this.getPage(page, options);
-                }
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        if (options.fetch === true) {
+            this.getPage(page, options);
+        }
+    }
+});

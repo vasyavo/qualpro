@@ -1,25 +1,19 @@
-define([
-        'collections/parrent',
-        'models/competitorsList',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : '/competitorList/',
-            viewType   : null,
-            contentType: null,
+var Parent = require('../parrent');
+var Model = require('../../models/competitorsList');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : '/competitorList/',
+    viewType   : null,
+    contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});

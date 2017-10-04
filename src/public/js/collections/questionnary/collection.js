@@ -1,25 +1,20 @@
-define([
-        'collections/parrent',
-        'models/questionnary',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.QUESTIONNARIES,
-            viewType   : null,
-            contentType: null,
+var Parent = require('../parrent');
+var Model = require('../../models/questionnary');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.QUESTIONNARIES,
+    viewType   : null,
+    contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});

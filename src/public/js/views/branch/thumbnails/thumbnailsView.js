@@ -1,13 +1,5 @@
-define([
-        'views/domain/thumbnails'
-    ],
+var MainThumbnails = require('../../../views/domain/thumbnails');
 
-    function (MainThumbnails) {
-        var View = MainThumbnails.extend({
-            contentType: 'branch'
-
-        });
-
-        return View;
-    });
-
+module.exports = MainThumbnails.extend({
+    contentType: 'branch',
+});

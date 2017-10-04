@@ -1,104 +1,100 @@
-define(function (require) {
+var _ = require('underscore');
+var Marionette = require('backbone.marionette');
+var ChildView = require('../../views/documents/listItem');
+var Template = require('../../../templates/documents/wrapper.html');
+var BadgeStore = require('../../services/badgeStore');
 
-    var _ = require('underscore');
-    var Marionette = require('marionette');
-    var ChildView = require('views/documents/listItem');
-    var Template = require('text!templates/documents/wrapper.html');
-    var BadgeStore = require('services/badgeStore');
+module.exports = Marionette.CompositeView.extend({
 
-    return Marionette.CompositeView.extend({
+    initialize: function (options) {
+        this.translation = options.translation;
 
-        initialize: function (options) {
-            this.translation = options.translation;
+        BadgeStore.cleanupDocuments();
+    },
 
-            BadgeStore.cleanupDocuments();
-        },
+    className: 'thumbnailHolder scrollable',
 
-        className: 'thumbnailHolder scrollable',
+    template : function (ops) {
+        return _.template(Template)(ops);
+    },
 
-        template: function (ops) {
-            return _.template(Template)(ops);
-        },
+    templateContext: function () {
+        return {
+            breadcrumbs: this.collection.breadcrumbs,
+            translation: this.translation
+        };
+    },
 
-        templateContext: function () {
-            return {
-                breadcrumbs: this.collection.breadcrumbs,
-                translation: this.translation
-            };
-        },
+    onRender: function () {
+        var that = this;
+        var collection = this.collection;
 
-        onRender: function () {
-            var that = this;
-            var collection = this.collection;
-
-            this.$el.on('scroll', _.debounce(function (event) {
-                if (that.isScrollReachedBottom(event)) {
-                    that.collection.getNextPage();
-                }
-            }));
-        },
-
-        isScrollReachedBottom: function (event) {
-            var target = event.target;
-            var scrollTop = target.scrollTop;
-            var scrollHeight = target.scrollHeight;
-            var elementHeight = target.clientHeight;
-            var scrolled = scrollTop + elementHeight;
-
-            if ((scrolled / scrollHeight) === 1) {
-                return true;
+        this.$el.on('scroll', _.debounce(function (event)  {
+            if (that.isScrollReachedBottom(event)) {
+                that.collection.getNextPage();
             }
+        }));
+    },
 
-            return false;
-        },
+    isScrollReachedBottom : function (event) {
+        var target = event.target;
+        var scrollTop = target.scrollTop;
+        var scrollHeight = target.scrollHeight;
+        var elementHeight = target.clientHeight;
+        var scrolled = scrollTop + elementHeight;
 
-        childViewContainer: '.items-container',
+        if ((scrolled / scrollHeight) === 1) {
+            return true;
+        }
 
-        childView: ChildView,
+        return false;
+    },
 
-        childViewOptions: function () {
-            return {
-                translation: this.translation
-            };
-        },
+    childViewContainer : '.items-container',
 
-        childViewEvents: {
-            'checked': 'childViewChecked'
-        },
+    childView : ChildView,
 
-        childViewChecked: function (child) {
-            var arrayOfCheckedItems = this.collection.checked;
+    childViewOptions : function () {
+        return {
+            translation : this.translation
+        };
+    },
 
-            if (child.state) {
-                arrayOfCheckedItems.push(child._id);
-            } else {
-                var valueIndex = arrayOfCheckedItems.indexOf(child._id);
+    childViewEvents : {
+        'checked' : 'childViewChecked'
+    },
 
-                if (valueIndex > -1) {
-                    arrayOfCheckedItems.splice(valueIndex, 1);
-                }
+    childViewChecked : function (child) {
+        var arrayOfCheckedItems = this.collection.checked;
+
+        if (child.state) {
+            arrayOfCheckedItems.push(child._id);
+        } else {
+            var valueIndex = arrayOfCheckedItems.indexOf(child._id);
+
+            if (valueIndex > -1) {
+                arrayOfCheckedItems.splice(valueIndex, 1);
             }
+        }
 
-            this.collection.trigger('item:checked');
-        },
+        this.collection.trigger('item:checked');
+    },
 
-        collectionEvents: {
-            'sync': 'render'
-        },
+    collectionEvents: {
+        'sync': 'render'
+    },
 
-        changeTranslatedFields: function (translation) {
-            var that = this;
-            var $elementsForTranslation = this.$el.find('[data-translation]');
+    changeTranslatedFields: function (translation) {
+        var that = this;
+        var $elementsForTranslation = this.$el.find('[data-translation]');
 
-            this.translation = translation;
-            $elementsForTranslation.each(function (index, el) {
-                var $element = $(el);
-                var property = $element.attr('data-translation');
+        this.translation = translation;
+        $elementsForTranslation.each(function (index, el) {
+            var $element = $(el);
+            var property = $element.attr('data-translation');
 
-                $element.html(that.translation[property]);
-            });
-        },
-
-    });
+            $element.html(that.translation[property]);
+        });
+    },
 
 });

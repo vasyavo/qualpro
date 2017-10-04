@@ -4,7 +4,7 @@
     <div class="userBlock flexColumn">
         <div class="top flexRowStart bottomLine">
             <div class="left flexColumn">
-                <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+                <img src="/preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
             </div>
             <div class="right flexColumn">
                 <div class="userName"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></div>
@@ -42,7 +42,7 @@
                 <% for(var i=0; i<previewCount; i++){ %>
                 <div class="bannerMin">
                     <% if (model.attachments[i].preview) { %>
-                    <img src="preview/<%= model.attachments[i].preview %>" alt="<%=  model.attachments[i].originalName %>" class="bannerImage"/>
+                    <img src="/preview/<%= model.attachments[i].preview %>" alt="<%=  model.attachments[i].originalName %>" class="bannerImage"/>
                     <% } else {%>
                     <div class="iconThumbnail <%= model.attachments[i].type %>"></div>
                     <% } %>

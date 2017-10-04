@@ -1,25 +1,20 @@
-define([
-        'underscore',
-        'collections/parrent',
-        'models/competitorItem',
-        'constants/contentType'
-    ],
-    function (_, Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.COMPETITORITEM,
-            viewType   : null,
-            contentType: CONTENT_TYPES.COMPETITORITEM,
+var Parent = require('../parrent');
+var Model = require('../../models/competitorItem');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.COMPETITORITEM,
+    viewType   : null,
+    contentType: CONTENT_TYPES.COMPETITORITEM,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            }
-        });
-        return Collection;
-    });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
+
+        this.getPage(page, options);
+    }
+});

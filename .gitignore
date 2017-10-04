@@ -67,3 +67,6 @@ restore-staging-db.sh
 # Qual Pro repositories
 /qualpro-spa-custom-reports
 /src/stories/customReports/frontend/
+
+# Frontend build
+/src/public/dist

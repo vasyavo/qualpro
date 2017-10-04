@@ -1,56 +1,52 @@
-define([
-        'underscore',
-        'collections/parrent',
-        'models/country',
-        'constants/contentType'
-    ],
-    function (_, Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.COUNTRY,
-            viewType   : null,
-            contentType: CONTENT_TYPES.COUNTRY,
+var _ = require('underscore');
+var Parent = require('../parrent');
+var Model = require('../../models/country');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.COUNTRY,
+    viewType   : null,
+    contentType: CONTENT_TYPES.COUNTRY,
 
-                options = options || {};
-                page = options.page;
+    initialize: function (options) {
+        var page;
 
-                if (!options.hasOwnProperty('reset')) {
-                    options.reset = true;
-                }
+        options = options || {};
+        page = options.page;
 
-                if (!options.hasOwnProperty('fetch')) {
-                    options.fetch = true;
-                }
+        if (!options.hasOwnProperty('reset')) {
+            options.reset = true;
+        }
 
-                if (options.fetch) {
-                    this.getPage(page, options);
-                }
-            },
+        if (!options.hasOwnProperty('fetch')) {
+            options.fetch = true;
+        }
 
-            getSelected: function (options) {
-                var selectedModels = this.where({selected: true});
-                var jsonModels;
+        if (options.fetch) {
+            this.getPage(page, options);
+        }
+    },
 
-                options = options || [];
-                jsonModels = _.invoke(selectedModels, 'toJSON');
+    getSelected: function (options) {
+        var selectedModels = this.where({selected: true});
+        var jsonModels;
 
-                if (options.json) {
-                    return jsonModels;
-                }
+        options = options || [];
+        jsonModels = _.invoke(selectedModels, 'toJSON');
 
-                if (options.names) {
-                    return _.pluck(jsonModels, 'name');
-                }
+        if (options.json) {
+            return jsonModels;
+        }
 
-                if (options.ids) {
-                    return _.pluck(jsonModels, '_id');
-                }
+        if (options.names) {
+            return _.pluck(jsonModels, 'name');
+        }
 
-                return selectedModels;
-            }
-        });
-        return Collection;
-    });
+        if (options.ids) {
+            return _.pluck(jsonModels, '_id');
+        }
+
+        return selectedModels;
+    }
+});

@@ -1,180 +1,177 @@
-define(['backbone',
-        'jQuery',
-        'Underscore',
-        'text!templates/domain/topBarTemplate.html',
-        'text!templates/pagination/pagination.html',
-        'views/baseTopBar',
-        'helpers/contentTypesHelper',
-        'constants/contentType'
-    ],
-    function (Backbone, $, _, topBarTemplate, pagination, baseTopBar, contentTypes, CONTENT_TYPES) {
-        var types = [
-            CONTENT_TYPES.COUNTRY,
-            CONTENT_TYPES.REGION,
-            CONTENT_TYPES.SUBREGION,
-            CONTENT_TYPES.RETAILSEGMENT,
-            CONTENT_TYPES.OUTLET,
-            CONTENT_TYPES.BRANCH
-        ];
+var $ = require('jquery');
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/domain/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var contentTypes = require('../../helpers/contentTypesHelper');
+var CONTENT_TYPES = require('../../constants/contentType');
+var App = require('../../appState');
 
-        var TopBarView = baseTopBar.extend({
-            template          : _.template(topBarTemplate),
-            paginationTemplate: _.template(pagination),
+var types = [
+    CONTENT_TYPES.COUNTRY,
+    CONTENT_TYPES.REGION,
+    CONTENT_TYPES.SUBREGION,
+    CONTENT_TYPES.RETAILSEGMENT,
+    CONTENT_TYPES.OUTLET,
+    CONTENT_TYPES.BRANCH
+];
 
-            changeContentType: function (newContentType, collection, translation) {
-                var level = App.currentUser.accessRole.level;
+module.exports = baseTopBar.extend({
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-                this.contentType = newContentType;
-                this.creationType = contentTypes.getCreationType(contentTypes.getNextType(this.contentType));
+    changeContentType: function (newContentType, collection, translation) {
+        var level = App.currentUser.accessRole.level;
 
-                if ((level <= 2) || (level >= 8)) {
-                    if (this.creationType === 'country' || this.creationType === 'Country') {
-                        if (level !== 2 && level !== 9) {
-                            this.$createBtn.show();
-                        } else {
-                            this.$createBtn.hide();
-                        }
-                    } else {
-                        this.$createBtn.show();
-                    }
+        this.contentType = newContentType;
+        this.creationType = contentTypes.getCreationType(contentTypes.getNextType(this.contentType));
+
+        if ((level <= 2) || (level >= 8)) {
+            if (this.creationType === 'country' || this.creationType === 'Country') {
+                if (level !== 2 && level !== 9) {
+                    this.$createBtn.show();
                 } else {
                     this.$createBtn.hide();
                 }
+            } else {
+                this.$createBtn.show();
+            }
+        } else {
+            this.$createBtn.hide();
+        }
 
-                this.changeTranslatedFields(translation);
+        this.changeTranslatedFields(translation);
 
-                this.setPagination({
-                    length     : collection.totalRecords,
-                    currentPage: collection.currentPage,
-                    itemsNumber: collection.pageSize
-                });
-            },
+        this.setPagination({
+            length     : collection.totalRecords,
+            currentPage: collection.currentPage,
+            itemsNumber: collection.pageSize
+        });
+    },
 
-            setStatus: function () {
-                var valuesArray;
-                var collectionElement;
+    setStatus: function () {
+        var valuesArray;
+        var collectionElement;
 
-                valuesArray = this.filter.translated.values;
+        valuesArray = this.filter.translated.values;
 
-                if (valuesArray) {
-                    for (var i = valuesArray.length - 1;
-                         i >= 0;
-                         i--) {
-                        collectionElement = this.translatedCollection.findWhere({_id: valuesArray[i]});
-                        collectionElement.set({status: true});
-                    }
-                }
-            },
+        if (valuesArray) {
+            for (var i = valuesArray.length - 1;
+                 i >= 0;
+                 i--) {
+                collectionElement = this.translatedCollection.findWhere({_id: valuesArray[i]});
+                collectionElement.set({status: true});
+            }
+        }
+    },
 
-            changeTabs: function (value) {
-                var level = App.currentUser.accessRole.level;
-                var $curEl = this.$el;
-                var $container = $curEl.find('#templateSwitcher');
-                var $actionBar = $curEl.find('#actionHolder');
-                var filterTab = value === 'archived';
-                var $targetAction = $actionBar.find('[data-archived-type="' + filterTab + '"]');
-                var $targetTab = $container.find('#' + value);
-                var $createBtn = $curEl.find('#createBtn');
-                var $editBtn = $curEl.find('#editBtn');
+    changeTabs: function (value) {
+        var level = App.currentUser.accessRole.level;
+        var $curEl = this.$el;
+        var $container = $curEl.find('#templateSwitcher');
+        var $actionBar = $curEl.find('#actionHolder');
+        var filterTab = value === 'archived';
+        var $targetAction = $actionBar.find('[data-archived-type="' + filterTab + '"]');
+        var $targetTab = $container.find('#' + value);
+        var $createBtn = $curEl.find('#createBtn');
+        var $editBtn = $curEl.find('#editBtn');
 
-                var $checkboxes = $curEl.find('input[type="checkbox"]');
+        var $checkboxes = $curEl.find('input[type="checkbox"]');
 
-                this.tabName = value;
+        this.tabName = value;
 
-                $checkboxes.prop('checked', false);
+        $checkboxes.prop('checked', false);
 
-                $targetTab.addClass('viewBarTabActive');
-                $targetTab.siblings().removeClass('viewBarTabActive');
+        $targetTab.addClass('viewBarTabActive');
+        $targetTab.siblings().removeClass('viewBarTabActive');
 
-                $targetAction.show('viewBarTabActive');
-                $targetAction.siblings('.archiveBtn').hide('viewBarTabActive');
+        $targetAction.show('viewBarTabActive');
+        $targetAction.siblings('.archiveBtn').hide('viewBarTabActive');
 
-                if (filterTab === false) {
-                    if ((level <= 2) || (level >= 8)) {
-                        if (this.creationType === 'country' || this.creationType === 'Country') {
-                            if (level !== 2 && level !== 9) {
-                                this.$createBtn.show();
-                            } else {
-                                this.$createBtn.hide();
-                            }
-                        } else {
-                            this.$createBtn.show();
-                        }
+        if (filterTab === false) {
+            if ((level <= 2) || (level >= 8)) {
+                if (this.creationType === 'country' || this.creationType === 'Country') {
+                    if (level !== 2 && level !== 9) {
+                        this.$createBtn.show();
                     } else {
                         this.$createBtn.hide();
                     }
                 } else {
-                    $createBtn.hide();
-                    $editBtn.hide();
+                    this.$createBtn.show();
                 }
+            } else {
+                this.$createBtn.hide();
+            }
+        } else {
+            $createBtn.hide();
+            $editBtn.hide();
+        }
 
-                this.hideAction();
+        this.hideAction();
 
-                this.trigger('showFilteredContent', value);
-            },
+        this.trigger('showFilteredContent', value);
+    },
 
-            render: function () {
-                var level = App.currentUser.accessRole.level;
-                var paginationContainer;
-                var $archiveBtn;
-                var $unArchiveBtn;
-                var $createBtn;
-                var $thisEl = this.$el;
+    render: function () {
+        var level = App.currentUser.accessRole.level;
+        var paginationContainer;
+        var $archiveBtn;
+        var $unArchiveBtn;
+        var $createBtn;
+        var $thisEl = this.$el;
 
-                contentTypes.setContentTypes(types);
+        contentTypes.setContentTypes(types);
 
-                $('title').text(this.contentType);
+        $('title').text(this.contentType);
 
-                this.creationType = contentTypes.getCreationType(this.contentType);
+        this.creationType = contentTypes.getCreationType(this.contentType);
 
-                $thisEl.html(this.template({
-                    viewType    : this.viewType,
-                    contentType : contentTypes.getDisplayName(this.contentType),
-                    creationType: contentTypes.getDisplayName(this.creationType),
-                    translation : this.translation
-                }));
+        $thisEl.html(this.template({
+            viewType    : this.viewType,
+            contentType : contentTypes.getDisplayName(this.contentType),
+            creationType: contentTypes.getDisplayName(this.creationType),
+            translation : this.translation,
+            App: App,
+        }));
 
-                this.$createBtn = this.$createBtn || $thisEl.find('#createBtn');
-                this.$mainContent = this.$mainContent || $thisEl.find('#all');
-                this.$actionButton = $thisEl.find('.actionBtn');
-                this.$editButton = $thisEl.find('#editBtn');
+        this.$createBtn = this.$createBtn || $thisEl.find('#createBtn');
+        this.$mainContent = this.$mainContent || $thisEl.find('#all');
+        this.$actionButton = $thisEl.find('.actionBtn');
+        this.$editButton = $thisEl.find('#editBtn');
 
-                $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');
+        $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');
 
-                paginationContainer = $thisEl.find('#paginationHolder');
-                paginationContainer.html(this.paginationTemplate({translation: this.translation}));
+        paginationContainer = $thisEl.find('#paginationHolder');
+        paginationContainer.html(this.paginationTemplate({translation: this.translation}));
 
-                $archiveBtn = $thisEl.find('#archiveBtn');
-                $unArchiveBtn = $thisEl.find('#unArchiveBtn');
-                $createBtn = $thisEl.find('#createBtn');
+        $archiveBtn = $thisEl.find('#archiveBtn');
+        $unArchiveBtn = $thisEl.find('#unArchiveBtn');
+        $createBtn = $thisEl.find('#createBtn');
 
-                if (this.tabName === 'archived') {
-                    $archiveBtn.hide();
-                    $unArchiveBtn.show();
-                    $createBtn.hide();
-                } else {
-                    $createBtn.show();
-                    $archiveBtn.show();
-                    $unArchiveBtn.hide();
-                }
+        if (this.tabName === 'archived') {
+            $archiveBtn.hide();
+            $unArchiveBtn.show();
+            $createBtn.hide();
+        } else {
+            $createBtn.show();
+            $archiveBtn.show();
+            $unArchiveBtn.hide();
+        }
 
-                if ((level <= 2) || (level >= 8)) {
-                    if (this.creationType === 'country' || this.creationType === 'Country') {
-                        if (level !== 2 && level !== 9) {
-                            this.$createBtn.show();
-                        } else {
-                            this.$createBtn.hide();
-                        }
-                    } else {
-                        this.$createBtn.show();
-                    }
+        if ((level <= 2) || (level >= 8)) {
+            if (this.creationType === 'country' || this.creationType === 'Country') {
+                if (level !== 2 && level !== 9) {
+                    this.$createBtn.show();
                 } else {
                     this.$createBtn.hide();
                 }
-
-                return this;
+            } else {
+                this.$createBtn.show();
             }
-        });
+        } else {
+            this.$createBtn.hide();
+        }
 
-        return TopBarView;
-    });
+        return this;
+    }
+});

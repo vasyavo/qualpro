@@ -1,40 +1,36 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'constants/contentType',
-    'text!templates/marketingCampaign/topBarTemplate.html',
-    'text!templates/pagination/pagination.html',
-    'views/baseTopBar'
-], function (Backbone, $, _, CONTENT_TYPES, topBarTemplate, pagination, baseTopBar) {
-    var TopBarView = baseTopBar.extend({
-        contentType       : CONTENT_TYPES.MARKETING_CAMPAIGN,
-        template          : _.template(topBarTemplate),
-        paginationTemplate: _.template(pagination),
+var $ = require('jquery');
+var _ = require('underscore');
+var topBarTemplate = require('../../../templates/marketingCampaign/topBarTemplate.html');
+var pagination = require('../../../templates/pagination/pagination.html');
+var baseTopBar = require('../../views/baseTopBar');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-        events: {
-            'click .changeContentView.filterType': 'changeByFilterType'
-        },
+module.exports = baseTopBar.extend({
+    contentType       : CONTENT_TYPES.MARKETING_CAMPAIGN,
+    template          : _.template(topBarTemplate),
+    paginationTemplate: _.template(pagination),
 
-        changeByFilterType: function (e) {
-            var targetEl = $(e.target);
-            var filterType = targetEl.attr('data-filter-type');
+    events: {
+        'click .changeContentView.filterType': 'changeByFilterType'
+    },
 
-            this.preventDefaults(e);
+    changeByFilterType: function (e) {
+        var targetEl = $(e.target);
+        var filterType = targetEl.attr('data-filter-type');
 
-            this.changeTabs(filterType);
-        },
+        this.preventDefaults(e);
 
-        changeTabs: function (filterType) {
-            var $curEl = this.$el;
-            var $container = $curEl.find('#templateSwitcher');
-            var $targetTab = $container.find('[data-filter-type="' + filterType + '"]');
+        this.changeTabs(filterType);
+    },
 
-            $targetTab.addClass('viewBarTabActive');
-            $targetTab.siblings().removeClass('viewBarTabActive');
+    changeTabs: function (filterType) {
+        var $curEl = this.$el;
+        var $container = $curEl.find('#templateSwitcher');
+        var $targetTab = $container.find('[data-filter-type="' + filterType + '"]');
 
-            this.trigger('showFilteredContent', filterType);
-        }
-    });
-    return TopBarView;
+        $targetTab.addClass('viewBarTabActive');
+        $targetTab.siblings().removeClass('viewBarTabActive');
+
+        this.trigger('showFilteredContent', filterType);
+    }
 });

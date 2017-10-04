@@ -1,49 +1,43 @@
-define([
-        'backbone',
-        'text!templates/personnel/compactContent.html',
-        'views/createView'
-    ],
-    function (Backbone, compactContentTemplate, CreateView) {
-        var compactContentView = Backbone.View.extend({
+var _ = require('underscore');
+var Backbone = require('backbone');
+var compactContentTemplate = require('../../../templates/personnel/compactContent.html');
+var CreateView = require('../../views/createView');
 
-            className: 'form', //todo check class name logic
+module.exports = Backbone.View.extend({
 
-            events: {
-                'click #personnels p>a': 'openPersonnelDialog'
-            },
+    className: 'form',
 
-            initialize: function (options) {
+    events: {
+        'click #personnels p>a': 'openPersonnelDialog'
+    },
 
-                this.translation = options.translation;
-                this.collection = options.collection;
+    initialize: function (options) {
 
-                this.render();
-            },
+        this.translation = options.translation;
+        this.collection = options.collection;
 
-            template: _.template(compactContentTemplate),
+        this.render();
+    },
 
-            openPersonnelDialog: function (e) {
-                e.preventDefault();
-                alert('personell popup');
-                var itemId = $(e.target).closest('a').attr('id');
+    template: _.template(compactContentTemplate),
 
+    openPersonnelDialog: function (e) {
+        e.preventDefault();
+        alert('personell popup');
+        var itemId = $(e.target).closest('a').attr('id');
+    },
 
-                //todo show popup
-            },
+    render: function () {
+        this.$el.html(this.template({
+            collection : this.collection,
+            translation: this.translation
+        }));
+        return this;
+    },
 
-            render: function () {
-                this.$el.html(this.template({
-                    collection : this.collection,
-                    translation: this.translation
-                }));
-                return this;
-            },
-
-            createItem: function () {
-                new CreateView({
-                    translation: this.translation
-                });
-            }
+    createItem: function () {
+        new CreateView({
+            translation: this.translation
         });
-        return compactContentView;
-    });
+    }
+});

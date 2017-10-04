@@ -9793,7 +9793,7 @@ table.fancytree-ext-table {
   padding-top: 0 !important;
 }
 .questionsDiagram .diagram_container {
-  padding-top: 60px;
+  padding-top: 10px;
 }
 .promotionItemsDialogWrap {
   height: 100%;
@@ -10091,8 +10091,9 @@ table.fancytree-ext-table {
 .darkGrayHeader tr th {
   background-color: #e8e8e8 !important;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
+::-webkit-file-upload-button { cursor:pointer; }
+
 @-webkit-keyframes rotate{ from{-webkit-transform: rotate(0deg)}  to{-webkit-transform: rotate(180deg);}}
 @-moz-keyframes rotate{ from{-moz-transform: rotate(0deg)}  to{-moz-transform: rotate(180deg);}}
 @-o-keyframes rotate{ from{-o-transform: rotate(0deg)}  to{-o-transform: rotate(180deg);}}
@@ -10310,8 +10311,7 @@ lesshat-selector {
   max-height: 0;
   overflow: hidden;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes fadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 39px;}}
 @-moz-keyframes fadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 39px;}}
 @-o-keyframes fadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 39px;}}
@@ -10337,15 +10337,13 @@ lesshat-selector {
   visibility: hidden;
   opacity: 0;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
 @-moz-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
 @-o-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
 @keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;};
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes fadeInDownTwo{ from{opacity: 0;display: none;bottom: -10%;}  to{display: block;opacity: 1;bottom: 30px;}}
 @-moz-keyframes fadeInDownTwo{ from{opacity: 0;display: none;bottom: -10%;}  to{display: block;opacity: 1;bottom: 30px;}}
 @-o-keyframes fadeInDownTwo{ from{opacity: 0;display: none;bottom: -10%;}  to{display: block;opacity: 1;bottom: 30px;}}
@@ -10384,8 +10382,7 @@ lesshat-selector {
 .dropDownInputWrap.openDdReverse .dropDownList {
   top: auto!important;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes objectivesFadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
 @-moz-keyframes objectivesFadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
 @-o-keyframes objectivesFadeInUp{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 30px;}}
@@ -10406,8 +10403,7 @@ lesshat-selector {
   -o-animation-name: objectivesFadeInUp;
   animation-name: objectivesFadeInUp;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes dropDownFixed{ from{opacity: 0;display: none;top: -50px;}  to{display: block;opacity: 1;top: -2px;}}
 @-moz-keyframes dropDownFixed{ from{opacity: 0;display: none;top: -50px;}  to{display: block;opacity: 1;top: -2px;}}
 @-o-keyframes dropDownFixed{ from{opacity: 0;display: none;top: -50px;}  to{display: block;opacity: 1;top: -2px;}}
@@ -10431,8 +10427,7 @@ lesshat-selector {
   -o-animation-name: dropDownFixed;
   animation-name: dropDownFixed;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 28px;}}
 @-moz-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 28px;}}
 @-o-keyframes fadeInUpTwo{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 28px;}}
@@ -10452,8 +10447,7 @@ lesshat-selector {
   -o-animation-name: fadeInUpTwo;
   animation-name: fadeInUpTwo;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes cubemove{25%{-webkit-transform:translateX(42px)rotate(-90deg)scale(0.5);}50%{-webkit-transform: translateX(42px) translateY(42px) rotate(-179deg);} 50.1% {-webkit-transform: translateX(42px) translateY(42px) rotate(-180deg);} 75% {-webkit-transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);} 100% {-webkit-transform: rotate(-360deg);}}
 @-moz-keyframes cubemove{25%{-moz-transform:translateX(42px)rotate(-90deg)scale(0.5);}50%{-moz-transform: translateX(42px) translateY(42px) rotate(-179deg);} 50.1% {-moz-transform: translateX(42px) translateY(42px) rotate(-180deg);} 75% {-moz-transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);} 100% {-moz-transform: rotate(-360deg);}}
 @-o-keyframes cubemove{25%{-o-transform:translateX(42px)rotate(-90deg)scale(0.5);}50%{-o-transform: translateX(42px) translateY(42px) rotate(-179deg);} 50.1% {-o-transform: translateX(42px) translateY(42px) rotate(-180deg);} 75% {-o-transform: translateX(0px) translateY(42px) rotate(-270deg) scale(0.5);} 100% {-o-transform: rotate(-360deg);}}
@@ -10472,8 +10466,7 @@ lesshat-selector {
   -o-animation-delay: -0.9s;
   animation-delay: -0.9s;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes errorAnimate{ 0%{ opacity: 0; -webkit-transform: translate3d(100%, 0, 0);}  15%{opacity: 1; -webkit-transform: none;} 85%{opacity: 1; -webkit-transform: none;} 100%{display:none; opacity: 0; -webkit-transform: translate3d(100%, 0, 0);}}
 @-moz-keyframes errorAnimate{ 0%{ opacity: 0; -moz-transform: translate3d(100%, 0, 0);}  15%{opacity: 1; -moz-transform: none;} 85%{opacity: 1; -moz-transform: none;} 100%{display:none; opacity: 0; -moz-transform: translate3d(100%, 0, 0);}}
 @-o-keyframes errorAnimate{ 0%{ opacity: 0; -o-transform: translate3d(100%, 0, 0);}  15%{opacity: 1; -o-transform: none;} 85%{opacity: 1; -o-transform: none;} 100%{display:none; opacity: 0; -o-transform: translate3d(100%, 0, 0);}}
@@ -10495,8 +10488,7 @@ lesshat-selector {
   -o-animation: 5s errorAnimate linear;
   animation: 5s errorAnimate linear;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes contentFadeOutLeft{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-webkit-transform: translate3d(-100%, 0, 0);}}
 @-moz-keyframes contentFadeOutLeft{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-moz-transform: translate3d(-100%, 0, 0);}}
 @-o-keyframes contentFadeOutLeft{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-o-transform: translate3d(-100%, 0, 0);}}
@@ -10520,12 +10512,11 @@ lesshat-selector {
   -o-animation-name: contentFadeOutLeft;
   animation-name: contentFadeOutLeft;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-webkit-transform: translate3d(100%, 0, 0);}}
 @-moz-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-moz-transform: translate3d(100%, 0, 0);}}
 @-o-keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-o-transform: translate3d(100%, 0, 0);}}
-@keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-webkit-transform: translate3d(100%, 0, 0);-moz-transform: translate3d(100%, 0, 0);-ms-transform: translate3d(100%, 0, 0);transform: translate3d(100%, 0, 0);};
+@keyframes contentFadeOutRight{ from{opacity: 1;}  to{opacity: 0;visibility:hidden;-webkit-transform: translate3d(100%, 0, 0);-moz-transform: translate3d(100%, 0, 0);-ms-transform: translate3d(100%, 0, 0);transform: translate3d(100%, 0, 0);}
 }
 .contentFadeOutRight {
   -webkit-animation-duration: 0.5s;
@@ -10545,12 +10536,49 @@ lesshat-selector {
   -o-animation-name: contentFadeOutRight;
   animation-name: contentFadeOutRight;
 }
-lesshat-selector {
-  -lh-property: 0; }
-@-webkit-keyframes contentFadeInLeft{ from{opacity: 0; -webkit-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-moz-keyframes contentFadeInLeft{ from{opacity: 0; -moz-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-o-keyframes contentFadeInLeft{ from{opacity: 0; -o-transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@keyframes contentFadeInLeft{ from{opacity: 0;-webkit-transform: translate3d(-100%, 0, 0);-moz-transform: translate3d(-100%, 0, 0);-ms-transform: translate3d(-100%, 0, 0);transform: translate3d(-100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);};
+
+@-webkit-keyframes contentFadeInLeft{
+  from{
+    opacity: 0;
+    -webkit-transform: translate3d(-100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+@-moz-keyframes contentFadeInLeft{
+  from{
+    opacity: 0;
+    -moz-transform: translate3d(-100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -moz-transform: translate3d(0, 0, 0);
+  }
+}
+@-o-keyframes contentFadeInLeft{
+  from {
+    opacity: 0;
+    -o-transform: translate3d(-100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -o-transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes contentFadeInLeft{
+  from{
+    opacity: 0;
+    -webkit-transform: translate3d(-100%, 0, 0);
+    -moz-transform: translate3d(-100%, 0, 0);
+    -ms-transform: translate3d(-100%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 .contentFadeInLeft {
   -webkit-animation-duration: 0.5s;
@@ -10570,12 +10598,49 @@ lesshat-selector {
   -o-animation-name: contentFadeInLeft;
   animation-name: contentFadeInLeft;
 }
-lesshat-selector {
-  -lh-property: 0; }
-@-webkit-keyframes contentFadeInRight{ from{opacity: 0; -webkit-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-moz-keyframes contentFadeInRight{ from{opacity: 0; -moz-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@-o-keyframes contentFadeInRight{ from{opacity: 0; -o-transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);}}
-@keyframes contentFadeInRight{ from{opacity: 0;-webkit-transform: translate3d(100%, 0, 0);-moz-transform: translate3d(100%, 0, 0);-ms-transform: translate3d(100%, 0, 0);transform: translate3d(100%, 0, 0);}  to{opacity: 1; translate3d(0, 0, 0);};
+
+@-webkit-keyframes contentFadeInRight{
+  from{
+    opacity: 0;
+    -webkit-transform: translate3d(100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+@-moz-keyframes contentFadeInRight{
+  from{
+    opacity: 0;
+    -moz-transform: translate3d(100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -moz-transform: translate3d(0, 0, 0);
+  }
+}
+@-o-keyframes contentFadeInRight{
+  from{
+    opacity: 0;
+    -o-transform: translate3d(100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    -o-transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes contentFadeInRight{
+  from{
+    opacity: 0;
+    -webkit-transform: translate3d(100%, 0, 0);
+    -moz-transform: translate3d(100%, 0, 0);
+    -ms-transform: translate3d(100%, 0, 0);
+    transform: translate3d(100%, 0, 0);
+  }
+  to{
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 .contentFadeInRight {
   -webkit-animation-duration: 0.5s;
@@ -10595,15 +10660,13 @@ lesshat-selector {
   -o-animation-name: contentFadeInRight;
   animation-name: contentFadeInRight;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 57px;}}
 @-moz-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 57px;}}
 @-o-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 57px;}}
 @keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 57px;};
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes selfShareAmination{ from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 107px;}}
 @-moz-keyframes selfShareAmination{ from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 107px;}}
 @-o-keyframes selfShareAmination{ from{opacity: 0;display: none;top: 200px;}  to{display: block;opacity: 1;top: 107px;}}
@@ -10620,8 +10683,7 @@ lesshat-selector {
   animation-name: uiDialogAmination;
 }
 @media screen and (max-width: 992px) {
-  lesshat-selector {
-    -lh-property: 0; }
+
 @-webkit-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 24px;}}
 @-moz-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 24px;}}
 @-o-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 24px;}}
@@ -10629,16 +10691,14 @@ lesshat-selector {
   }
 }
 @media screen and (min-width: 992px) and (max-width: 1366px) {
-  lesshat-selector {
-    -lh-property: 0; }
+
 @-webkit-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 40px;}}
 @-moz-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 40px;}}
 @-o-keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 40px;}}
 @keyframes uiDialogAmination{ from{opacity: 0;display: none;top: 10%;}  to{display: block;opacity: 1;top: 40px;};
   }
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes headerAnimation{ from{-webkit-transform: translateY(-150px);}  to{-webkit-transform: none;}}
 @-moz-keyframes headerAnimation{ from{-moz-transform: translateY(-150px);}  to{-moz-transform: none;}}
 @-o-keyframes headerAnimation{ from{-o-transform: translateY(-150px);}  to{-o-transform: none;}}
@@ -10647,8 +10707,7 @@ lesshat-selector {
 .topMenuHolder {
   animation: .7s headerAnimation;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes leftMenuAnimation{ from{-webkit-transform: translateX(-255px);}  to{-webkit-transform: none;}}
 @-moz-keyframes leftMenuAnimation{ from{-moz-transform: translateX(-255px);}  to{-moz-transform: none;}}
 @-o-keyframes leftMenuAnimation{ from{-o-transform: translateX(-255px);}  to{-o-transform: none;}}
@@ -10657,8 +10716,7 @@ lesshat-selector {
 .leftMenuHolder {
   animation: .7s leftMenuAnimation;
 }
-lesshat-selector {
-  -lh-property: 0; }
+
 @-webkit-keyframes rightMenuAnimation{ from{opacity: 0;}  to{opacity: 1;}}
 @-moz-keyframes rightMenuAnimation{ from{opacity: 0;}  to{opacity: 1;}}
 @-o-keyframes rightMenuAnimation{ from{opacity: 0;}  to{opacity: 1;}}
@@ -10943,7 +11001,6 @@ canvas::selection,
   right: 10px;
   display: inline-block;
   font-family: 'icomoon';
-  font-size: 12px;
   font-size: 0.75rem;
   -webkit-transform: translateY(-50%);
   -moz-transform: translateY(-50%);
@@ -10975,7 +11032,6 @@ canvas::selection,
   color: #ffffff;
   border-radius: 3px;
   font-weight: bold;
-  font-size: 11px;
   font-size: 0.6875rem;
 }
 .cell .newBrand:after {

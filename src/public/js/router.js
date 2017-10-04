@@ -1,193 +1,192 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'lodash',
-    'moment',
-    'views/main/main',
-    'views/login/login',
-    'views/createSuperAdmin/createSuperAdmin',
-    'views/forgotPassword/forgotPassword',
-    'dataService',
-    'custom',
-    'constants/contentType',
-    'js-cookie',
-    'views/documents/list',
-    'views/documents/topBar',
-    'views/importExport/Overview',
-    'views/importExport/TopBar',
-    'models/importExport',
-    'constants/aclRoleIndexes',
-    'services/pubnub',
-], function (Backbone, $, _, lodash, moment, mainView, LoginView, CreateSuperAdminView, forgotPassView, dataService, custom, CONSTANTS, Cookies,
-             DocumentsListView, DocumentsTopBarView, ImportExportOverview, ImportExportTopBarView, ImportExportModel, ACL_ROLES, PubNubClient) {
+var Backbone = require('backbone');
+var $ = require('jquery');
+var _ = require('underscore');
+var lodash = require('lodash');
+var Cookies = require('js-cookie');
+var mainView = require('./views/main/main');
+var LoginView = require('./views/login/login');
+var CreateSuperAdminView = require('./views/createSuperAdmin/createSuperAdmin');
+var forgotPassView = require('./views/forgotPassword/forgotPassword');
+var dataService = require('./dataService');
+var custom = require('./custom');
+var CONSTANTS = require('./constants/contentType');
+var DocumentsListView = require('./views/documents/list');
+var DocumentsTopBarView = require('./views/documents/topBar');
+var ImportExportOverview = require('./views/importExport/Overview');
+var ImportExportTopBarView = require('./views/importExport/TopBar');
+var ImportExportModel = require('./models/importExport');
+var ACL_ROLES = require('./constants/aclRoleIndexes');
+var PubNubClient = require('./services/pubnub');
+var App = require('./appState');
+var DocumentCollection = require('./collections/documents/collection');
+var DefFilters = require('./helpers/defFilterLogic');
+var requireContent = require('./helpers/requireContent');
 
-    var appRouter = Backbone.Router.extend({
+module.exports = Backbone.Router.extend({
 
-        wrapperView: null,
-        mainView   : null,
-        topBarView : null,
-        view       : null,
+    wrapperView: null,
+    mainView   : null,
+    topBarView : null,
+    view       : null,
 
-        routes: {
-            'home': 'any',
-            'login(/:confirmed)': 'login',
-            'logout': 'logout',
-            'forgotPass': 'forgotPass',
-            'qualPro/documents(/filter=:filter)': 'documentsHomePage',
-            'qualPro/documents/:id(/filter=:filter)': 'showDocumentsView',
-            'qualPro/importExport': 'goToImportExportView',
-            'qualPro/importExport/*any': 'goToImportExportView',
-            'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)': 'goToCustomReport',
-            'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
-            'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'getDomainList',
-            'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToContent',
-            'qualPro/:contentType/form/:contentId': 'goToForm',
-            '*any': 'any'
-        },
+    routes: {
+        'home': 'any',
+        'login(/:confirmed)': 'login',
+        'logout': 'logout',
+        'forgotPass': 'forgotPass',
+        'qualPro/documents(/filter=:filter)': 'documentsHomePage',
+        'qualPro/documents/:id(/filter=:filter)': 'showDocumentsView',
+        'qualPro/importExport': 'goToImportExportView',
+        'qualPro/importExport/*any': 'goToImportExportView',
+        'qualPro/customReports/:customReportType(/:tabName)(/filter=:filter)': 'goToCustomReport',
+        'qualPro/domain/:domainType/:tabName/:viewType(/pId=:parentId)(/sId=:subRegionId)(/rId=:retailSegmentId)(/oId=:outletId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToDomains',
+        'qualPro/domain/:domainType(/:tabName)(/:viewType)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'getDomainList',
+        'qualPro/:contentType(/:tabName)(/:viewType)(/pId=:parentId)(/p=:page)(/c=:countPerPage)(/filter=:filter)': 'goToContent',
+        'qualPro/:contentType/form/:contentId': 'goToForm',
+        '*any': 'any'
+    },
 
-        initialize: function () {
-            App.$preLoader = $('#loader');
-            this.on('all', function () {
-                $('.ui-dialog').remove();
-                $('#ui-datepicker-div').hide().remove();
+    initialize: function () {
+        App.$preLoader = $('#loader');
+        this.on('all', function () {
+            $('.ui-dialog').remove();
+            $('#ui-datepicker-div').hide().remove();
+        });
+
+        $(document).on('click', function () {
+            $('#paginationHolder .pagesPopup').hide();
+            $('.dropDownInputWrap').removeClass('openDdReverse');
+            $('.dropDownInputWrap').removeClass('openDd');
+        });
+
+        custom.applyDefaults();
+    },
+
+    logout: function () {
+        var self = this;
+
+        $.get('/logout', function () {
+            var userId = App.currentUser._id;
+
+            PubNubClient.unsubscribe({
+                userId: userId
             });
 
-            $(document).on('click', function () {
-                $('#paginationHolder .pagesPopup').hide();
-                $('.dropDownInputWrap').removeClass('openDdReverse');
-                $('.dropDownInputWrap').removeClass('openDd');
-            });
+            App.socket.emit('logout');
+            delete App.currentUser;
+            self.changeStyle('en');
+            Backbone.history.navigate('/login', {trigger: true});
+        });
+    },
 
-            custom.applyDefaults();
-        },
+    documentsHomePage : function (filter) {
+        this.showDocumentsView(null, filter);
+    },
 
-        logout: function () {
-            var self = this;
+    showDocumentsView : function (folder, filter) {
+        var that = this;
 
-            $.get('/logout', function () {
-                var userId = App.currentUser._id;
+        this.checkLogin(function (success) {
+            if (!success) {
+                return that.redirectTo();
+            }
 
-                PubNubClient.unsubscribe({
-                    userId: userId
-                });
+            if (that.view) {
+                that.view.undelegateEvents();
+            }
 
-                App.socket.emit('logout');
-                delete App.currentUser;
-                self.changeStyle('en');
-                Backbone.history.navigate('/login', {trigger: true});
-            });
-        },
+            if (that.wrapperView) {
+                that.wrapperView.undelegateEvents();
+            }
 
-        documentsHomePage: function (filter) {
-            this.showDocumentsView(null, filter);
-        },
+            that.main('documents');
 
-        showDocumentsView: function (folder, filter) {
-            var that = this;
+            that.mainView.topMenu.currentCT = 'documents';
 
-            this.checkLogin(function (success) {
-                if (!success) {
-                    return that.redirectTo();
-                }
-
-                if (that.view) {
-                    that.view.undelegateEvents();
-                }
-
-                if (that.wrapperView) {
-                    that.wrapperView.undelegateEvents();
-                }
-
-                that.main('documents');
-
-                that.mainView.topMenu.currentCT = 'documents';
-
-                that.mainView.on('languageChanged', function () {
-                    App.$preLoader.fadeFn({
-                        visibleState: false,
-                    });
-                });
-
-                that.mainView.on('translationLoaded', function (translation) {
-                    that.view.changeTranslatedFields(translation);
-                    that.topBarView.changeTranslatedFields(translation);
-                });
-
-                var $loader = $('#alaliLogo');
-                if (!$loader.hasClass('smallLogo')) {
-                    $loader.addClass('animated');
-                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
-                }
-
-                var currentLanguage = App.currentUser.currentLanguage;
-                require(['translations/' + currentLanguage + '/documents', 'collections/documents/collection'], function (translation, collection) {
-                    var rootPath = CONSTANTS.DOCUMENTS + '/folder';
-                    var documentsCollection = new collection();
-
-                    delete documentsCollection.state.search;
-
-                    if (folder) {
-                        documentsCollection.url = rootPath + '/' + folder;
-                        documentsCollection.folder = folder;
-                    } else {
-                        documentsCollection.url = rootPath;
-                        documentsCollection.folder = null;
-                    }
-
-                    if (filter) {
-                        filter = JSON.parse(filter);
-                        documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
-                    }
-
-                    var documentsTopBarView = new DocumentsTopBarView({
-                        translation: translation,
-                        collection : documentsCollection,
-                        archived   : lodash.get(filter, 'archived')
-                    });
-                    $('#topBarHolder').html(documentsTopBarView.render().$el);
-
-                    var documentsListView = new DocumentsListView({
-                        collection : documentsCollection,
-                        translation: translation
-                    });
-
-                    that.changeView(documentsListView);
-                    that.changeTopBarView(documentsTopBarView);
-
-                    $('#contentHolder').html(documentsListView.render().$el);
-
-                    documentsCollection.getFirstPage();
-
-                    if (!App.filterCollections) {
-                        App.filterCollections = [];
-                    }
-
-                    App.filterCollections['documents'] = documentsCollection;
+            that.mainView.on('languageChanged', function () {
+                App.$preLoader.fadeFn({
+                    visibleState: false,
                 });
             });
-        },
 
-        goToImportExportView: function () {
-            var that = this;
+            that.mainView.on('translationLoaded', function (translation) {
+                that.view.changeTranslatedFields(translation);
+                that.topBarView.changeTranslatedFields(translation);
+            });
 
-            this.checkLogin(function (success) {
-                if (!success) {
-                    return that.redirectTo();
-                }
+            var $loader = $('#alaliLogo');
+            if (!$loader.hasClass('smallLogo')) {
+                $loader.addClass('animated');
+                $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+            }
 
-                var currentUserAccessRole = App.currentUser.accessRole.level;
-                if (![ACL_ROLES.MASTER_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
-                    return Backbone.history.navigate('qualPro', true);
-                }
+            var currentLanguage = App.currentUser.currentLanguage;
+            var translation = require('./translations/' + currentLanguage + '/documents');
+            var rootPath = CONSTANTS.DOCUMENTS + '/folder';
+            var documentsCollection = new DocumentCollection();
 
-                if (that.view) {
-                    that.view.undelegateEvents();
-                }
+            delete documentsCollection.state.search;
 
-                if (that.wrapperView) {
-                    that.wrapperView.undelegateEvents();
-                }
+            if (folder) {
+                documentsCollection.url = rootPath + '/' + folder;
+                documentsCollection.folder = folder;
+            } else {
+                documentsCollection.url = rootPath;
+                documentsCollection.folder = null;
+            }
+
+            if (filter) {
+                filter = JSON.parse(filter);
+                documentsCollection.url = documentsCollection.url + '?' + $.param(filter);
+            }
+
+            var documentsTopBarView = new DocumentsTopBarView({
+                translation : translation,
+                collection : documentsCollection,
+                archived : lodash.get(filter, 'archived')
+            });
+            $('#topBarHolder').html(documentsTopBarView.render().$el);
+
+            var documentsListView = new DocumentsListView({
+                collection : documentsCollection,
+                translation : translation
+            });
+
+            that.changeView(documentsListView);
+            that.changeTopBarView(documentsTopBarView);
+
+            $('#contentHolder').html(documentsListView.render().$el);
+
+            documentsCollection.getFirstPage();
+
+            if (!App.filterCollections) {
+                App.filterCollections = [];
+            }
+
+            App.filterCollections['documents'] = documentsCollection;
+        });
+    },
+
+    goToImportExportView: function () {
+        var that = this;
+
+        this.checkLogin(function (success) {
+            if (!success) {
+                return that.redirectTo();
+            }
+
+            var currentUserAccessRole = App.currentUser.accessRole.level;
+            if (![ACL_ROLES.MASTER_ADMIN, ACL_ROLES.MASTER_UPLOADER, ACL_ROLES.COUNTRY_UPLOADER].includes(currentUserAccessRole)) {
+                return Backbone.history.navigate('qualPro', true);
+            }
+
+            if (that.view) {
+                that.view.undelegateEvents();
+            }
+
+            if (that.wrapperView) {
+                that.wrapperView.undelegateEvents();
+            }
 
                 that.main('importExport');
 
@@ -204,572 +203,392 @@ define([
                     that.topBarView.changeTranslatedFields(translation);
                 });
 
+            var $loader = $('#alaliLogo');
+            if (!$loader.hasClass('smallLogo')) {
+                $loader.addClass('animated');
+                $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+            }
+
+            var translation = require('./translations/' + App.currentUser.currentLanguage + '/importExport');
+            var importExportModel = new ImportExportModel();
+
+            var importExportTopBar = new ImportExportTopBarView({
+                model: importExportModel,
+                translation: translation,
+            });
+            $('#topBarHolder').html(importExportTopBar.render().$el);
+
+            var importExportOverview = new ImportExportOverview({
+                model      : importExportModel,
+                translation: translation,
+            });
+
+            that.changeView(importExportOverview);
+            that.changeTopBarView(importExportTopBar);
+
+            $('#contentHolder').html(importExportOverview.render().$el);
+        });
+    },
+
+    redirectTo: function () {
+        if (App.requestedURL === null) {
+            App.requestedURL = Backbone.history.fragment;
+        }
+
+        Backbone.history.fragment = '';
+        Backbone.history.navigate('login', {trigger: true});
+    },
+
+    changeWrapperView: function (wrapperView) {
+        if (this.wrapperView) {
+            this.wrapperView.undelegateEvents();
+        }
+        this.wrapperView = wrapperView;
+    },
+
+    changeView: function (view) {
+        if (this.view) {
+            this.view.undelegateEvents();
+        }
+
+        $(document).trigger('resize');
+
+        this.view = view;
+    },
+
+    main: function (contentType) {
+        this.mainView = new mainView({contentType: contentType});
+        this.changeWrapperView(this.mainView);
+    },
+
+    testContent: function (contentType) {
+        if (!CONSTANTS[contentType.toUpperCase()]) {
+            contentType = CONSTANTS.PERSONNEL;
+        }
+
+        return contentType;
+    },
+
+    goToDomains: function (domainType, tabName, viewType, parentId, subRegionId, retailSegmentId, outletId, page, countPerPage, filter) {
+        var self = this;
+
+        App.$preLoader.fadeFn({
+            visibleState: true
+        });
+
+        this.checkLogin(function (success) {
+            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
+
+            if (!success) {
+                return self.redirectTo();
+            }
+
+            if (self.mainView === null) {
+                self.main(domainType);
+            }
+
+            var startTime = new Date();
+            var breadcrumb = {
+                type: domainType,
+                ids : {
+                    parent       : parentId,
+                    subRegion    : subRegionId,
+                    retailSegment: retailSegmentId,
+                    outlet       : outletId
+                }
+            };
+
+            self.mainView.topMenu.currentCT = domainType;
+
+            function loadContent() {
                 var $loader = $('#alaliLogo');
+
                 if (!$loader.hasClass('smallLogo')) {
-                    $loader.addClass('animated');
-                    $loader.addClass('smallLogo').removeClass('ellipseAnimated');
+                    $loader
+                        .addClass('animated');
+
+                    setTimeout(function () {
+                        $loader
+                            .addClass('smallLogo')
+                            .removeClass('ellipseAnimated');
+
+                        getContentDomain();
+                    }, 1000);
+                } else {
+                    getContentDomain();
                 }
-
-                require(['translations/' + App.currentUser.currentLanguage + '/importExport'], function (translation) {
-                    var importExportModel = new ImportExportModel();
-
-                    var importExportTopBar = new ImportExportTopBarView({
-                        model      : importExportModel,
-                        translation: translation,
-                    });
-                    $('#topBarHolder').html(importExportTopBar.render().$el);
-
-                    var importExportOverview = new ImportExportOverview({
-                        model      : importExportModel,
-                        translation: translation,
-                    });
-
-                    that.changeView(importExportOverview);
-                    that.changeTopBarView(importExportTopBar);
-
-                    $('#contentHolder').html(importExportOverview.render().$el);
-                });
-            });
-        },
-
-        redirectTo: function () {
-            if (App.requestedURL === null) {
-                App.requestedURL = Backbone.history.fragment;
             }
 
-            Backbone.history.fragment = '';
-            Backbone.history.navigate('login', {trigger: true});
-        },
+            loadContent();
 
-        changeWrapperView: function (wrapperView) {
-            if (this.wrapperView) {
-                this.wrapperView.undelegateEvents();
-            }
-            this.wrapperView = wrapperView;
-        },
+            function getContentDomain() {
+                var ContentView = requireContent('domain.views.' + viewType);
+                var TopBar = requireContent('domain.views.topBarView');
+                var Collection = requireContent(domainType + '.collection');
+                var translation = requireContent(domainType + '.translation.' + currentLanguage);
+                var defaultFilters = new DefFilters(App.currentUser._id);
+                var defCurFilter = defaultFilters.getDefFilter(domainType, tabName);
+                filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
+                var domainFilter = composeDomainFilter(domainType, parentId, subRegionId, retailSegmentId, outletId);
+                filter = _.extend(filter, domainFilter);
 
-        changeView: function (view) {
-            if (this.view) {
-                this.view.undelegateEvents();
-            }
-
-            $(document).trigger('resize');
-
-            this.view = view;
-        },
-
-        main: function (contentType) {
-            this.mainView = new mainView({contentType: contentType});
-            this.changeWrapperView(this.mainView);
-        },
-
-        testContent: function (contentType) {
-            if (!CONSTANTS[contentType.toUpperCase()]) {
-                contentType = CONSTANTS.PERSONNEL;
-            }
-
-            return contentType;
-        },
-
-        goToDomains: function (domainType, tabName, viewType, parentId, subRegionId, retailSegmentId, outletId, page, countPerPage, filter) {
-            App.$preLoader.fadeFn({
-                visibleState: true
-            });
-            var self = this;
-            this.checkLogin(function (success) {
-                var currentUser;
-                var breadcrumb;
-                var domainFilter;
-                var defaultFilters;
-                var collectionUrl;
-                var startTime;
-                var topBarViewUrl;
-                var contentViewUrl;
-                var defCurFilter;
-                var translationUrl;
-                var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-                var $loader = $('#alaliLogo');
-                if (!success) {
-                    return self.redirectTo();
-                }
+                var contentViewOpts = {
+                    Constructor: ContentView,
+                    options    : {
+                        startTime  : startTime,
+                        filter     : filter,
+                        breadcrumb : breadcrumb,
+                        tabName    : tabName,
+                        defFilter  : defCurFilter,
+                        contentType: domainType,
+                        translation: translation
+                    }
+                };
+                var collectionOpts = {
+                    Constructor: Collection,
+                    options    : {
+                        viewType     : viewType,
+                        filter       : filter,
+                        newCollection: true
+                    }
+                };
+                var topBarOpts = {
+                    Constructor: TopBar,
+                    options    : {
+                        viewType   : viewType,
+                        filter     : filter,
+                        contentType: domainType,
+                        tabName    : tabName,
+                        translation: translation
+                    }
+                };
 
                 if (self.mainView === null) {
                     self.main(domainType);
                 }
 
-                contentViewUrl = 'views/domain/' + viewType;
-                topBarViewUrl = 'views/domain/topBarView';
-                startTime = new Date();
-                collectionUrl = 'collections/' + domainType + '/collection';
-                translationUrl = 'translations/' + currentLanguage + '/' + domainType;
-                breadcrumb = {
-                    type: domainType,
-                    ids : {
-                        parent       : parentId,
-                        subRegion    : subRegionId,
-                        retailSegment: retailSegmentId,
-                        outlet       : outletId
-                    }
-                };
+                self.createViews(contentViewOpts, topBarOpts, collectionOpts, self.mainView.topMenu);
+            }
+        });
+    },
 
-                self.mainView.topMenu.currentCT = domainType;
+    getContent: function (options) {
+        var context = options.context;
+        var contentType = options.contentType;
+        var viewType = options.viewType || 'list';
+        var tabName = options.tabName || 'all';
+        var countPerPage = options.countPerPage;
+        var page = options.page || 1;
+        var filter = options.filter;
 
-                function loadContent() {
-                    if (!$loader.hasClass('smallLogo')) {
-                        $loader
-                            .addClass('animated');
+        var self = context;
+        var startTime = new Date();
+        var contentViewUrl = contentType + '.views.' + viewType;
+        var topBarViewUrl = contentType + '.views.' + '.topBarView';
+        var collectionUrl = contentType + '.collection';
+        var translationUrl = contentType + '.translation.' + App.currentUser.currentLanguage;
 
-                        setTimeout(function () {
-                            $loader
-                                .addClass('smallLogo')
-                                .removeClass('ellipseAnimated');
+        if (context.mainView === null) {
+            context.main(contentType);
+        }
 
-                            getContentDomain();
-                        }, 1000);
-                    } else {
-                        getContentDomain();
-                    }
+        function loadContent() {
+            var ContentView = requireContent(contentViewUrl);
+            var TopBarView = requireContent(topBarViewUrl);
+            var ContentCollection = requireContent(collectionUrl);
+            var translation = requireContent(translationUrl);
+            var defaultFilters = new DefFilters(App.currentUser._id);
+            var defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
+            filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
+
+            var contentViewOpts = {
+                Constructor: ContentView,
+                options    : {
+                    el         : '#contentHolder',
+                    startTime  : startTime,
+                    filter     : filter,
+                    tabName    : tabName,
+                    defFilter  : defCurFilter,
+                    contentType: contentType,
+                    translation: translation
                 }
+            };
+            var collectionOpts = {
+                Constructor: ContentCollection,
+                options    : {
+                    viewType     : viewType,
+                    page         : page,
+                    count        : countPerPage,
+                    filter       : filter,
+                    contentType  : contentType,
+                    newCollection: true
+                }
+            };
+            var topBarOpts = {
+                Constructor: TopBarView,
+                options    : {
+                    viewType   : viewType,
+                    filter     : filter,
+                    contentType: contentType,
+                    tabName    : tabName,
+                    translation: translation
+                }
+            };
 
-                loadContent();
+            self.createViews(contentViewOpts, topBarOpts, collectionOpts, context.mainView.topMenu);
+        }
 
-                function getContentDomain() {
+        loadContent();
+    },
 
-                    require([
-                        contentViewUrl,
-                        topBarViewUrl,
-                        collectionUrl,
-                        'helpers/defFilterLogic',
-                        translationUrl
-                    ], function (ContentView, TopBar, Collection, DefFilters, translation) {
-                        var contentViewOpts;
-                        var collectionOpts;
-                        var topBarOpts;
+    selectMenu: function (href) {
+        var self = this;
 
-                        defaultFilters = new DefFilters(App.currentUser._id);
-                        defCurFilter = defaultFilters.getDefFilter(domainType, tabName);
-                        filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
-                        domainFilter = composeDomainFilter(domainType, parentId, subRegionId, retailSegmentId, outletId);
-                        filter = _.extend(filter, domainFilter);
+        if (!this.mainView || !this.mainView.leftMenu) {
+            return setTimeout(function () {
+                self.selectMenu(null, href);
+            }, 500);
+        }
 
-                        contentViewOpts = {
-                            Constructor: ContentView,
-                            options    : {
-                                startTime  : startTime,
-                                filter     : filter,
-                                breadcrumb : breadcrumb,
-                                tabName    : tabName,
-                                defFilter  : defCurFilter,
-                                contentType: domainType,
-                                translation: translation
-                            }
-                        };
-                        collectionOpts = {
-                            Constructor: Collection,
-                            options    : {
-                                viewType     : viewType,
-                                filter       : filter,
-                                newCollection: true
-                            }
-                        };
-                        topBarOpts = {
-                            Constructor: TopBar,
-                            options    : {
-                                viewType   : viewType,
-                                filter     : filter,
-                                contentType: domainType,
-                                tabName    : tabName,
-                                translation: translation
-                            }
-                        };
+        this.mainView.leftMenu.selectMenu(null, href);
+    },
 
-                        if (self.mainView === null) {
-                            self.main(domainType);
-                        }
+    createViews: function (viewOpts, topBarOpts, collectionOpts, topMenu) {
+        var self = this;
+        var ContentView = viewOpts.Constructor;
+        var viewOptions = viewOpts.options || {};
+        var TopBarView = topBarOpts.Constructor;
+        var topBarOptions = topBarOpts.options || {};
+        var Collection = collectionOpts.Constructor;
+        var collectionOptions = collectionOpts.options;
+        var collection = new Collection(collectionOptions);
 
-                        self.createViews(contentViewOpts, topBarOpts, collectionOpts, self.mainView.topMenu);
-                    });
+        this.mainView.topMenu.trigger('changeStyle');
+
+        viewOptions.collection = collection;
+
+        collection.bind('reset', _.bind(function () {
+            var topbarView;
+            var contentView;
+
+            collection.unbind('reset');
+
+            topbarView = new TopBarView(topBarOptions);
+            contentView = new ContentView(viewOptions);
+
+            contentView.render();
+
+            self.changeView(contentView);
+            self.changeTopBarView(topbarView);
+
+            subscribeTopBarEvents(self.topBarView, self.view);
+            subscribeContentViewEvents(self.view, self.topBarView, topMenu);
+            subscribeCollectionEvents(collection, self.view, self.topBarView);
+
+            collection.trigger('renderFinished', {
+                length     : collection.totalRecords,
+                currentPage: collection.currentPage,
+                itemsNumber: collection.pageSize
+            });
+
+            self.mainView.off();
+
+            self.mainView.on('languageChanged', function () {
+                var curContentView = self.view;
+                var filterView = curContentView.filterView;
+
+                curContentView.filter = _.extend(curContentView.defFilter, curContentView.filter);
+                curContentView.trigger('filter');
+                if (filterView) {
+                    filterView.changeLanguage();
                 }
             });
-        },
 
-        getContent: function (options) {
-            var context = options.context;
-            var contentType = options.contentType;
-            var viewType = options.viewType || 'list';
-            var tabName = options.tabName || 'all';
-            var countPerPage = options.countPerPage;
-            var page = options.page || 1;
-            var filter = options.filter;
-
-            var self = context;
-            var startTime = new Date();
-            var contentViewUrl = 'views/' + contentType + '/' + viewType + '/' + viewType + 'View';
-            var topBarViewUrl = 'views/' + contentType + '/topBarView';
-            var collectionUrl = 'collections/' + contentType + '/collection';
-            var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-            var translationUrl = 'translations/' + currentLanguage + '/' + contentType;
-
-            var defaultFilters;
-            var defCurFilter;
-
-            if (context.mainView === null) {
-                context.main(contentType);
-            }
-
-            function loadContent() {
-                require([contentViewUrl,
-                    topBarViewUrl,
-                    collectionUrl,
-                    'helpers/defFilterLogic',
-                    translationUrl
-                ], function (ContentView, TopBarView, ContentCollection, DefFilters, translation) {
-                    var contentViewOpts;
-                    var collectionOpts;
-                    var topBarOpts;
-
-                    defaultFilters = new DefFilters(App.currentUser._id);
-                    defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
-                    filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
-
-                    contentViewOpts = {
-                        Constructor: ContentView,
-                        options    : {
-                            el         : '#contentHolder',
-                            startTime  : startTime,
-                            filter     : filter,
-                            tabName    : tabName,
-                            defFilter  : defCurFilter,
-                            contentType: contentType,
-                            translation: translation
-                        }
-                    };
-                    collectionOpts = {
-                        Constructor: ContentCollection,
-                        options    : {
-                            viewType     : viewType,
-                            page         : page,
-                            count        : countPerPage,
-                            filter       : filter,
-                            contentType  : contentType,
-                            newCollection: true
-                        }
-                    };
-                    topBarOpts = {
-                        Constructor: TopBarView,
-                        options    : {
-                            viewType   : viewType,
-                            filter     : filter,
-                            contentType: contentType,
-                            tabName    : tabName,
-                            translation: translation
-                        }
-                    };
-
-                    self.createViews(contentViewOpts, topBarOpts, collectionOpts, context.mainView.topMenu);
-                });
-            }
-
-            loadContent();
-        },
-
-        goToCustomReport: function (customReportType, tabName, filter) {
-            var self = this;
-
-            this.checkLogin(function (success) {
-                var $loader = $('#alaliLogo');
-
-                if (!success) {
-                    return self.redirectTo();
-                }
-
-                if (App && App.filterCollections) {
-                    delete App.filterCollections[customReportType];
-                }
-
-                if (tabName && tabName.indexOf('filter=') > -1) {
-                    filter = tabName.replace('filter=', '');
-                    tabName = null;
-                    self.selectMenu('#qualPro/' + customReportType);
-                }
-
-                if (self.mainView === null) {
-                    self.main(customReportType);
-                }
-
-                self.mainView.topMenu.currentCT = customReportType;
-
-                function getCurrentCustomReport(options) {
-                    var startTime = new Date();
-                    var context = options.context;
-                    var contentType = options.contentType;
-                    var viewType = options.viewType || 'list';
-                    var tabName = options.tabName || 'all';
-                    var countPerPage = options.countPerPage;
-                    var page = options.page || 1;
-                    var filter = options.filter;
-                    var self = context;
-                    var contentViewUrl = 'views/customReport/' + contentType + '/reportView';
-                    var topBarViewUrl = 'views/customReports/' + contentType + '/topBarView';
-                    var collectionUrl = 'collections/' + contentType + '/collection';
-                    var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
-                    var translationUrl = 'translations/' + currentLanguage + '/' + contentType;
-                    var defaultFilters;
-                    var defCurFilter;
-                    var currentUser;
-
-                    if (context.mainView === null) {
-                        context.main(contentType);
-                    }
-
-                    function loadContent() {
-                        require([contentViewUrl,
-                            topBarViewUrl,
-                            collectionUrl,
-                            'helpers/defFilterLogic',
-                            translationUrl
-                        ], function (ContentView, TopBarView, ContentCollection, DefFilters, translation) {
-                            var contentViewOpts;
-                            var collectionOpts;
-                            var topBarOpts;
-
-                            defaultFilters = new DefFilters(App.currentUser._id);
-                            defCurFilter = defaultFilters.getDefFilter(contentType, tabName);
-                            filter = filter ? JSON.parse(decodeURIComponent(filter)) : defCurFilter;
-
-                            contentViewOpts = {
-                                Constructor: ContentView,
-                                options    : {
-                                    el         : '#contentHolder',
-                                    startTime  : startTime,
-                                    filter     : filter,
-                                    tabName    : tabName,
-                                    defFilter  : defCurFilter,
-                                    contentType: contentType,
-                                    translation: translation
-                                }
-                            };
-                            collectionOpts = {
-                                Constructor: ContentCollection,
-                                options    : {
-                                    viewType     : viewType,
-                                    page         : page,
-                                    count        : countPerPage,
-                                    filter       : filter,
-                                    contentType  : contentType,
-                                    newCollection: true
-                                }
-                            };
-                            topBarOpts = {
-                                Constructor: TopBarView,
-                                options    : {
-                                    viewType   : viewType,
-                                    filter     : filter,
-                                    contentType: contentType,
-                                    tabName    : tabName,
-                                    translation: translation
-                                }
-                            };
-
-                            self.createViews(contentViewOpts, topBarOpts, collectionOpts, context.mainView.topMenu);
-                        });
-                    }
-
-                    loadContent();
-                }
-
-                if (!$loader.hasClass('smallLogo')) {
-                    $loader
-                        .addClass('animated');
-
-                    setTimeout(function () {
-                        $loader
-                            .addClass('smallLogo')
-                            .removeClass('ellipseAnimated');
-
-                        self.getCurrentCustomReport({
-                            context     : self,
-                            contentType : customReportType,
-                            page        : 1,
-                            countPerPage: 25,
-                            tabName     : tabName,
-                            filter      : filter
-                        });
-                    }, 1000);
-                } else {
-                    self.getCurrentCustomReport({
-                        context     : self,
-                        contentType : customReportType,
-                        page        : 1,
-                        countPerPage: 25,
-                        tabName     : tabName,
-                        filter      : filter
-                    });
-                }
-
+            self.mainView.on('translationLoaded', function (translation) {
+                self.view.changeTranslatedFields(translation);
+                self.topBarView.changeTranslatedFields(translation);
             });
-        },
+            self.selectMenu('#qualPro/' + topBarOptions.contentType);
+        }, self));
+        App.storage.remove('currentCheckedFilter');
+    },
 
-        selectMenu: function (href) {
-            var self = this;
+    getDomainList: function (contentType, tabName, viewType, page, countPerPage, filter) {
+        var viewTypes = ['list', 'thumbnails'];
 
-            if (!this.mainView || !this.mainView.leftMenu) {
-                return setTimeout(function () {
-                    self.selectMenu(null, href);
-                }, 500);
+        this.contentType = contentType;
+
+        contentType = this.testContent(contentType);
+
+        if (!tabName || (viewTypes.indexOf(tabName) !== -1)) {
+            tabName = custom.getCurrentTab(contentType);
+        }
+
+        if (!viewType || (viewTypes.indexOf(viewTypes) === -1)) {
+            viewType = custom.getCurrentVT({contentType: contentType});
+            if (viewType) {
+                App.requestedURL = '#qualPro/domain/' + contentType + '/' + tabName + '/' + viewType;
+                Backbone.history.navigate(App.requestedURL, {trigger: true});
+            } else {
+                this.goToDomains(contentType, null, null, null, null, null, page, countPerPage, filter);
             }
+        }
+    },
 
-            this.mainView.leftMenu.selectMenu(null, href);
-        },
+    goToContent: function (contentType, tabName, viewType, parentId, page, countPerPage, filter) {
+        App.$preLoader.fadeFn({
+            visibleState: true
+        });
+        var self = this;
 
-        createViews: function (viewOpts, topBarOpts, collectionOpts, topMenu) {
-            var self = this;
-            var ContentView = viewOpts.Constructor;
-            var viewOptions = viewOpts.options || {};
-            var TopBarView = topBarOpts.Constructor;
-            var topBarOptions = topBarOpts.options || {};
-            var Collection = collectionOpts.Constructor;
-            var collectionOptions = collectionOpts.options;
-            var collection = new Collection(collectionOptions);
-
-            this.mainView.topMenu.trigger('changeStyle');
-
-            viewOptions.collection = collection;
-
-            collection.bind('reset', _.bind(function () {
-                var topbarView;
-                var contentView;
-
-                collection.unbind('reset');
-
-                topbarView = new TopBarView(topBarOptions);
-                contentView = new ContentView(viewOptions);
-
-                contentView.render();
-
-                self.changeView(contentView);
-                self.changeTopBarView(topbarView);
-
-                subscribeTopBarEvents(self.topBarView, self.view);
-                subscribeContentViewEvents(self.view, self.topBarView, topMenu);
-                subscribeCollectionEvents(collection, self.view, self.topBarView);
-
-                collection.trigger('renderFinished', {
-                    length     : collection.totalRecords,
-                    currentPage: collection.currentPage,
-                    itemsNumber: collection.pageSize
-                });
-
-                self.mainView.off();
-
-                self.mainView.on('languageChanged', function () {
-                    var curContentView = self.view;
-                    var filterView = curContentView.filterView;
-
-                    curContentView.filter = _.extend(curContentView.defFilter, curContentView.filter);
-                    curContentView.trigger('filter');
-                    if (filterView) {
-                        filterView.changeLanguage();
-                    }
-                });
-
-                self.mainView.on('translationLoaded', function (translation) {
-                    self.view.changeTranslatedFields(translation);
-                    self.topBarView.changeTranslatedFields(translation);
-                });
-                self.selectMenu('#qualPro/' + topBarOptions.contentType);
-            }, self));
-            App.storage.remove('currentCheckedFilter');
-        },
-
-        getDomainList: function (contentType, tabName, viewType, page, countPerPage, filter) {
+        this.checkLogin(function (success) {
             var viewTypes = ['list', 'thumbnails'];
+            var $loader = $('#alaliLogo');
 
-            this.contentType = contentType;
+            if (!success) {
+                return self.redirectTo();
+            }
 
-            contentType = this.testContent(contentType);
+            if (App && App.filterCollections) {
+                delete App.filterCollections[contentType];
+            }
+
+            if (tabName && tabName.indexOf('filter=') > -1) {
+                filter = tabName.replace('filter=', '');
+                tabName = null;
+
+                self.selectMenu('#qualPro/' + contentType);
+
+                // self.mainView.leftMenu.selectMenu(null, '#qualPro/' + contentType);
+            }
 
             if (!tabName || (viewTypes.indexOf(tabName) !== -1)) {
                 tabName = custom.getCurrentTab(contentType);
             }
 
-            if (!viewType || (viewTypes.indexOf(viewTypes) === -1)) {
+            if (!viewType) {
                 viewType = custom.getCurrentVT({contentType: contentType});
                 if (viewType) {
-                    App.requestedURL = '#qualPro/domain/' + contentType + '/' + tabName + '/' + viewType;
-                    Backbone.history.navigate(App.requestedURL, {trigger: true});
-                } else {
-                    this.goToDomains(contentType, null, null, null, null, null, page, countPerPage, filter);
+                    App.requestedURL = '#qualPro/' + contentType + '/' + tabName + '/' + viewType;
+                    Backbone.history.navigate(App.requestedURL, {trigger: false});
                 }
             }
-        },
 
-        goToContent: function (contentType, tabName, viewType, parentId, page, countPerPage, filter) {
-            App.$preLoader.fadeFn({
-                visibleState: true
-            });
-            var self = this;
+            if (self.mainView === null) {
+                self.main(contentType);
+            }
 
-            this.checkLogin(function (success) {
-                var viewTypes = ['list', 'thumbnails'];
-                var $loader = $('#alaliLogo');
+            self.mainView.topMenu.currentCT = contentType;
 
-                if (!success) {
-                    return self.redirectTo();
-                }
+            if (!$loader.hasClass('smallLogo')) {
+                $loader
+                    .addClass('animated');
 
-                if (App && App.filterCollections) {
-                    delete App.filterCollections[contentType];
-                }
-
-                if (tabName && tabName.indexOf('filter=') > -1) {
-                    filter = tabName.replace('filter=', '');
-                    tabName = null;
-
-                    self.selectMenu('#qualPro/' + contentType);
-
-                    // self.mainView.leftMenu.selectMenu(null, '#qualPro/' + contentType);
-                }
-
-                if (!tabName || (viewTypes.indexOf(tabName) !== -1)) {
-                    tabName = custom.getCurrentTab(contentType);
-                }
-
-                if (!viewType) {
-                    viewType = custom.getCurrentVT({contentType: contentType});
-                    if (viewType) {
-                        App.requestedURL = '#qualPro/' + contentType + '/' + tabName + '/' + viewType;
-                        Backbone.history.navigate(App.requestedURL, {trigger: false});
-                    }
-                }
-
-                if (self.mainView === null) {
-                    self.main(contentType);
-                }
-
-                self.mainView.topMenu.currentCT = contentType;
-
-                if (!$loader.hasClass('smallLogo')) {
+                setTimeout(function () {
                     $loader
-                        .addClass('animated');
+                        .addClass('smallLogo')
+                        .removeClass('ellipseAnimated');
 
-                    setTimeout(function () {
-                        $loader
-                            .addClass('smallLogo')
-                            .removeClass('ellipseAnimated');
-
-                        self.getContent({
-                            context     : self,
-                            contentType : contentType,
-                            page        : page,
-                            countPerPage: countPerPage,
-                            viewType    : viewType,
-                            tabName     : tabName,
-                            parentId    : parentId,
-                            filter      : filter
-                        });
-                    }, 1000);
-                } else {
                     self.getContent({
                         context     : self,
                         contentType : contentType,
@@ -780,229 +599,239 @@ define([
                         parentId    : parentId,
                         filter      : filter
                     });
-                }
-            });
-        },
-
-        changeTopBarView: function (topBarView) {
-            if (this.topBarView) {
-                this.topBarView.undelegateEvents();
+                }, 1000);
+            } else {
+                self.getContent({
+                    context     : self,
+                    contentType : contentType,
+                    page        : page,
+                    countPerPage: countPerPage,
+                    viewType    : viewType,
+                    tabName     : tabName,
+                    parentId    : parentId,
+                    filter      : filter
+                });
             }
-            this.topBarView = topBarView;
-        },
+        });
+    },
 
-        any: function () {
-            this.mainView = new mainView();
-            this.changeWrapperView(this.mainView);
-            this.goToContent('activityList');
-        },
-
-        login: function (confirmed) {
-            var self = this;
-
-            this.mainView = null;
-            dataService.getData('/personnel/existSuperAdmin', {}, function (err, res) {
-                var createSuperAdminView;
-                var loginView;
-
-                function runView() {
-                    if (res === 'exist') {
-                        loginView = new LoginView();
-                        self.changeWrapperView(loginView);
-                    } else {
-                        createSuperAdminView = new CreateSuperAdminView();
-                        self.changeWrapperView(createSuperAdminView);
-                    }
-                }
-
-                if (err) {
-                    return App.render(err);
-                }
-
-                if (confirmed) {
-                    $.get('/logout', function () {
-                        delete App.currentUser;
-                        App.requestedURL = null;
-                        Backbone.history.navigate('/login', false);
-                        runView();
-                    });
-                } else {
-                    runView();
-                }
-
-            });
-        },
-
-        forgotPass: function () {
-            this.mainView = null;
-            this.changeWrapperView(new forgotPassView());
+    changeTopBarView: function (topBarView) {
+        if (this.topBarView) {
+            this.topBarView.undelegateEvents();
         }
-    });
+        this.topBarView = topBarView;
+    },
 
-    // region Methods
+    any: function () {
+        this.mainView = new mainView();
+        this.changeWrapperView(this.mainView);
+        this.goToContent('activityList');
+    },
 
-    /**
-     * Subscribes next top bar events to specific methods of contentView setting context to context view:
-     * createEvents -> createItem
-     * editEvent -> editItem
-     * disableEvent -> archiveItems
-     * showFilteredContent -> showFilteredContent
-     * firstPage -> firstPage
-     * lastPage -> lastPage
-     * nextPage -> nextPage
-     * previousPage -> previousPage
-     * getPage -> getPage
-     * switchPageCounter -> switchPageCounter
-     * @param topBarView
-     * @param contentView
-     */
-    var subscribeTopBarEvents = function (topBarView, contentView) {
-        topBarView.bind('createEvent', contentView.createItem, contentView);
-        topBarView.bind('editEvent', contentView.editItem, contentView);
-        topBarView.bind('disableEvent', contentView.archiveItems, contentView);
-        topBarView.bind('update-list-view', contentView.updateListView, contentView);
+    login: function (confirmed) {
+        var self = this;
 
-        topBarView.bind('sendPass', contentView.sendPass, contentView);
-        topBarView.bind('addSupervisor', contentView.addSupervisor, contentView);
+        this.mainView = null;
+        dataService.getData('/personnel/existSuperAdmin', {}, function (err, res) {
+            var createSuperAdminView;
+            var loginView;
 
-        topBarView.bind('showFilteredContent', contentView.showFilteredContent, contentView);
+            function runView() {
+                if (res === 'exist') {
+                    loginView = new LoginView();
+                    self.changeWrapperView(loginView);
+                } else {
+                    createSuperAdminView = new CreateSuperAdminView();
+                    self.changeWrapperView(createSuperAdminView);
+                }
+            }
 
-        topBarView.bind('nextPage', function (options) {
-            App.$preLoader.fadeFn({
-                visibleState: true,
-                transparent : true
-            });
+            if (err) {
+                return App.render(err);
+            }
 
-            contentView.nextPage(options);
-        }, contentView);
-        topBarView.bind('previousPage', function (options) {
-            App.$preLoader.fadeFn({
-                visibleState: true,
-                transparent : true
-            });
-            contentView.previousPage(options);
-        }, contentView);
-        topBarView.bind('getPage', function (options) {
-            App.$preLoader.fadeFn({
-                visibleState: true,
-                transparent : true
-            });
+            if (confirmed) {
+                $.get('/logout', function () {
+                    delete App.currentUser;
+                    App.requestedURL = null;
+                    Backbone.history.navigate('/login', false);
+                    runView();
+                });
+            } else {
+                runView();
+            }
 
-            contentView.getPage(options);
-        }, contentView);
-        topBarView.bind('switchPageCounter', function (options) {
-            App.$preLoader.fadeFn({
-                visibleState: true,
-                transparent : true
-            });
+        });
+    },
 
-            contentView.switchPageCounter(options);
-        }, contentView);
+    forgotPass: function () {
+        this.mainView = null;
+        this.changeWrapperView(new forgotPassView());
+    }
+});
 
-        topBarView.bind('checkAll', contentView.checkAll, contentView);
-        topBarView.bind('checkAvailableSendPass', contentView.checkAvailableSendPass, contentView);
-    };
+// region Methods
 
-    /**
-     * Subscribes next collection events to specific methods of contentView setting context to context view:
-     * showMore -> showMoreContent
-     * @param collection
-     * @param contentView
-     */
-    var subscribeCollectionEvents = function (collection, contentView, topBarView) {
-        collection.bind('showMore', function (options) {
-            App.$preLoader.fadeFn({
-                visibleState: false
-            });
-            contentView.showMoreContent(options)
-        }, contentView);
-        collection.bind('add', contentView.addItem, contentView);
-        collection.bind('remove', contentView.removeRow, contentView);
-        collection.bind('renderFinished', topBarView.setPagination, topBarView);
-    };
+/**
+ * Subscribes next top bar events to specific methods of contentView setting context to context view:
+ * createEvents -> createItem
+ * editEvent -> editItem
+ * disableEvent -> archiveItems
+ * showFilteredContent -> showFilteredContent
+ * firstPage -> firstPage
+ * lastPage -> lastPage
+ * nextPage -> nextPage
+ * previousPage -> previousPage
+ * getPage -> getPage
+ * switchPageCounter -> switchPageCounter
+ * @param topBarView
+ * @param contentView
+ */
+var subscribeTopBarEvents = function (topBarView, contentView) {
+    topBarView.bind('createEvent', contentView.createItem, contentView);
+    topBarView.bind('editEvent', contentView.editItem, contentView);
+    topBarView.bind('disableEvent', contentView.archiveItems, contentView);
+    topBarView.bind('update-list-view', contentView.updateListView, contentView);
 
-    /**
-     * Subscribes next contentView events to specific methods of topBarView setting context to topBarView:
-     * selectedElementsChanged -> changeActionButtonState
-     * @param contentView
-     * @param topBarView
-     */
-    var subscribeContentViewEvents = function (contentView, topBarView, topMenu) {
-        contentView.bind('renderCurrentUserInfo', topMenu.renderCurrentUserInfo, topMenu);
-        contentView.bind('contentTypeChanged', topBarView.changeContentType, topBarView);
-        contentView.bind('contentTypeChanged', function (newContentType, collection, translation) {
-            topMenu.currentCT = newContentType;
-            topMenu.collection = collection;
-            contentView.translation = translation;
-            contentView.contentType = newContentType;
-            contentView.collection.unbind();
-            contentView.correctView(newContentType);
-            subscribeCollectionEvents(contentView.collection, contentView, topBarView);
+    topBarView.bind('sendPass', contentView.sendPass, contentView);
+    topBarView.bind('addSupervisor', contentView.addSupervisor, contentView);
+
+    topBarView.bind('showFilteredContent', contentView.showFilteredContent, contentView);
+
+    topBarView.bind('nextPage', function (options) {
+        App.$preLoader.fadeFn({
+            visibleState: true,
+            transparent : true
         });
 
-        contentView.bind('changeTabs', topBarView.changeTabs, topBarView);
-        contentView.bind('hideCreateForBreadCrumbs', topBarView.hideCreateForBreadCrumbs, topBarView);
+        contentView.nextPage(options);
+    }, contentView);
+    topBarView.bind('previousPage',function(options){
+        App.$preLoader.fadeFn({
+            visibleState: true,
+            transparent : true
+        });
+        contentView.previousPage(options);
+    }, contentView);
+    topBarView.bind('getPage', function(options){
+        App.$preLoader.fadeFn({
+            visibleState: true,
+            transparent : true
+        });
 
-        contentView.bind('hideActionDd', topBarView.hideAction, topBarView);
-        contentView.bind('unCheckSelectAll', topBarView.unCheckSelectAll, topBarView);
-        contentView.bind('collapseActionDropDown', topBarView.collapseActionDropDown, topBarView);
+        contentView.getPage(options);
+    }, contentView);
+    topBarView.bind('switchPageCounter', function(options){
+        App.$preLoader.fadeFn({
+            visibleState: true,
+            transparent : true
+        });
 
-        contentView.bind('filter', topBarView.showFilteredPage, topBarView);
-        contentView.bind('selectedElementsChanged', topBarView.changeActionButtonState, topBarView);
-        contentView.bind('changeActionButtons', topBarView.changeActionButtons, topBarView);
+        contentView.switchPageCounter(options);
+    }, contentView);
 
-        contentView.bind('pagination', topBarView.setPagination, topBarView);
-    };
+    topBarView.bind('checkAll', contentView.checkAll, contentView);
+    topBarView.bind('checkAvailableSendPass', contentView.checkAvailableSendPass, contentView);
+};
 
-    var composeDomainFilter = function (domainType, parentId, subRegionId, retailSegmentId, outletId) {
-        if (parentId) {
-            parentId = parentId.split(',')[0];
-        }
+/**
+ * Subscribes next collection events to specific methods of contentView setting context to context view:
+ * showMore -> showMoreContent
+ * @param collection
+ * @param contentView
+ */
+var subscribeCollectionEvents = function (collection, contentView, topBarView) {
+    collection.bind('showMore', function (options) {
+        App.$preLoader.fadeFn({
+            visibleState: false
+        });
+        contentView.showMoreContent(options)
+    }, contentView);
+    collection.bind('add', contentView.addItem, contentView);
+    collection.bind('remove', contentView.removeRow, contentView);
+    collection.bind('renderFinished', topBarView.setPagination, topBarView);
+};
 
-        if (subRegionId) {
-            subRegionId = subRegionId.split(',')[0];
-        }
+/**
+ * Subscribes next contentView events to specific methods of topBarView setting context to topBarView:
+ * selectedElementsChanged -> changeActionButtonState
+ * @param contentView
+ * @param topBarView
+ */
+var subscribeContentViewEvents = function (contentView, topBarView, topMenu) {
+    contentView.bind('renderCurrentUserInfo', topMenu.renderCurrentUserInfo, topMenu);
+    contentView.bind('contentTypeChanged', topBarView.changeContentType, topBarView);
+    contentView.bind('contentTypeChanged', function (newContentType, collection, translation) {
+        topMenu.currentCT = newContentType;
+        topMenu.collection = collection;
+        contentView.translation = translation;
+        contentView.contentType = newContentType;
+        contentView.collection.unbind();
+        contentView.correctView(newContentType);
+        subscribeCollectionEvents(contentView.collection, contentView, topBarView);
+    });
 
-        if (retailSegmentId) {
-            retailSegmentId = retailSegmentId.split(',')[0];
-        }
+    contentView.bind('changeTabs', topBarView.changeTabs, topBarView);
+    contentView.bind('hideCreateForBreadCrumbs', topBarView.hideCreateForBreadCrumbs, topBarView);
 
-        if (outletId) {
-            outletId = outletId.split(',')[0];
-        }
+    contentView.bind('hideActionDd', topBarView.hideAction, topBarView);
+    contentView.bind('unCheckSelectAll', topBarView.unCheckSelectAll, topBarView);
+    contentView.bind('collapseActionDropDown', topBarView.collapseActionDropDown, topBarView);
 
-        switch (domainType) {
-            case CONSTANTS.COUNTRY:
-                return {};
-            case CONSTANTS.REGION:
-            case CONSTANTS.SUBREGION:
-                if (parentId) {
-                    return {parent: {values: [parentId], type: 'ObjectId'}};
-                }
-                return {};
-            case CONSTANTS.RETAILSEGMENT:
-                if (subRegionId) {
-                    return {subRegions: {values: [subRegionId], type: 'ObjectId'}};
-                }
-                return {};
-            case CONSTANTS.OUTLET:
-                if (subRegionId && retailSegmentId) {
-                    return {
-                        subRegions    : {values: [subRegionId], type: 'ObjectId'},
-                        retailSegments: {values: [retailSegmentId], type: 'ObjectId'}
-                    };
-                }
-                return {};
-            case CONSTANTS.BRANCH:
-                if (subRegionId && retailSegmentId && outletId) {
-                    return {
-                        subRegion    : {values: [subRegionId], type: 'ObjectId'},
-                        retailSegment: {values: [retailSegmentId], type: 'ObjectId'},
-                        outlet       : {values: [outletId], type: 'ObjectId'}
-                    };
-                }
-                return {};
-        }
-    };
-    return appRouter;
-});
+    contentView.bind('filter', topBarView.showFilteredPage, topBarView);
+    contentView.bind('selectedElementsChanged', topBarView.changeActionButtonState, topBarView);
+    contentView.bind('changeActionButtons', topBarView.changeActionButtons, topBarView);
+
+    contentView.bind('pagination', topBarView.setPagination, topBarView);
+};
+
+var composeDomainFilter = function (domainType, parentId, subRegionId, retailSegmentId, outletId) {
+    if (parentId) {
+        parentId = parentId.split(',')[0];
+    }
+
+    if (subRegionId) {
+        subRegionId = subRegionId.split(',')[0];
+    }
+
+    if (retailSegmentId) {
+        retailSegmentId = retailSegmentId.split(',')[0];
+    }
+
+    if (outletId) {
+        outletId = outletId.split(',')[0];
+    }
+
+    switch (domainType) {
+        case CONSTANTS.COUNTRY:
+            return {};
+        case CONSTANTS.REGION:
+        case CONSTANTS.SUBREGION:
+            if (parentId) {
+                return {parent: {values: [parentId], type: 'ObjectId'}};
+            }
+            return {};
+        case CONSTANTS.RETAILSEGMENT:
+            if (subRegionId) {
+                return {subRegions: {values: [subRegionId], type: 'ObjectId'}};
+            }
+            return {};
+        case CONSTANTS.OUTLET:
+            if (subRegionId && retailSegmentId) {
+                return {
+                    subRegions    : {values: [subRegionId], type: 'ObjectId'},
+                    retailSegments: {values: [retailSegmentId], type: 'ObjectId'}
+                };
+            }
+            return {};
+        case CONSTANTS.BRANCH:
+            if (subRegionId && retailSegmentId && outletId) {
+                return {
+                    subRegion    : {values: [subRegionId], type: 'ObjectId'},
+                    retailSegment: {values: [retailSegmentId], type: 'ObjectId'},
+                    outlet       : {values: [outletId], type: 'ObjectId'}
+                };
+            }
+            return {};
+    }
+};

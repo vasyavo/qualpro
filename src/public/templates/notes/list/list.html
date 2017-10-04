@@ -3,7 +3,7 @@
 <% collection.forEach(function(model, index){ %>
 <div class="notesItem listRow" data-id="<%= model._id %>">
     <div class="notesUser flexRowStart">
-        <img src="preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
+        <img src="/preview/<%= model.createdBy.user.imageSrc %>" class="imgCircle userImgBig">
         <span class="fontBold textEllipsis"><%= (model.createdBy.user && model.createdBy.user.firstName) ? model.createdBy.user.firstName.currentLanguage + ' ' + model.createdBy.user.lastName.currentLanguage : '' %></span>
     </div>
     <div class="locationBlock">

@@ -1,59 +1,54 @@
-define([
-    'backbone',
-    'jQuery',
-    'Underscore',
-    'collections/parrent',
-    'models/taskFlow',
-    'constants/otherConstants',
-    'constants/contentType'
-], function (Backbone, $, _, Parent, Model, OTHER_CONSTANTS, CONTENT_TYPES) {
-    var Collection = Parent.extend({
-        model      : Model,
-        url        : CONTENT_TYPES.INSTORETASKS + '/taskFlow/',
-        viewType   : null,
-        contentType: null,
+var $ = require('jquery');
+var Parent = require('../parrent');
+var Model = require('../../models/taskFlow');
+var CONTENT_TYPES = require('../../constants/contentType');
+var OTHER_CONSTANTS = require('../../constants/otherConstants');
+var App = require('../../appState');
 
-        initialize: function (options) {
-            var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.INSTORETASKS + '/taskFlow/',
+    viewType   : null,
+    contentType: null,
 
-            options = options || {};
-            page = options.page;
-            options.reset = true;
+    initialize: function (options) {
+        var page;
 
-            if ($.isEmptyObject(options.filter)) {
-                this.filterInitialize(options);
-            }
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-            this.getPage(page, options);
-        },
-
-        filterInitialize: function (options) {
-            var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
-
-            var id = App.currentUser._id;
-            var filterId = {
-                type  : 'ObjectId',
-                values: [id]
-            };
-
-            var filter = {
-                '$or'   : {
-                    type  : 'collection',
-                    values: [
-                        {'assignedTo': filterId},
-                        {'createdBy.user': filterId}
-                    ]
-                },
-                'status': {
-                    type   : 'string',
-                    values : [OBJECTIVE_STATUSES.CLOSED],
-                    options: {$nin: true}
-                }
-            };
-
-            options.filter = filter;
+        if ($.isEmptyObject(options.filter)) {
+            this.filterInitialize(options);
         }
-    });
 
-    return Collection;
+        this.getPage(page, options);
+    },
+
+    filterInitialize: function (options) {
+        var OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
+
+        var id = App.currentUser._id;
+        var filterId = {
+            type  : 'ObjectId',
+            values: [id]
+        };
+
+        var filter = {
+            '$or'   : {
+                type  : 'collection',
+                values: [
+                    {'assignedTo': filterId},
+                    {'createdBy.user': filterId}
+                ]
+            },
+            'status': {
+                type   : 'string',
+                values : [OBJECTIVE_STATUSES.CLOSED],
+                options: {$nin: true}
+            }
+        };
+
+        options.filter = filter;
+    }
 });

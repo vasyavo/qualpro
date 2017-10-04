@@ -1,31 +1,27 @@
-define([
-        'collections/parrent',
-        'models/subRegion',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.SUBREGION,
-            viewType   : null,
-            contentType: CONTENT_TYPES.SUBREGION,
+var Parent = require('../parrent');
+var Model = require('../../models/subRegion');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = Parent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.SUBREGION,
+    viewType   : null,
+    contentType: CONTENT_TYPES.SUBREGION,
 
-                this.parentCT = CONTENT_TYPES.REGION;
+    initialize: function (options) {
+        var page;
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
-                options.parentCT = this.parentCT;
+        this.parentCT = CONTENT_TYPES.REGION;
 
-                this.parentId = options.parent;
+        options = options || {};
+        page = options.page;
+        options.reset = true;
+        options.parentCT = this.parentCT;
 
-                if (options.create !== false) {
-                    this.getPage(page, options);
-                }
-            }
-        });
-        return Collection;
-    });
+        this.parentId = options.parent;
+
+        if (options.create !== false) {
+            this.getPage(page, options);
+        }
+    }
+});

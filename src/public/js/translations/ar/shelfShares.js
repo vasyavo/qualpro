@@ -1,34 +1,33 @@
-define([
-    'Underscore',
-    'translations/ar/pagination',
-    'translations/ar/filters'
-], function (_, paginationTranslation, filtersTranslation) {
-    var shelfSharesTranslation = {
-        // body
-        max: 'الحد الاقصى',
-        mid: 'متوسط',
-        min: 'الحد الادنى',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-        // header
-        total: 'العدد الإجمالي 100٪',
-        brand: 'المنافس',
+var shelfSharesTranslation = {
+    // body
+    max: 'الحد الاقصى',
+    mid: 'متوسط',
+    min: 'الحد الادنى',
 
-        //list
-        product: 'المنتج',
+    // header
+    total: 'العدد الإجمالي 100٪',
+    brand: 'المنافس',
 
-        //preview
-        timeStamp: 'وقت الدخول',
-        branch   : 'الفرع',
-        value    : 'القيمة',
-        employee : 'الموظف',
-        options  : 'الخيارات',
-        saveBtn: 'حفظ',
-        okBtn: 'موافق',
-        delete: 'حذف',
-        edit: 'تعديل',
+    //list
+    product: 'المنتج',
 
-        //top Bar
-        all: ' حصة الرف'
-    };
-    return _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);
-});
+    //preview
+    timeStamp: 'وقت الدخول',
+    branch   : 'الفرع',
+    value    : 'القيمة',
+    employee : 'الموظف',
+    options  : 'الخيارات',
+    saveBtn: 'حفظ',
+    okBtn: 'موافق',
+    delete: 'حذف',
+    edit: 'تعديل',
+
+    //top Bar
+    all: ' حصة الرف'
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, shelfSharesTranslation);

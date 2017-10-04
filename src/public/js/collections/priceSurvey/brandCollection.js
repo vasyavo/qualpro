@@ -1,29 +1,24 @@
-define([
-        'collections/parrent',
-        'models/shelfSharesBrand',
-        'constants/contentType'
-    ],
-    function (parrent, Model, contentType) {
-        var Collection = parrent.extend({
-            model      : Model,
-            contentType: contentType.PRICESURVEY,
+var parrent = require('../parrent');
+var Model = require('../../models/shelfSharesBrand');
+var contentType = require('../../constants/contentType');
 
-            url: function () {
-                return '/' + this.contentType + '/brands';
-            },
+module.exports = parrent.extend({
+    model      : Model,
+    contentType: contentType.PRICESURVEY,
 
-            initialize: function (options) {
-                var page;
+    url: function () {
+        return '/' + this.contentType + '/brands';
+    },
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                if (options.fetch === true) {
-                    this.getPage(page, options);
-                }
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        if (options.fetch === true) {
+            this.getPage(page, options);
+        }
+    }
+});

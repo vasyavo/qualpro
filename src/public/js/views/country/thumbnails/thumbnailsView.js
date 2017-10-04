@@ -1,14 +1,6 @@
-define([
-		'views/domain/thumbnails',
-		'models/country'
-	],
+var MainThumbnails = require('../../../views/domain/thumbnails');
 
-	function (MainThumbnails, Model) {
-		var View = MainThumbnails.extend({
-			contentType: 'country',
-			childContent: 'region'
-		});
-
-		return View;
-	});
-
+module.exports = MainThumbnails.extend({
+	contentType: 'country',
+	childContent: 'region'
+});

@@ -1,153 +1,150 @@
-define(function(require) {
-    var _ = require('underscore');
-    var $ = require('jQuery');
-    var template = require('text!templates/notes/list/list.html');
-    var createView = require('views/notes/createView');
-    var newRow = require('text!templates/notes/list/newRow.html');
-    var EditView = require('views/notes/editView');
-    var PreView = require('views/notes/preView/preView');
-    var paginator = require('views/paginator');
-    var CONTENT_TYPES = require('constants/contentType');
-    var BadgeStore = require('services/badgeStore');
+var _ = require('underscore');
+var $ = require('jquery');
+var template = require('../../../../templates/notes/list/list.html');
+var createView = require('../../../views/notes/createView');
+var newRow = require('../../../../templates/notes/list/newRow.html');
+var EditView = require('../../../views/notes/editView');
+var PreView = require('../../../views/notes/preView/preView');
+var paginator = require('../../../views/paginator');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BadgeStore = require('../../../services/badgeStore');
+var App = require('../../../appState');
 
-    var View = paginator.extend({
-        contentType: CONTENT_TYPES.NOTES,
-        viewType   : 'list',
-        template   : _.template(template),
-        templateNew: _.template(newRow),
+module.exports = paginator.extend({
+    contentType: CONTENT_TYPES.NOTES,
+    viewType   : 'list',
+    template   : _.template(template),
+    templateNew: _.template(newRow),
 
-        CreateView: createView,
+    CreateView: createView,
 
-        events: {
-            'click .notesItem'  : 'incClicks',
-            'click .editContent': 'showEditDialog',
-            'click .trash'      : 'deleteNote'
-        },
+    events: {
+        'click .notesItem'  : 'incClicks',
+        'click .editContent': 'showEditDialog',
+        'click .trash'      : 'deleteNote'
+    },
 
-        initialize: function (options) {
-            this.filter = options.filter;
-            this.tabName = options.tabName;
-            this.collection = options.collection;
-            this.defaultItemsNumber = this.collection.pageSize;
-            this.listLength = this.collection.totalRecords;
-            this.translation = options.translation;
+    initialize: function (options) {
+        this.filter = options.filter;
+        this.tabName = options.tabName;
+        this.collection = options.collection;
+        this.defaultItemsNumber = this.collection.pageSize;
+        this.listLength = this.collection.totalRecords;
+        this.translation = options.translation;
 
-            options.contentType = this.contentType;
+        options.contentType = this.contentType;
 
-            BadgeStore.cleanupNotes();
+        BadgeStore.cleanupNotes();
 
-            this.makeRender(options);
-        },
+        this.makeRender(options);
+    },
 
-        listRowClick: function (e) {
-            var targetEl = $(e.target);
-            var targetRow = targetEl.closest('.notesItem');
-            var id = targetRow.attr('data-id');
-            var model = this.collection.get(id);
+    listRowClick: function (e) {
+        var targetEl = $(e.target);
+        var targetRow = targetEl.closest('.notesItem');
+        var id = targetRow.attr('data-id');
+        var model = this.collection.get(id);
 
-            this.preView = new PreView({
-                model      : model,
-                translation: this.translation
-            });
-        },
+        this.preView = new PreView({
+            model      : model,
+            translation: this.translation
+        });
+    },
 
-        showEditDialog: function (e) {
-            var self = this;
-            var id = $(e.target).closest('.notesItem').attr('data-id');
-            var model = this.collection.get(id);
+    showEditDialog: function (e) {
+        var self = this;
+        var id = $(e.target).closest('.notesItem').attr('data-id');
+        var model = this.collection.get(id);
 
-            e.stopPropagation();
-            e.stopImmediatePropagation();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-            this.editView = new EditView({
-                model      : model,
-                translation: this.translation
-            });
+        this.editView = new EditView({
+            model      : model,
+            translation: this.translation
+        });
 
-            this.editView.on('modelSaved', function (model) {
-                self.addReplaceRow(model);
-            });
-        },
+        this.editView.on('modelSaved', function (model) {
+            self.addReplaceRow(model);
+        });
+    },
 
-        deleteNote: function (e) {
-            var $noteItem = $(e.target).closest('.notesItem');
-            var id = $noteItem.attr('data-id');
-            var model = this.collection.get(id);
-            var totalRecords = this.collection.totalRecords;
-            var pageSize = this.collection.pageSize;
-            var currentPage = this.collection.currentPage;
-            var totalPages = Math.ceil(totalRecords / pageSize);
-            var recordsOnLastPage = pageSize - (totalPages * pageSize - totalRecords);
-            var itemsNumber = ((currentPage === totalPages) && (recordsOnLastPage < pageSize)) ? this.collection.pageSize : ++this.collection.pageSize;
-            var self = this;
-            var options;
-            e.stopPropagation();
-            e.stopImmediatePropagation();
+    deleteNote: function (e) {
+        var $noteItem = $(e.target).closest('.notesItem');
+        var id = $noteItem.attr('data-id');
+        var model = this.collection.get(id);
+        var totalRecords = this.collection.totalRecords;
+        var pageSize = this.collection.pageSize;
+        var currentPage = this.collection.currentPage;
+        var totalPages = Math.ceil(totalRecords / pageSize);
+        var recordsOnLastPage = pageSize - (totalPages * pageSize - totalRecords);
+        var itemsNumber = ((currentPage === totalPages) && (recordsOnLastPage < pageSize)) ? this.collection.pageSize : ++this.collection.pageSize;
+        var self = this;
+        var options;
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-            this.destroyModel = function () {
+        this.destroyModel = function () {
 
-                model.destroy({
-                    wait   : true,
-                    success: function (model, response, options) {
-                        $noteItem.remove();
-                        self.trigger('pagination', {
-                            length     : --self.collection.totalRecords,
-                            currentPage: self.collection.currentPage,
-                            itemsNumber: itemsNumber
-                        });
-                    },
+            model.destroy({
+                wait   : true,
+                success: function (model, response, options) {
+                    $noteItem.remove();
+                    self.trigger('pagination', {
+                        length     : --self.collection.totalRecords,
+                        currentPage: self.collection.currentPage,
+                        itemsNumber: itemsNumber
+                    });
+                },
 
-                    error: function (model, xhr, options) {
-                        App.render({type: 'error', message: xhr.message});
-                    }
-                });
-            };
-
-            options = {
-                contentType: this.contentType,
-                action     : 'delete',
-                saveTitle  : this.translation.okBtn,
-                saveCb     : function () {
-                    self.destroyModel();
-                    $(this).dialog('close').dialog('destroy').remove();
+                error: function (model, xhr, options) {
+                    App.render({type: 'error', message: xhr.message});
                 }
-            };
+            });
+        };
 
-            App.showPopUp(options);
-        },
+        options = {
+            contentType: this.contentType,
+            action     : 'delete',
+            saveTitle  : this.translation.okBtn,
+            saveCb     : function () {
+                self.destroyModel();
+                $(this).dialog('close').dialog('destroy').remove();
+            }
+        };
 
-        render: function () {
-            var $currentEl = this.$el;
-            var jsonCollection = this.collection.toJSON();
-            var $holder;
+        App.showPopUp(options);
+    },
 
-            $currentEl.html('');
-            $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="listTable"></div></div></div>');
+    render: function () {
+        var $currentEl = this.$el;
+        var jsonCollection = this.collection.toJSON();
+        var $holder;
 
-            $holder = $currentEl.find('.listTable');
-            $holder.append(this.template({
-                collection : jsonCollection,
-                translation: this.translation
-            }));
+        $currentEl.html('');
+        $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="listTable"></div></div></div>');
 
-            return this;
-        },
+        $holder = $currentEl.find('.listTable');
+        $holder.append(this.template({
+            collection : jsonCollection,
+            translation: this.translation,
+            App: App,
+        }));
 
-        showMoreContent: function (newModels) {
-            var $currentEl = this.$el;
-            var $holder = $currentEl.find('.listTable');
-            var jsonCollection = newModels.toJSON();
+        return this;
+    },
 
-            this.pageAnimation(this.collection.direction, $holder);
+    showMoreContent: function (newModels) {
+        var $currentEl = this.$el;
+        var $holder = $currentEl.find('.listTable');
+        var jsonCollection = newModels.toJSON();
 
-            $holder.empty();
-            $holder.html(this.template({
-                collection : jsonCollection,
-                translation: this.translation
-            }));
-        }
-    });
+        this.pageAnimation(this.collection.direction, $holder);
 
-    return View;
+        $holder.empty();
+        $holder.html(this.template({
+            collection : jsonCollection,
+            translation: this.translation
+        }));
+    }
 });
-

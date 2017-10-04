@@ -1,7 +1,4 @@
-const fs = require('fs');
 const path = require('path');
-const mongoose = require('mongoose');
-const logger = require('./../utils/logger');
 const errorHandler = require('./../utils/errorHandler');
 const notFoundHandler = require('./../utils/notFound');
 const csrfProtection = require('./../utils/csrfProtection');
@@ -13,8 +10,6 @@ const proxy = require('http-proxy-middleware');
 const storePersonnelInMiddleware = require('../reusableComponents/storePersonnelInMiddleware');
 
 module.exports = function(app) {
-    var redis = require('../helpers/redisClient');
-
     app.set('csrfProtection', csrfProtection);
 
     var ModuleslHandler = require('../handlers/modules');
@@ -70,13 +65,7 @@ module.exports = function(app) {
     app.use(require('../utils/IncomingRequestPayloadLogger'));
     app.use(require('./../utils/rememberMeMiddleware'));
 
-    app.get('/', csrfProtection, (req, res, next) => {
-        res.render('index.html', {
-            csrfToken: req.csrfToken(),
-            pubnubSubscribeKey: config.pubnub.subscribeKey,
-            previewUrlRoot: config.previewUrlRoot,
-        });
-    });
+    app.get('/', csrfProtection, require('./../utils/handleRoot'));
 
     if (config.reactDevelopment) {
         app.use('/reporting', proxy({
@@ -87,6 +76,9 @@ module.exports = function(app) {
     } else {
         app.use('/reporting', express.static(path.join(config.workingDirectory, 'src/stories/customReports/frontend')));
     }
+
+    app.use(express.static(path.join(config.workingDirectory, 'src/public/dist')));
+    app.use(express.static(path.join(config.workingDirectory, 'src/public/js/libs/malihu-custom-scrollbar-plugin')));
 
     // endpoint for handling api documents
     app.get('/docs', (req, res, next) => {

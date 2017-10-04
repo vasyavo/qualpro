@@ -1,37 +1,34 @@
-define([
-    'backbone',
-    'jQuery',
-    'populate'
-], function (Backbone, $, populate) {
-    var View = Backbone.View.extend({
+var $ = require('jquery');
+var Backbone = require('backbone');
+var populate = require('../populate');
 
-        hideNewSelect: function () {
-            $('.newSelectList').hide();
-        },
+module.exports = Backbone.View.extend({
 
-        notHide: function () {
-            return false;
-        },
+    hideNewSelect: function () {
+        $('.newSelectList').hide();
+    },
 
-        nextSelect: function (e) {
-            this.showNewSelect(e, false, true);
-        },
+    notHide: function () {
+        return false;
+    },
 
-        prevSelect: function (e) {
-            this.showNewSelect(e, true, false);
-        },
+    nextSelect: function (e) {
+        this.showNewSelect(e, false, true);
+    },
 
-        showNewSelect: function (e, prev, next) {
-            populate.showSelect(e, prev, next, this);
-            return false;
-        },
+    prevSelect: function (e) {
+        this.showNewSelect(e, true, false);
+    },
 
-        chooseOption: function (e) {
-            var $target = $(e.target);
-            var holder = $target.parents('.cell').find('.currentSelected');
+    showNewSelect: function (e, prev, next) {
+        populate.showSelect(e, prev, next, this);
+        return false;
+    },
 
-            holder.text($target.text()).attr('data-id', $target.attr('id'));
-        }
-    });
-    return View;
+    chooseOption: function (e) {
+        var $target = $(e.target);
+        var holder = $target.parents('.cell').find('.currentSelected');
+
+        holder.text($target.text()).attr('data-id', $target.attr('id'));
+    }
 });

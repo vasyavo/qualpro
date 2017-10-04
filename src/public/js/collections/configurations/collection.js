@@ -1,36 +1,30 @@
-define([
-        'collections/parrent',
-        'models/configuration',
-        'constants/contentType'
-    ],
-    function (Parrent, Model, CONTENT_TYPES) {
-        var Collection = Parrent.extend({
-            model      : Model,
-            viewType   : null,
-            contentType: null,
+var Parent = require('../parrent');
+var Model = require('../../models/configuration');
 
-            url: function () {
-                return `/retailSegment/forConfigs?arrayOfId=${this.retailSegmentId}`;
-            },
+module.exports = Parent.extend({
+    model      : Model,
+    viewType   : null,
+    contentType: null,
 
-            initialize: function () {
+    url: function () {
+        return '/retailSegment/forConfigs?arrayOfId=' + this.retailSegmentId;
+    },
 
-            },
+    initialize: function () {
 
-            fetchFromRetailSegmentId: function (retailSegmentId) {
-                this.retailSegmentId = retailSegmentId;
-                this.fetch({reset: true});
-            },
+    },
 
-            parse: function (response) {
-                return response.configurations.map((item) => {
-                    return {
-                        _id : item._id,
-                        name: item.configuration
-                    }
-                });
+    fetchFromRetailSegmentId: function (retailSegmentId) {
+        this.retailSegmentId = retailSegmentId;
+        this.fetch({reset: true});
+    },
+
+    parse: function (response) {
+        return response.configurations.map(function(item) {
+            return {
+                _id : item._id,
+                name: item.configuration
             }
         });
-
-        return Collection;
-    });
+    }
+});

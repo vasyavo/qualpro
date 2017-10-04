@@ -1,42 +1,40 @@
-define([
-        'Underscore',
-        'translations/ar/pagination',
-        'translations/ar/filters'
-    ],
-    function (_, paginationTranslation, filtersTranslation) {
-        var priceSurveyTranslation = {
-            // body
-            max: 'الاقصى',
-            mid: ' منتصف',
-            min: 'الأدنى',
-            avg: ' متوسط ',
-            median: 'متوسط السعر',
+var _ = require('underscore');
+var paginationTranslation = require('./pagination');
+var filtersTranslation = require('./filters');
 
-            // header
-            total   : 'المجموع الكلى',
-            brand   : 'المنافس',
-            variants: 'المنوع',
-            size    : 'الحجم',
-            origin  : 'بلد المنشأ',
-            gms     : '(كلغ.)',
+var priceSurveyTranslation = {
+    // body
+    max: 'الاقصى',
+    mid: ' منتصف',
+    min: 'الأدنى',
+    avg: ' متوسط ',
+    median: 'متوسط السعر',
 
-            // list
-            product : 'المننج',
-            category: 'الفئة',
+    // header
+    total   : 'المجموع الكلى',
+    brand   : 'المنافس',
+    variants: 'المنوع',
+    size    : 'الحجم',
+    origin  : 'بلد المنشأ',
+    gms     : '(كلغ.)',
 
-            // preview
-            timeStamp: 'وقت الدخول',
-            branch   : 'الفرع',
-            value    : 'القيمة',
-            employee : 'الموظف',
-            options  : 'الخيارات',
-            okBtn: 'موافق',
-            saveBtn: 'حفظ',
-            delete: 'حذف',
-            edit: 'تعديل',
+    // list
+    product : 'المننج',
+    category: 'الفئة',
 
-            // topBar
-            all: ' الدراسة الاستقصائية للأسعار'
-        };
-        return _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);
-    });
+    // preview
+    timeStamp: 'وقت الدخول',
+    branch   : 'الفرع',
+    value    : 'القيمة',
+    employee : 'الموظف',
+    options  : 'الخيارات',
+    okBtn: 'موافق',
+    saveBtn       : 'حفظ',
+    delete: 'حذف',
+    edit: 'تعديل',
+
+    // topBar
+    all: ' الدراسة الاستقصائية للأسعار'
+};
+
+module.exports = _.extend({}, paginationTranslation, filtersTranslation, priceSurveyTranslation);

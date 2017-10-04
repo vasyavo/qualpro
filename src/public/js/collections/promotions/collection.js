@@ -1,28 +1,23 @@
-define([
-        'backbone',
-        'jQuery',
-        'Underscore',
-        'collections/parrent',
-        'models/promotions',
-        'constants/contentType'
-    ],
-    function (Backbone, $, _, Parent, Model, CONTENT_TYPES) {
-        var Collection = Parent.extend({
-            model      : Model,
-            url        : CONTENT_TYPES.PROMOTIONS,
-            viewType   : null,
-            contentType: null,
+var $ = require('jquery');
+var _ = require('underscore');
+var Backbone = require('backbone');
+var parrent = require('../parrent');
+var Model = require('../../models/promotions');
+var CONTENT_TYPES = require('../../constants/contentType');
 
-            initialize: function (options) {
-                var page;
+module.exports = parrent.extend({
+    model      : Model,
+    url        : CONTENT_TYPES.PROMOTIONS,
+    viewType   : null,
+    contentType: null,
 
-                options = options || {};
-                page = options.page;
-                options.reset = true;
+    initialize: function (options) {
+        var page;
 
-                this.getPage(page, options);
-            }
-        });
+        options = options || {};
+        page = options.page;
+        options.reset = true;
 
-        return Collection;
-    });
+        this.getPage(page, options);
+    }
+});

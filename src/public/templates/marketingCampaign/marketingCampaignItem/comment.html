@@ -2,7 +2,7 @@
 <div id="comment-container-<%- comment._id %>" class="commentWrap" data-id="<%- comment._id %>">
     <div class="userBlock">
         <div class="flexRowStart">
-            <img src="preview/<%- comment.createdBy.user.imageSrc %>" alt="image" class="userImgBig imgCircle"/>
+            <img src="/preview/<%- comment.createdBy.user.imageSrc %>" alt="image" class="userImgBig imgCircle"/>
             <div class="userDescription">
                 <div class="fontSmall"><%- comment.createdBy.user.firstName.currentLanguage +
                     comment.createdBy.user.lastName.currentLanguage %>

@@ -569,6 +569,7 @@ var CompetitorItem = function () {
                     {
                         $unwind: '$root',
                     },
+
                     {
                         $skip: skip,
                     },

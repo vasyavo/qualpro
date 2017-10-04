@@ -1,128 +1,119 @@
-define([
-    'backbone',
-    'Underscore',
-    'jQuery',
-    'constants/contentType',
-    'views/baseDialog',
-    'collections/file/collection',
-    'views/fileDialog/fileDialog',
-    'text!templates/notifications/preview.html',
-    'constants/levelConfig',
-    'constants/otherConstants'
-], function (Backbone, _, $, CONTENT_TYPES, BaseView, FileCollection, FileDialogPreviewView, PreviewTemplate, LEVEL_CONFIG, CONSTANTS) {
+var $ = require('jquery');
+var _ = require('underscore');
+var CONTENT_TYPES = require('../../../constants/contentType');
+var BaseView = require('../../../views/baseDialog');
+var FileCollection = require('../../../collections/file/collection');
+var FileDialogPreviewView = require('../../../views/fileDialog/fileDialog');
+var PreviewTemplate = require('../../../../templates/notifications/preview.html');
+var LEVEL_CONFIG = require('../../../constants/levelConfig');
+var CONSTANTS = require('../../../constants/otherConstants');
+var App = require('../../../appState');
+var requireContent = require('../../../helpers/requireContent');
 
-    var PreView = BaseView.extend({
-        contentType: CONTENT_TYPES.NOTIFICATIONS,
+module.exports = BaseView.extend({
+    contentType: CONTENT_TYPES.NOTIFICATIONS,
 
-        template: _.template(PreviewTemplate),
+    template: _.template(PreviewTemplate),
 
-        initialize: function (options) {
-            this.activityList = options.activityList;
-            this.translation = options.translation;
-            this.model = options.model;
-            this.language = App.currentUser.currentLanguage;
+    initialize: function (options) {
+        this.activityList = options.activityList;
+        this.translation = options.translation;
+        this.model = options.model;
+        this.language = App.currentUser.currentLanguage;
 
-            this.previewFiles = new FileCollection(this.model.get('attachments'), true);
+        this.previewFiles = new FileCollection(this.model.get('attachments'), true);
 
-            this.makeRender();
-            this.render();
-        },
+        this.makeRender();
+        this.render();
+    },
 
-        events : {
-            'click .fileThumbnailItem' : 'showFilePreview',
-            'click #goToBtn' : 'goTo'
-        },
+    events : {
+        'click .fileThumbnailItem' : 'showFilePreview',
+        'click #goToBtn' : 'goTo'
+    },
 
-        showFilePreview : function (event) {
-            var target = $(event.target);
-            var $thumbnail = target.closest('.masonryThumbnail');
-            var fileModelId = $thumbnail.attr('data-id');
-            var fileModel = this.previewFiles.get(fileModelId);
+    showFilePreview : function (event) {
+        var target = $(event.target);
+        var $thumbnail = target.closest('.masonryThumbnail');
+        var fileModelId = $thumbnail.attr('data-id');
+        var fileModel = this.previewFiles.get(fileModelId);
 
-            this.fileDialogView = new FileDialogPreviewView({
-                fileModel  : fileModel,
-                translation: this.translation
+        this.fileDialogView = new FileDialogPreviewView({
+            fileModel  : fileModel,
+            translation: this.translation
+        });
+    },
+
+    render: function () {
+        var jsonModel = this.model.toJSON();
+        var formString;
+        var self = this;
+        var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
+        jsonModel.currentLanguage = this.language;
+
+        if (jsonModel.type) {
+            var notificationTypeObject = CONSTANTS.NOTIFICATION_TYPES.find(function (type) {
+                return type._id === jsonModel.type;
             });
-        },
 
-        render: function () {
-            var jsonModel = this.model.toJSON();
-            var formString;
-            var self = this;
-            var currentConfig = this.activityList ? LEVEL_CONFIG[this.contentType].activityList.preview : [];
-            jsonModel.currentLanguage = this.language;
+            jsonModel.type = notificationTypeObject.name[this.language];
+        }
 
-            if (jsonModel.type) {
-                var notificationTypeObject = CONSTANTS.NOTIFICATION_TYPES.find(function (type) {
-                    return type._id === jsonModel.type;
-                });
+        formString = this.$el.html(this.template({
+            jsonModel: jsonModel,
+            translation: this.translation
+        }));
 
-                jsonModel.type = notificationTypeObject.name[this.language];
+        this.$el = formString.dialog({
+            dialogClass  : 'create-dialog competitorBranding-dialog',
+            title        : this.translation.viewNotification,
+            width        : '1000',
+            showCancelBtn: false,
+            buttons      : {
+                save: {
+                    text : this.translation.okBtn,
+                    class: 'btn saveBtn',
+                    click: function () {
+                        self.undelegateEvents();
+                        self.$el.dialog('close').dialog('destroy').remove();
+                    }
+                }
+            },
+            close: function () {
+                var model = self.model;
+                var id;
+                var previousAttributes;
+
+                if (model.changedAttributes()) {
+                    id = model.get('_id');
+                    previousAttributes = model.previousAttributes();
+                    model.clear();
+                    model.set(previousAttributes);
+                    model.set({_id: id});
+                }
+
+                $('body').css({overflow: 'inherit'});
             }
+        });
 
-            formString = this.$el.html(this.template({
-                jsonModel: jsonModel,
-                translation: this.translation
-            }));
+        if (App.currentUser.workAccess && this.activityList) {
+            currentConfig.forEach(function (config) {
+                var template = requireContent(config.template);
+                var container = self.$el.find(config.selector);
 
-            this.$el = formString.dialog({
-                dialogClass  : 'create-dialog competitorBranding-dialog',
-                title        : this.translation.viewNotification,
-                width        : '1000',
-                showCancelBtn: false,
-                buttons      : {
-                    save: {
-                        text : this.translation.okBtn,
-                        class: 'btn saveBtn',
-                        click: function () {
-                            self.undelegateEvents();
-                            self.$el.dialog('close').dialog('destroy').remove();
-                        }
-                    }
-                },
-                close: function () {
-                    var model = self.model;
-                    var id;
-                    var previousAttributes;
+                template = _.template(template);
 
-                    if (model.changedAttributes()) {
-                        id = model.get('_id');
-                        previousAttributes = model.previousAttributes();
-                        model.clear();
-                        model.set(previousAttributes);
-                        model.set({_id: id});
-                    }
-
-                    $('body').css({overflow: 'inherit'});
+                if (!container.find('#' + config.elementId).length) {
+                    container[config.insertType](template({
+                        elementId  : config.elementId,
+                        translation: self.translation
+                    }));
                 }
             });
-
-            if (App.currentUser.workAccess && this.activityList) {
-                currentConfig.forEach(function (config) {
-                    require([
-                            config.template
-                        ],
-                        function (template) {
-                            var container = self.$el.find(config.selector);
-
-                            template = _.template(template);
-
-                            if (!container.find('#' + config.elementId).length) {
-                                container[config.insertType](template({
-                                    elementId  : config.elementId,
-                                    translation: self.translation
-                                }));
-                            }
-                        });
-
-                });
-            } else {
-                this.$el.find('.objectivesTopBtnBlockSmall').hide();
-            }
-
-            this.delegateEvents(this.events);
+        } else {
+            this.$el.find('.objectivesTopBtnBlockSmall').hide();
         }
-    });
 
-    return PreView;
+        this.delegateEvents(this.events);
+    }
 });
