@@ -3640,10 +3640,10 @@ const Personnel = function () {
                     return next(err);
                 }
 
-                res.status(200).send();
+                res.status(200).send({ status: 'ok' });
             });
         } else {
-            res.status(200).send();
+            res.status(200).send({ status: 'ok' });
         }
 
         res.clearCookie();
