@@ -21,7 +21,7 @@ module.exports = (options) => {
     const personelObj = options.personnel;
     const locations = ['country', 'region', 'subRegion', 'branch'];
 
-    if (personelObj.accessRole.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
+    if (personelObj && personelObj.accessRole && personelObj.accessRole.level === ACL_CONSTANTS.AREA_IN_CHARGE) {
         locations.pop();
     }
 
