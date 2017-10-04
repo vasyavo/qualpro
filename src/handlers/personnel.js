@@ -3506,6 +3506,7 @@ const Personnel = function () {
 
     this.checkVerifCode = function (req, res, next) {
         const body = req.body;
+        const isMobile = req.isMobile;
         const phoneNumber = body.phone;
         const code = body.code;
         const url = `${config.localhost}/passwordChange/${code}`;
@@ -3525,7 +3526,11 @@ const Personnel = function () {
                 return errorSender.badRequest(next, ERROR_MESSAGES.INCORRECT_VERIFICATION_CODE);
             }
 
-            res.status(200).send(url);
+            if (isMobile) {
+                res.status(200).send({ status: 'ok' });
+            } else {
+                res.status(200).send(url);
+            }
         });
     };
 
@@ -3533,6 +3538,7 @@ const Personnel = function () {
         const forgotToken = req.params.forgotToken;
         let currentLanguage;
         const body = req.body;
+        const isMobile = req.isMobile;
         let pass = body.pass;
         let message;
         let title;
@@ -3559,7 +3565,11 @@ const Personnel = function () {
             };
             url = `${config.localhost}/passwordChangeNotification/${JSON.stringify(objToSend)}`;
 
-            res.status(200).send(url);
+            if (isMobile) {
+                res.status(200).send({ status: 'ok' });
+            } else {
+                res.status(200).send(url);
+            }
         });
 
         function updatePass(callback) {
