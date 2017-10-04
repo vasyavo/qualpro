@@ -27,11 +27,13 @@ module.exports = (options, callback) => {
         });
     }
 
-    pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'personnels',
-        key: 'assignedTo',
-        addProjection: ['firstName', 'lastName', 'imageSrc', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
-    }));
+    if (!isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'assignedTo',
+            addProjection: ['firstName', 'lastName', 'imageSrc', 'branch'].concat(isMobile ? [] : ['position', 'accessRole']),
+        }));
+    }
 
     pipeline.push(...aggregateHelper.aggregationPartMaker({
         from: 'files',
@@ -70,20 +72,22 @@ module.exports = (options, callback) => {
         addProjection: ['_id', 'name', 'outlet'],
     }));
 
-    pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'personnels',
-        key: 'createdBy.user',
-        isArray: false,
-        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-        includeSiblings: { createdBy: { date: 1 } },
-    }));
+    if (!isMobile) {
+        pipeline.push(...aggregateHelper.aggregationPartMaker({
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: { createdBy: { date: 1 } },
+        }));
 
-    pipeline.push({
-        $unwind: {
-            path: '$assignedTo',
-            preserveNullAndEmptyArrays: true,
-        },
-    });
+        pipeline.push({
+            $unwind: {
+                path: '$assignedTo',
+                preserveNullAndEmptyArrays: true,
+            },
+        });
+    }
 
     if (!isMobile) {
         pipeline.push(...aggregateHelper.aggregationPartMaker({
@@ -185,65 +189,20 @@ module.exports = (options, callback) => {
         });
     }
 
-    pipeline.push({
-        $group: aggregateHelper.getGroupObject({
-            assignedTo: { $addToSet: '$assignedTo' },
-        }),
-    });
-
-    pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'accessRoles',
-        key: 'createdBy.user.accessRole',
-        isArray: false,
-        addProjection: ['_id', 'name', 'level'],
-        includeSiblings: {
-            createdBy: {
-                date: 1,
-                user: {
-                    _id: 1,
-                    position: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
-                },
-            },
-        },
-    }));
-
-    pipeline.push(...aggregateHelper.aggregationPartMaker({
-        from: 'positions',
-        key: 'createdBy.user.position',
-        isArray: false,
-        includeSiblings: {
-            createdBy: {
-                date: 1,
-                user: {
-                    _id: 1,
-                    accessRole: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    imageSrc: 1,
-                },
-            },
-        },
-    }));
-
-    if (isMobile) {
-        pipeline.push(...aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'editedBy.user',
-            isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings: { editedBy: { date: 1 } },
-        }));
+    if (!isMobile) {
+        pipeline.push({
+            $group: aggregateHelper.getGroupObject({
+                assignedTo: { $addToSet: '$assignedTo' },
+            }),
+        });
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
             from: 'accessRoles',
-            key: 'editedBy.user.accessRole',
+            key: 'createdBy.user.accessRole',
             isArray: false,
             addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
-                editedBy: {
+                createdBy: {
                     date: 1,
                     user: {
                         _id: 1,
@@ -258,10 +217,10 @@ module.exports = (options, callback) => {
 
         pipeline.push(...aggregateHelper.aggregationPartMaker({
             from: 'positions',
-            key: 'editedBy.user.position',
+            key: 'createdBy.user.position',
             isArray: false,
             includeSiblings: {
-                editedBy: {
+                createdBy: {
                     date: 1,
                     user: {
                         _id: 1,
@@ -280,6 +239,15 @@ module.exports = (options, callback) => {
             $project: aggregateHelper.getProjection({
                 creationDate: '$createdBy.date',
             }),
+        });
+    }
+
+    if (isMobile) {
+        pipeline.push({
+            $addFields: {
+                createdBy: '$createdBy.user',
+                editedBy: '$editedBy.user',
+            },
         });
     }
 
