@@ -91,7 +91,7 @@ var NewProductLaunch = function() {
                         body.brand.name = _.escape(body.brand.name);
                         body.brand.custom = 1;
                     }
-                    if (body.variant && body.variant.name) {
+                    if (body.variant && body.variant.name && !body.variant._id) {
                         body.variant.name = _.escape(body.variant.name);
                         body.variant.custom = 1;
                     }
