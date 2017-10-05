@@ -1263,7 +1263,7 @@ allowedParams[CONTENT_TYPES.ACHIEVEMENTFORM] = {
         update: []
     },
     1: {
-        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location'],
+        create: ['description', 'additionalComment', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', 'location', 'startDate', 'endDate'],
         update: ['description', 'startDate', 'endDate', 'additionalComment']
     },
     2: {
