@@ -23,7 +23,8 @@
         <div class="locationTop flexRow">
             <div class="flexColumn">
                 <div class="flexRow">
-                    <div class="locationTitle"><%= (model.category && model.category.name) ? translation.productCategory + ': ' + model.category.name.currentLanguage : model.category_name[App.currentUser.currentLanguage] %></div>
+                    <% var customCategory = model.category_name ? model.category_name[currentLanguage] || model.category_name[anotherLanguage] : null %>
+                    <div class="locationTitle"><%= (model.category && model.category.name) ? translation.productCategory + ': ' + model.category.name.currentLanguage : translation.productCategory + ': ' + customCategory %></div>
                     <span class="textSmall"></span>
                 </div>
                 <div class="fontSmall fontGray textContainer">

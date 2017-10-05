@@ -150,6 +150,8 @@ module.exports = BaseView.extend({
         var formString;
         var self = this;
         var currentConfig;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
         if (this.activityList) {
             currentConfig = LEVEL_CONFIG[this.contentType].activityList.preview;
@@ -157,13 +159,16 @@ module.exports = BaseView.extend({
             currentConfig = LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level] ? LEVEL_CONFIG[this.contentType][App.currentUser.accessRole.level].preview : [];
         }
 
-        var newLabelClass = App.currentUser.currentLanguage === 'en' ? 'newBrand' : 'newBrandAr';
+        var newLabelClass = currentLanguage === 'en' ? 'newBrand' : 'newBrandAr';
         formString = this.$el.html(this.template({
             model      : jsonModel,
             translation: this.translation,
             brandNewLabelClass: jsonModel.brand.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
             variantNewLabelClass: jsonModel.variant.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
+            categoryNewLabelClass: (jsonModel.category && jsonModel.category.name && jsonModel.category.name.currentLanguage) ? '' : 'class="' + newLabelClass + '"',
             App: App,
+            currentLanguage: currentLanguage,
+            anotherLanguage: anotherLanguage,
         }));
 
         this.$el = formString.dialog({

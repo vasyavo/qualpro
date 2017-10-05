@@ -17,7 +17,7 @@
                                 <span><%= translation.category %></span>
                             </div>
                             <div class="cell">
-                                <span id="category"><%= (model.category && model.category.name) ? model.category.name.currentLanguage : model.category_name[App.currentUser.currentLanguage] %></span>
+                                <span id="category" <%= categoryNewLabelClass %>><%= (model.category && model.category.name) ? model.category.name.currentLanguage : model.category_name[currentLanguage] || model.category_name[anotherLanguage] %></span>
                             </div>
                         </div>
                         <div class="row">
