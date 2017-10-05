@@ -104,7 +104,7 @@ module.exports = (req, res, next) => {
             delete queryObject.position;
         }
 
-        queryObject.context = CONTENT_TYPES.OBJECTIVES;
+        queryObject.context = CONTENT_TYPES.OBJECTIVES
 
         const setSubordinateId = [];
 
@@ -167,6 +167,20 @@ module.exports = (req, res, next) => {
                 const mobilePipeLine = [
                     {
                         $match: queryObject,
+                    },
+                    {
+                        $match: {
+                            $or: [
+                                {
+                                    'createdBy.user': personnel
+                                },
+                                {
+                                    status: {
+                                        $nin: ['draft']
+                                    }
+                                }
+                            ]
+                        }
                     },
                     {
                         $match: {
