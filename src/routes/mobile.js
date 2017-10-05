@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var PersonnelHandler = require('../handlers/personnel');
+var AndroidVersionHandler = require('../handlers/androidVersion');
 
 /**
  * @module Mobile - Login
@@ -8,6 +9,7 @@ var PersonnelHandler = require('../handlers/personnel');
 
 module.exports = function () {
     var personnelHandler = new PersonnelHandler();
+    var androidVersionHandler = new AndroidVersionHandler();
     var brandingActivityRouter = require('./mobile/marketingCampaign')();
     var brandingActivityItemsRouter = require('./mobile/marketingCampaignItem')();
     var domainRouter = require('./mobile/domain')();
@@ -134,6 +136,7 @@ module.exports = function () {
      */
 
     router.post('/deviceId', personnelHandler.deviceId);
+    router.get('/androidVersion', androidVersionHandler.getVersion);
 
     return router;
 };

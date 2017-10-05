@@ -24,6 +24,7 @@
         CURRENCY : 'currency',
         DISTRIBUTIONLIST : 'distributionList',
         DOMAIN : 'domain',
+        ANDROID_VERSION : 'androidVersion',
         DISPLAY_TYPE : 'displayType',
         ITEM : 'item',
         INSTORETASKS : 'inStoreTasks',
