@@ -7,7 +7,6 @@ const paths = [
     path.join(config.workingDirectory, 'src/public/js/libs/Jcrop/css/jquery.Jcrop.min.css'),
     path.join(config.workingDirectory, 'src/public/js/libs/jquery-ui/themes/base/jquery-ui.min.css'),
     path.join(config.workingDirectory, 'src/public/js/libs/malihu-custom-scrollbar-plugin/jquery.mCustomScrollbar.min.css'),
-    path.join(config.workingDirectory, 'src/public/js/libs/lightslider/dist/css/lightslider.css'),
 ];
 
 module.exports = (callback) => {

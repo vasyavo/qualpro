@@ -42,10 +42,6 @@ module.exports = {
                 use: 'imports-loader?backbone',
             },
             {
-                test: /lightslider/,
-                use: 'imports-loader?jQuery=jquery',
-            },
-            {
                 test: /fancytree/,
                 use: 'imports-loader?jQuery=jquery,jqueryui',
             },
