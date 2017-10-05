@@ -373,6 +373,45 @@ var CompetitorItem = function () {
                     },
                 },
                 {
+                    $lookup: {
+                        from: 'competitorVariants',
+                        localField: 'variant',
+                        foreignField: '_id',
+                        as: 'variant',
+                    },
+                },
+                {
+                    $addFields: {
+                        variant: {
+                            $arrayElemAt: ['$variant', 0]
+                        },
+                    },
+                },
+                {
+                    $addFields: {
+                        product: '$variant.category'
+                    },
+                },
+                {
+                    $addFields: {
+                        origin: {
+                            $filter: {
+                                input: '$origin',
+                                as: 'origin',
+                                cond: {
+                                    $ne: ['$$origin', null],
+                                },
+                            },
+                        },
+                    },
+                },
+
+                {
+                    $addFields: {
+                        variant: '$variant._id',
+                    },
+                },
+                {
                     $group: {
                         _id: null,
                         total: {
@@ -604,7 +643,6 @@ var CompetitorItem = function () {
                                         archived: '$$root.archived',
                                         brand: '$$root.brand',
                                         variant: '$$root.variant',
-                                        product: '$$root.product',
                                         origin: '$$root.origin',
                                         country: '$$root.country',
                                         total: '$total',
@@ -620,6 +658,26 @@ var CompetitorItem = function () {
                         },
                     },
                     {
+                        $lookup: {
+                            from: 'competitorVariants',
+                            localField: 'variant',
+                            foreignField: '_id',
+                            as: 'variant',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            variant: {
+                                $arrayElemAt: ['$variant', 0]
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            product: '$variant.category'
+                        },
+                    },
+                    {
                         $addFields: {
                             origin: {
                                 $filter: {
@@ -630,6 +688,12 @@ var CompetitorItem = function () {
                                     },
                                 },
                             },
+                        },
+                    },
+    
+                    {
+                        $addFields: {
+                            variant: '$variant._id'
                         },
                     },
 
