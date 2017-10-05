@@ -1,0 +1,1 @@
+require('../js/libs/lightslider/dist/css/lightslider.css');
