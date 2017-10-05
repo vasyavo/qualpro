@@ -919,6 +919,59 @@ var BranchHandler = function () {
             if (isMobile) {
                 pipeLine = [
                     {
+                        $lookup: {
+                            from: 'domains',
+                            localField: 'subRegion',
+                            foreignField: '_id',
+                            as: 'subRegion',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            subRegion: {
+                                $let: {
+                                    vars: {
+                                        subRegion: {
+                                            $arrayElemAt: [
+                                                '$subRegion',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in  : {
+                                        _id: '$$subRegion._id',
+                                        parent: '$$subRegion.parent',
+                                    },
+                                },
+                            }
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: 'domains',
+                            localField: 'subRegion.parent',
+                            foreignField: '_id',
+                            as: 'subRegion.parent',
+                        },
+                    },
+                    {
+                        $addFields: {
+                            country: {
+                                $let: {
+                                    vars: {
+                                        country: {
+                                            $arrayElemAt: [
+                                                '$subRegion.parent',
+                                                0,
+                                            ],
+                                        },
+                                    },
+                                    in  : '$$country.parent',
+                                },
+                            }
+                        }
+                    },
+                    {
                         $match: queryObject,
                     },
                     {
