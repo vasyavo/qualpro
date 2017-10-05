@@ -8,7 +8,7 @@ const prototype = require('./prototype');
 module.exports = (options) => {
     co(function * () {
         const moduleId = aclModules.CUSTOMER;
-        const contentType = contentTypes.OUTLET;
+        const contentType = 'location';
         const actionType = activityTypes.CREATED;
 
         const extendedOptions = Object.assign({}, options, {
