@@ -71,17 +71,20 @@ module.exports = paginator.extend({
     render: function () {
         var $currentEl = this.$el;
         var jsonCollection = this.collection.toJSON();
-        var $holder;
+        var currentLanguage = App.currentUser.currentLanguage;
+        var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
 
         $currentEl.html('');
         $currentEl.append('<div class="absoluteContent listnailsWrap"><div class="listnailsHolder scrollable"><div class="reportingWrap"></div></div></div>');
 
-        $holder = $currentEl.find('.reportingWrap');
+        var $holder = $currentEl.find('.reportingWrap');
         $holder.append(this.template({
             collection : jsonCollection,
             translation: this.translation,
             newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
             App: App,
+            currentLanguage: currentLanguage,
+            anotherLanguage: anotherLanguage,
         }));
 
         return this;
