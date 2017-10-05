@@ -1045,7 +1045,7 @@ var Promotions = function () {
 
                 (cb) => {
                     self.getByIdAggr({
-                        id: promotionId,
+                        id: ObjectId(promotionId),
                         isMobile,
                     }, cb);
                 },
