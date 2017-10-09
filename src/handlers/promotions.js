@@ -342,7 +342,7 @@ var Promotions = function () {
                 body.dateStart = moment(body.dateStart);
                 body.dateStart = body.dateStart.utc().add(4, 'h').startOf('day').toDate();
                 body.dateEnd = moment(body.dateEnd);
-                body.dateEnd = body.dateEnd.utc().add(4, 'h').endOf('day').toDate();
+                body.dateEnd = body.dateEnd.utc().endOf('day').toDate();
                 const model = new PromotionModel();
 
                 model.set(body);
