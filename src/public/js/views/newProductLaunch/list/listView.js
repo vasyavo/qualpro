@@ -56,6 +56,8 @@ module.exports = paginator.extend({
         var $currentEl = this.$el;
         var $holder = $currentEl.find('.reportingWrap');
         var jsonCollection = newModels.toJSON();
+        var currentLanguage = App.currentUser.currentLanguage;
+        var anotherLanguage = App.currentUser.currentLanguage === 'en' ? 'ar' : 'en';
 
         this.pageAnimation(this.collection.direction, $holder);
 
@@ -65,6 +67,8 @@ module.exports = paginator.extend({
             translation: this.translation,
             newLabelClass: App.currentUser.currentLanguage === 'en' ? 'class="newBrand"' : 'class="newBrandAr"',
             App: App,
+            currentLanguage,
+            anotherLanguage,
         }));
     },
 
