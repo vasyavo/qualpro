@@ -478,13 +478,11 @@ function getConstants(CONSTANTS) {
         displayName: {en: 'Region', ar: 'المنطقة'},
         parent     : 'country',
         filterType : 'singleSelect',
-        mandatory: true,
     });
     activityListFilter[CONSTANTS.SUBREGION] = getFilterConstant({
         displayName: {en: 'Sub-Region', ar: 'المنطقة الفرعية:'},
         parent     : 'region',
         filterType : 'singleSelect',
-        mandatory: true,
     });
     // activityListFilter[CONSTANTS.RETAILSEGMENT] = getFilterConstant({displayName: 'Trade channel', filterType: 'singleSelect'});
     // activityListFilter[CONSTANTS.OUTLET] = getFilterConstant({displayName: 'Customer', filterType: 'singleSelect'});
