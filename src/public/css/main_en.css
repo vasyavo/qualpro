@@ -8726,6 +8726,13 @@ table:not(.ui-datepicker-calendar) thead tr td {
   top: 0;
   right: 0;
 }
+.productLaunchList .locationTitle.newBrand:after {
+  top: 0;
+  right: 0;
+}
+.productLaunchList .locationTitle.newBrand {
+  padding-right: 35px;
+}
 .fixedHeight {
   overflow: hidden;
   height: 40px;
