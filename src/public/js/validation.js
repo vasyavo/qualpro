@@ -3,7 +3,7 @@ var App = require('./appState');
 // Removed cyrillic chars
 var phoneRegExp = /^[0-9\+]?([0-9-\s()])+[0-9()]$/;
 var intNumberRegExp = /[0-9]+/;
-var priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,2})?)$/;
+var priceQualProRegExp = /(^[0-9]+(\.[0-9]{1,4})?)$/;
 var floatNumberRegExp = /(^[0-9]+(\.[0-9]{1,2})?)$/;
 var nameRegExp = /^[a-zA-Z]+[a-zA-Z-_\s]|[\u0621-\u064A\u0660-\u0669 ]+$/;
 var groupsNameRegExp = /[a-zA-Z0-9]+[a-zA-Z0-9-,#@&*-_\s()\.\/\s]|[\u0621-\u064A\u0660-\u0669 ]+$/;
@@ -119,7 +119,7 @@ var errorMessages = {
         invalidNameMsg            : "field value is incorrect. It should start with letter or number",
         invalidLoginMsg           : "field value is incorrect. It should contain only the following symbols: A-Z, a-z, 0-9, _ @",
         notNumberMsg              : "field should contain a valid integer value",
-        notPriceMsg               : "field should contain a valid price value with only 2 digits after dot and contain only the following symbols: 0-9, .",
+        notPriceMsg               : "field should contain a valid price value with only 4 digits after dot and contain only the following symbols: 0-9, .",
         invalidCountryMsg         : "field should contain only letters, whitespaces and '-' sign",
         loggedNotValid            : "field should contain a valid decimal value with max 1 digit after dot",
         minLengthMsg              : function (minLength) {

@@ -15,9 +15,9 @@ module.exports = baseDialog.extend({
     template      : _.template(template),
 
     events: {
-        'click #editPlanogram': 'openEditView',
-        'click #imgPreView'   : 'showFilePreviewDialog',
-        'click #goToBtn'      : 'goTo',
+        'click #editPlanogram' : 'openEditView',
+        'click #imgPreView'    : 'showFilePreviewDialog',
+        'click #goToBtn'       : 'goTo',
         'click .file-thumbnail': 'openFullSizeFile'
     },
 
@@ -40,14 +40,14 @@ module.exports = baseDialog.extend({
 
         this.fullSizeFileOverview = new FileDialogPreviewView({
             translation: this.translation,
-            fileModel: fileModel
+            fileModel  : fileModel
         });
         this.fullSizeFileOverview.on('download', function (options) {
             var url = options.url;
             var originalName = options.originalName;
             var attachmentsContainer = that.$el.find('#product-information-container');
 
-            attachmentsContainer.append('<a id="download-file" class="hidden" href="' + url +  '" download="' + originalName + '"></a>');
+            attachmentsContainer.append('<a id="download-file" class="hidden" href="' + url + '" download="' + originalName + '"></a>');
 
             var fileElement = attachmentsContainer.find('#download-file');
             fileElement[0].click();
@@ -74,14 +74,15 @@ module.exports = baseDialog.extend({
         editView.on('modelSaved', function (model) {
             const jsonModel = model.toJSON();
 
-            jsonModel.retailSegmentString = jsonModel.retailSegment.map(function(item) {
+            jsonModel.retailSegmentString = jsonModel.retailSegment.map(function (item) {
                 return item.name.currentLanguage;
             }).join(', ');
 
             self.$el.html(self.template({
-                translation: self.translation,
-                model      : jsonModel,
-                activityList : self.activityList
+                translation : self.translation,
+                model       : jsonModel,
+                activityList: self.activityList,
+                App         : App
             }));
             self.trigger('modelSaved', model);
         })
@@ -91,9 +92,7 @@ module.exports = baseDialog.extend({
         var that = this;
         var modelJSON = this.model.toJSON();
 
-
-
-        modelJSON.retailSegmentString = modelJSON.retailSegment.map(function(item) {
+        modelJSON.retailSegmentString = modelJSON.retailSegment.map(function (item) {
             return item.name.currentLanguage;
         }).join(', ');
 
@@ -101,7 +100,7 @@ module.exports = baseDialog.extend({
             translation : this.translation,
             model       : modelJSON,
             activityList: this.activityList,
-            App: App,
+            App         : App,
         }));
 
         this.$el = this.$el.dialog({

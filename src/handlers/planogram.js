@@ -3,7 +3,7 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 const logger = require('./../utils/logger');
 const extractBody = require('./../utils/extractBody');
 
-var planogramsHandler = function() {
+var planogramsHandler = function () {
     var async = require('async');
     var mongoose = require('mongoose');
     var FileHandler = require('../handlers/file');
@@ -22,25 +22,28 @@ var planogramsHandler = function() {
     var AggregationHelper = require('../helpers/aggregationCreater');
     var bodyValidator = require('../helpers/bodyValidator');
     var ObjectId = mongoose.Types.ObjectId;
+    var errorSender = require('../utils/errorSender');
+    var ERROR_MESSAGES = require('../constants/errorMessages');
     var self = this;
     var $defProjection = {
-        _id : 1,
-        country : 1,
-        retailSegment : 1,
-        product : 1,
-        productInfo : 1,
-        fileID : 1,
-        configuration : 1,
-        editedBy : 1,
-        createdBy : 1,
-        archived : 1,
-        displayType : 1
+        _id          : 1,
+        country      : 1,
+        retailSegment: 1,
+        product      : 1,
+        productInfo  : 1,
+        fileID       : 1,
+        configuration: 1,
+        editedBy     : 1,
+        createdBy    : 1,
+        archived     : 1,
+        displayType  : 1
     };
 
     this.create = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
+        const body = extractBody(req.body);
 
         const queryRun = (body, callback) => {
             const files = req.files;
@@ -50,7 +53,7 @@ var planogramsHandler = function() {
 
                 // retrieve retail segment which has configuration name by provided configuration id
                 (cb) => {
-                    RetailSegmentModel.findOne({ 'configurations._id': configurationId }, 'configurations', cb)
+                    RetailSegmentModel.findOne({'configurations._id': configurationId}, 'configurations', cb);
                 },
 
                 // pick configuraiton name from result set and upload attached picture
@@ -91,11 +94,11 @@ var planogramsHandler = function() {
 
                     const dataToSave = Object.assign({}, body, {
                         configuration: {
-                            _id: configurationId,
+                            _id : configurationId,
                             name: configurationName,
                         },
                         createdBy,
-                        editedBy: createdBy,
+                        editedBy     : createdBy,
                     });
 
                     if (fileId) {
@@ -114,7 +117,7 @@ var planogramsHandler = function() {
                     ActivityLog.emit('planogram:published', {
                         actionOriginator: userId,
                         accessRoleLevel,
-                        body: planogramModel.toJSON(),
+                        body            : planogramModel.toJSON(),
                     });
 
                     const id = planogramModel.get('_id');
@@ -131,12 +134,41 @@ var planogramsHandler = function() {
         async.waterfall([
 
             (cb) => {
+                const {
+                    country,
+                    retailSegment,
+                    product,
+                    displayType: {name},
+                    configuration,
+                } = body;
+                const query = {
+                    country,
+                    retailSegment      : {
+                        $in: retailSegment,
+                    },
+                    product,
+                    'displayType.name' : name,
+                    'configuration._id': configuration,
+                };
+
+                PlanogramModel.findOne(query, (err, result) => {
+                    if (err) {
+                        return cb(err);
+                    }
+
+                    if (!result) {
+                        return cb();
+                    }
+
+                    errorSender.badRequest(cb, ERROR_MESSAGES.PLANOGRAM_SAME_PARAMETERS);
+                });
+            },
+
+            (cb) => {
                 access.getWriteAccess(req, ACL_MODULES.PLANOGRAM, cb);
             },
 
             (allowed, personnel, cb) => {
-                const body = extractBody(req.body);
-
                 bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'create', cb);
             },
 
@@ -151,7 +183,7 @@ var planogramsHandler = function() {
         });
     };
 
-    this.getByIdAggr = function(options, callback) {
+    this.getByIdAggr = function (options, callback) {
         var aggregateHelper;
         var pipeLine = [];
         var aggregation;
@@ -161,37 +193,37 @@ var planogramsHandler = function() {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match : {_id : id}
+            $match: {_id: id}
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'fileID',
-            addProjection : ['contentType', 'originalName', 'createdBy'],
-            isArray : false
+            from         : 'files',
+            key          : 'fileID',
+            addProjection: ['contentType', 'originalName', 'createdBy'],
+            isArray      : false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-            includeSiblings : {createdBy : {date : 1}}
+            from           : 'personnels',
+            key            : 'createdBy.user',
+            isArray        : false,
+            addProjection  : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            includeSiblings: {createdBy: {date: 1}}
         }));
 
         if (!isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'accessRoles',
-                key : 'createdBy.user.accessRole',
-                isArray : false,
-                addProjection : ['_id', 'name', 'level'],
-                includeSiblings : {
-                    createdBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
+                from           : 'accessRoles',
+                key            : 'createdBy.user.accessRole',
+                isArray        : false,
+                addProjection  : ['_id', 'name', 'level'],
+                includeSiblings: {
+                    createdBy: {
+                        date: 1,
+                        user: {
+                            _id      : 1,
                             position : 1,
-                            firstName : 1,
+                            firstName: 1,
                             lastName : 1
                         }
                     }
@@ -199,17 +231,17 @@ var planogramsHandler = function() {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'positions',
-                key : 'createdBy.user.position',
-                isArray : false,
-                includeSiblings : {
-                    createdBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            accessRole : 1,
+                from           : 'positions',
+                key            : 'createdBy.user.position',
+                isArray        : false,
+                includeSiblings: {
+                    createdBy: {
+                        date: 1,
+                        user: {
+                            _id       : 1,
+                            accessRole: 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName  : 1
                         }
                     }
                 }
@@ -218,51 +250,51 @@ var planogramsHandler = function() {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'categories',
-            key : 'product',
-            isArray : false,
-            addProjection : ['archived', 'information']
+            from         : 'categories',
+            key          : 'product',
+            isArray      : false,
+            addProjection: ['archived', 'information']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            isArray : false
+            from   : 'domains',
+            key    : 'country',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment',
-            isArray : true
+            from   : 'retailSegments',
+            key    : 'retailSegment',
+            isArray: true
         }));
 
         pipeLine.push({
-            $project : {
-                _id : 1,
-                country : 1,
-                retailSegment : 1,
-                product : 1,
-                fileID : 1,
-                configuration : 1,
-                editedBy : 1,
-                createdBy : 1,
-                archived : 1,
-                displayType : 1,
-                productInfo: '$product.information',
+            $project: {
+                _id          : 1,
+                country      : 1,
+                retailSegment: 1,
+                product      : 1,
+                fileID       : 1,
+                configuration: 1,
+                editedBy     : 1,
+                createdBy    : 1,
+                archived     : 1,
+                displayType  : 1,
+                productInfo  : '$product.information',
             }
         });
-    
+
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'productInfo',
-            isArray : true,
-            addProjection : ['originalName', 'preview', 'contentType', ]
+            from         : 'files',
+            key          : 'productInfo',
+            isArray      : true,
+            addProjection: ['originalName', 'preview', 'contentType',]
         }));
-        
+
         aggregation = PlanogramModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse : true
+            allowDiskUse: true
         };
 
         aggregation.exec((err, result) => {
@@ -285,11 +317,11 @@ var planogramsHandler = function() {
             const setIdToArchive = req.body.ids.objectID();
             const archived = req.body.archived === 'false' ? false : !!req.body.archived;
             const options = [{
-                idsToArchive: setIdToArchive,
+                idsToArchive   : setIdToArchive,
                 keyForCondition: '_id',
                 archived,
-                topArchived: archived,
-                model: PlanogramModel,
+                topArchived    : archived,
+                model          : PlanogramModel,
             }];
             const activityType = archived ? 'archived' : 'unarchived';
 
@@ -314,7 +346,7 @@ var planogramsHandler = function() {
                         ActivityLog.emit(`planogram:${activityType}`, {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: item,
+                            body            : item,
                         });
                         eachCb();
                     }, cb);
@@ -342,14 +374,14 @@ var planogramsHandler = function() {
         });
     };
 
-    this.getById = function(req, res, next) {
+    this.getById = function (req, res, next) {
         function queryRun() {
             var id = req.params.id;
 
             self.getByIdAggr({
-                id : ObjectId(id),
-                isMobile : req.isMobile
-            }, function(err, model) {
+                id      : ObjectId(id),
+                isMobile: req.isMobile
+            }, function (err, model) {
                 if (err) {
                     return next(err);
                 }
@@ -357,7 +389,7 @@ var planogramsHandler = function() {
             })
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -384,29 +416,29 @@ var planogramsHandler = function() {
         var pipeLine = [];
 
         pipeLine.push({
-            $match : queryObject
+            $match: queryObject
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-            includeSiblings : {createdBy : {date : 1}}
+            from           : 'personnels',
+            key            : 'createdBy.user',
+            isArray        : false,
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            includeSiblings: {createdBy: {date: 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'createdBy.user.accessRole',
-            isArray : false,
-            addProjection : ['_id', 'name', 'level'],
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
+            from           : 'accessRoles',
+            key            : 'createdBy.user.accessRole',
+            isArray        : false,
+            addProjection  : ['_id', 'name', 'level'],
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id      : 1,
                         position : 1,
-                        firstName : 1,
+                        firstName: 1,
                         lastName : 1
                     }
                 }
@@ -414,17 +446,17 @@ var planogramsHandler = function() {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'createdBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        accessRole : 1,
+            from           : 'positions',
+            key            : 'createdBy.user.position',
+            isArray        : false,
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id       : 1,
+                        accessRole: 1,
                         firstName : 1,
-                        lastName : 1
+                        lastName  : 1
                     }
                 }
             }
@@ -432,25 +464,25 @@ var planogramsHandler = function() {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'personnels',
-                key : 'editedBy.user',
-                isArray : false,
-                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                includeSiblings : {editedBy : {date : 1}}
+                from           : 'personnels',
+                key            : 'editedBy.user',
+                isArray        : false,
+                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                includeSiblings: {editedBy: {date: 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'accessRoles',
-                key : 'editedBy.user.accessRole',
-                isArray : false,
-                addProjection : ['_id', 'name', 'level'],
-                includeSiblings : {
-                    editedBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
+                from           : 'accessRoles',
+                key            : 'editedBy.user.accessRole',
+                isArray        : false,
+                addProjection  : ['_id', 'name', 'level'],
+                includeSiblings: {
+                    editedBy: {
+                        date: 1,
+                        user: {
+                            _id      : 1,
                             position : 1,
-                            firstName : 1,
+                            firstName: 1,
                             lastName : 1
                         }
                     }
@@ -458,17 +490,17 @@ var planogramsHandler = function() {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'positions',
-                key : 'editedBy.user.position',
-                isArray : false,
-                includeSiblings : {
-                    editedBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            accessRole : 1,
+                from           : 'positions',
+                key            : 'editedBy.user.position',
+                isArray        : false,
+                includeSiblings: {
+                    editedBy: {
+                        date: 1,
+                        user: {
+                            _id       : 1,
+                            accessRole: 1,
                             firstName : 1,
-                            lastName : 1
+                            lastName  : 1
                         }
                     }
                 }
@@ -476,85 +508,85 @@ var planogramsHandler = function() {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            isArray : false,
-            addProjection : ['archived']
+            from         : 'domains',
+            key          : 'country',
+            isArray      : false,
+            addProjection: ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from             : 'retailSegments',
-            key              : 'retailSegment',
-            isArray          : true,
-            addProjection : ['archived']
+            from         : 'retailSegments',
+            key          : 'retailSegment',
+            isArray      : true,
+            addProjection: ['archived']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'categories',
-            key : 'product',
-            isArray : false,
-            addProjection : ['archived', 'information']
+            from         : 'categories',
+            key          : 'product',
+            isArray      : false,
+            addProjection: ['archived', 'information']
         }));
 
         pipeLine.push({
-            $project : {
-                _id : 1,
-                country : 1,
-                retailSegment : 1,
-                product : 1,
-                fileID : 1,
-                configuration : 1,
-                editedBy : 1,
-                createdBy : 1,
-                archived : 1,
-                displayType : 1,
-                productInfo: '$product.information',
+            $project: {
+                _id          : 1,
+                country      : 1,
+                retailSegment: 1,
+                product      : 1,
+                fileID       : 1,
+                configuration: 1,
+                editedBy     : 1,
+                createdBy    : 1,
+                archived     : 1,
+                displayType  : 1,
+                productInfo  : '$product.information',
             }
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'productInfo',
-            isArray : true,
-            addProjection : ['originalName', 'preview', 'contentType', ]
+            from         : 'files',
+            key          : 'productInfo',
+            isArray      : true,
+            addProjection: ['originalName', 'preview', 'contentType',]
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'fileID',
-            addProjection : ['contentType', 'originalName', 'createdBy', 'preview'],
-            isArray : false
+            from         : 'files',
+            key          : 'fileID',
+            addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
+            isArray      : false
         }));
 
         if (!isMobile) {
             pipeLine.push({
-                $match : {
-                    'retailSegment.archived' : false,
-                    'product.archived' : false,
-                    'country.archived' : false
+                $match: {
+                    'retailSegment.archived': false,
+                    'product.archived'      : false,
+                    'country.archived'      : false
                 }
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile : isMobile,
-            searchFieldsArray : searchFieldsArray,
-            filterSearch : filterSearch,
-            skip : skip,
-            limit : limit,
-            sort : sort
+            isMobile         : isMobile,
+            searchFieldsArray: searchFieldsArray,
+            filterSearch     : filterSearch,
+            skip             : skip,
+            limit            : limit,
+            sort             : sort
         }));
 
         return pipeLine;
     }
 
-    this.getAllForSync = function(req, res, next) {
+    this.getAllForSync = function (req, res, next) {
         function queryRun() {
             var query = req.query;
             var isMobile = req.isMobile;
             var lastLogOut = new Date(query.lastLogOut);
             var aggregateHelper = new AggregationHelper($defProjection);
-            var sort = {'createdBy.date' : -1};
+            var sort = {'createdBy.date': -1};
             var queryObject = {};
             var pipeLine;
             var aggregation;
@@ -562,27 +594,27 @@ var planogramsHandler = function() {
 
             if (query._ids) {
                 ids = query._ids.split(',');
-                ids = _.map(ids, function(id) {
+                ids = _.map(ids, function (id) {
                     return ObjectId(id);
                 });
                 queryObject._id = {
-                    $in : ids
+                    $in: ids
                 };
             }
             aggregateHelper.setSyncQuery(queryObject, lastLogOut);
 
             pipeLine = getAllPipeLine({
-                queryObject : queryObject,
-                aggregateHelper : aggregateHelper,
-                isMobile : isMobile,
-                forSync : true,
-                sort : sort
+                queryObject    : queryObject,
+                aggregateHelper: aggregateHelper,
+                isMobile       : isMobile,
+                forSync        : true,
+                sort           : sort
             });
 
             aggregation = PlanogramModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse : true
+                allowDiskUse: true
             };
 
             aggregation.exec((err, result) => {
@@ -591,7 +623,7 @@ var planogramsHandler = function() {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 next({
                     status: 200,
@@ -600,7 +632,7 @@ var planogramsHandler = function() {
             });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed) {
             if (err) {
                 return next(err);
             }
@@ -615,7 +647,7 @@ var planogramsHandler = function() {
         });
     };
 
-    this.getAll = function(req, res, next) {
+    this.getAll = function (req, res, next) {
 
         function queryRun(personnel) {
             var query = req.query;
@@ -642,8 +674,8 @@ var planogramsHandler = function() {
             ];
 
             var sort = query.sort || {
-                    'editedBy.date' : 1
-                };
+                'editedBy.date': 1
+            };
 
             delete queryObject.globalSearch;
 
@@ -659,9 +691,9 @@ var planogramsHandler = function() {
             }
 
             queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.PLANOGRAM,
-                filter : query.filter || {},
-                personnel : personnel
+                contentType: CONTENT_TYPES.PLANOGRAM,
+                filter     : query.filter || {},
+                personnel  : personnel
             });
 
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
@@ -695,7 +727,7 @@ var planogramsHandler = function() {
                     }
 
                     const body = result.length ?
-                        result[0] : { data: [], total: 0 };
+                        result[0] : {data: [], total: 0};
 
                     next({
                         status: 200,
@@ -704,7 +736,7 @@ var planogramsHandler = function() {
                 });
         }
 
-        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function(err, allowed, personnel) {
+        access.getReadAccess(req, ACL_MODULES.PLANOGRAM, function (err, allowed, personnel) {
             if (err) {
                 return next(err);
             }
@@ -713,7 +745,7 @@ var planogramsHandler = function() {
         });
     };
 
-    this.update = function(req, res, next) {
+    this.update = function (req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
@@ -724,28 +756,28 @@ var planogramsHandler = function() {
             var id = req.params.id;
 
             body.editedBy = {
-                user : ObjectId(userId),
-                date : new Date()
+                user: ObjectId(userId),
+                date: new Date(),
             };
 
             async.waterfall([
-                function(callback) {
+                function (callback) {
                     if (!files) {
                         return callback(null, null);
                     }
-                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function(err, fileId) {
+                    fileHandler.uploadFile(userId, files, CONTENT_TYPES.PLANOGRAM, function (err, fileId) {
                         if (err) {
                             return callback(err);
                         }
                         callback(null, fileId[0]);
                     })
                 },
-                function(fileId, callback) {
+                function (fileId, callback) {
                     if (fileId) {
                         body.fileID = fileId;
                     }
-                    PlanogramModel.findByIdAndUpdate(id, {$set : body}, {new : true})
-                        .exec(function(err, model) {
+                    PlanogramModel.findByIdAndUpdate(id, {$set: body}, {new: true})
+                        .exec(function (err, model) {
                             if (err) {
                                 return callback(err);
                             }
@@ -753,22 +785,22 @@ var planogramsHandler = function() {
                             ActivityLog.emit(`planogram:updated`, {
                                 actionOriginator: userId,
                                 accessRoleLevel,
-                                body: model.toJSON(),
+                                body            : model.toJSON(),
                             });
 
                             callback(null, model);
                         });
                 },
-                function(model, callback) {
+                function (model, callback) {
                     var id = model.get('_id');
 
                     self.getByIdAggr({
-                        id : id,
-                        isMobile : req.isMobile
+                        id      : id,
+                        isMobile: req.isMobile
                     }, callback);
                 }
 
-            ], function(err, model) {
+            ], function (err, model) {
                 if (err) {
                     return next(err);
                 }
@@ -777,7 +809,7 @@ var planogramsHandler = function() {
             });
         }
 
-        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, function(err) {
+        access.getEditAccess(req, ACL_MODULES.COMPETITOR_LIST, err => {
             var body = req.body;
 
             if (err) {
@@ -794,14 +826,47 @@ var planogramsHandler = function() {
                 return next(err);
             }
 
+            const {
+                country,
+                retailSegment,
+                product,
+                displayType: {
+                    name,
+                },
 
-            bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'update', function(err, saveData) {
+                configuration: {
+                    _id: configuration,
+                },
+            } = body;
+            const query = {
+                country,
+                retailSegment: {
+                    $in: retailSegment,
+                },
+
+                product,
+                'displayType.name' : name,
+                'configuration._id': configuration,
+            };
+
+            PlanogramModel.findOne(query, (err, result) => {
                 if (err) {
                     return next(err);
                 }
 
-                queryRun(saveData);
+                if (result) {
+                    return errorSender.badRequest(next, ERROR_MESSAGES.PLANOGRAM_SAME_PARAMETERS);
+                }
+
+                bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.PLANOGRAM, 'update', (err, saveData) => {
+                    if (err) {
+                        return next(err);
+                    }
+
+                    queryRun(saveData);
+                });
             });
+
         });
     };
 
