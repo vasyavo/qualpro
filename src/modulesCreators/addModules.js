@@ -491,7 +491,7 @@ const modules = [
 
     {
         _id     : 45,
-        name    : {en: 'al alali Branding & Monthly display', ar: 'العلامات التجارية وتقارير العرض الخاصة بالعلالي'},
+        name    : {en: 'al alali Branding & Monthly display', ar: 'العلامات التجارية وتقارير العرض الشهرية الخاصة بالعلالى'},
         href    : CONSTANTS.BRANDING_AND_MONTHLY_DISPLAY,
         sequence: 45,
         parrent : 16,
