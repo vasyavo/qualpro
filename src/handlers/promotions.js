@@ -966,6 +966,16 @@ var Promotions = function () {
                         updateObject.branch = updateObject.branch.split(',');
                     }
 
+                    if (updateObject.dateStart) {
+                        updateObject.dateStart = moment(updateObject.dateStart);
+                        updateObject.dateStart = updateObject.dateStart.utc().add(4, 'h').startOf('day').toDate();
+                    }
+
+                    if (updateObject.dateEnd) {
+                        updateObject.dateEnd = moment(updateObject.dateEnd);
+                        updateObject.dateEnd = updateObject.dateEnd.utc().endOf('day').toDate();
+                    }
+
                     // map ObjectId[] to String[]
                     const setFileId = options.setFileId
                         .filter(id => id)
