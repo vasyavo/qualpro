@@ -64,10 +64,10 @@ module.exports = parent.extend({
 
         if (tempEmployee) {
             if (this.translatedFields.firstName) {
-                validation.checkNameField(errors, true, attrs.firstName, this.translatedFields.firstName);
+                validation.checkTitleField(errors, true, attrs.firstName, this.translatedFields.firstName);
             }
             if (this.translatedFields.lastName) {
-                validation.checkNameField(errors, true, attrs.lastName, this.translatedFields.lastName);
+                validation.checkTitleField(errors, true, attrs.lastName, this.translatedFields.lastName);
             }
             if (this.translatedFields.phoneNumber) {
                 validation.checkPhoneField(errors, true, attrs.phoneNumber, this.translatedFields.phoneNumber);
@@ -76,10 +76,10 @@ module.exports = parent.extend({
 
         if (!tempEmployee) {
             if (this.translatedFields.firstName) {
-                validation.checkNameField(errors, true, attrs.firstName, this.translatedFields.firstName);
+                validation.checkTitleField(errors, true, attrs.firstName, this.translatedFields.firstName);
             }
             if (this.translatedFields.lastName) {
-                validation.checkNameField(errors, true, attrs.lastName, this.translatedFields.lastName);
+                validation.checkTitleField(errors, true, attrs.lastName, this.translatedFields.lastName);
             }
             if (this.translatedFields.phoneNumber) {
                 validation.checkPhoneField(errors, true, attrs.phoneNumber, this.translatedFields.phoneNumber);

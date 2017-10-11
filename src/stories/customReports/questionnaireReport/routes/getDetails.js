@@ -256,6 +256,150 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (queryFilter.country && queryFilter.country.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.country': {
+                                $in: queryFilter.country,
+                            },
+                        },
+                        {
+                            'answer.country': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.country': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
+        if (queryFilter.region && queryFilter.region.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.region': {
+                                $in: queryFilter.region,
+                            },
+                        },
+                        {
+                            'answer.region': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.region': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
+        if (queryFilter.subRegion && queryFilter.subRegion.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.subRegion': {
+                                $in: queryFilter.subRegion,
+                            },
+                        },
+                        {
+                            'answer.subRegion': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.subRegion': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
+        if (queryFilter.retailSegment && queryFilter.retailSegment.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.retailSegment': {
+                                $in: queryFilter.retailSegment,
+                            },
+                        },
+                        {
+                            'answer.retailSegment': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.retailSegment': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
+        if (queryFilter.outlet && queryFilter.outlet.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.outlet': {
+                                $in: queryFilter.outlet,
+                            },
+                        },
+                        {
+                            'answer.outlet': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.outlet': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
+        if (queryFilter.branch && queryFilter.branch.length) {
+            pipeline.push({
+                $match: {
+                    $or: [
+                        {
+                            'answer.branch': {
+                                $in: queryFilter.branch,
+                            },
+                        },
+                        {
+                            'answer.branch': {
+                                $eq: null,
+                            },
+                        },
+                        {
+                            'answer.branch': {
+                                $eq: [],
+                            },
+                        },
+                    ],
+                },
+            });
+        }
+
         if (queryFilter.assignedTo && queryFilter.assignedTo.length) {
             pipeline.push({
                 $match: { $or: [{
@@ -320,7 +464,7 @@ module.exports = (req, res, next) => {
         });
 
         pipeline.push({
-            $unwind: '$records'
+            $unwind: '$records',
         });
 
         pipeline.push({
@@ -347,7 +491,6 @@ module.exports = (req, res, next) => {
                 answer: { $ifNull: [{ $arrayElemAt: ['$records.answer.answerText', 0] }, { en: 'N/A', ar: 'N/A' }] },
             },
         });
-
 
         pipeline.push({
             $lookup: {
