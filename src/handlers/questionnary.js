@@ -20,44 +20,44 @@ const ActivityLog = require('./../stories/push-notifications/activityLog');
 
 const QuestionnaryHandler = function () {
     const $defProjection = {
-        _id: 1,
-        title: 1,
-        dueDate: 1,
-        country: 1,
-        region: 1,
-        subRegion: 1,
+        _id          : 1,
+        title        : 1,
+        dueDate      : 1,
+        country      : 1,
+        region       : 1,
+        subRegion    : 1,
         retailSegment: 1,
-        outlet: 1,
-        branch: 1,
-        countAll: 1,
+        outlet       : 1,
+        branch       : 1,
+        countAll     : 1,
         countAnswered: 1,
-        status: 1,
-        questions: 1,
-        location: 1,
-        editedBy: 1,
-        createdBy: 1,
-        creationDate: 1,
-        updateDate: 1,
-        position: 1,
-        personnels: 1
+        status       : 1,
+        questions    : 1,
+        location     : 1,
+        editedBy     : 1,
+        createdBy    : 1,
+        creationDate : 1,
+        updateDate   : 1,
+        position     : 1,
+        personnels   : 1
     };
     const $answerDefProjection = {
-        _id: 1,
-        personnel: 1,
-        personnelId: 1,
+        _id           : 1,
+        personnel     : 1,
+        personnelId   : 1,
         questionnaryId: 1,
-        questionId: 1,
-        optionIndex: 1,
-        editedBy: 1,
-        createdBy: 1,
-        branch: 1,
-        outlet: 1,
-        retailSegment: 1,
-        subRegion: 1,
-        region: 1,
-        country: 1,
-        text: 1,
-        position: 1
+        questionId    : 1,
+        optionIndex   : 1,
+        editedBy      : 1,
+        createdBy     : 1,
+        branch        : 1,
+        outlet        : 1,
+        retailSegment : 1,
+        subRegion     : 1,
+        region        : 1,
+        country       : 1,
+        text          : 1,
+        position      : 1
     };
     const self = this;
     const sendEventThatAnswerIsPublished = (options) => {
@@ -70,7 +70,9 @@ const QuestionnaryHandler = function () {
         QuestionnaryModel.findById(questionnaireId)
             .lean()
             .exec((err, questionnaire) => {
-                if (err || !questionnaire) return;
+                if (err || !questionnaire) {
+                    return;
+                }
 
                 ActivityLog.emit('marketing:al-alali-questionnaire:item-published', {
                     actionOriginator,
@@ -125,7 +127,7 @@ const QuestionnaryHandler = function () {
         }
 
         const body = result && result[0] ?
-            result[0] : { data: [], total: 0 };
+            result[0] : {data: [], total: 0};
 
         cb(null, body);
     };
@@ -309,7 +311,7 @@ const QuestionnaryHandler = function () {
 
             const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
-                filter: queryFilter,
+                filter     : queryFilter,
             });
 
             const aggregateHelper = new AggregationHelper($defProjection, queryObject);
@@ -331,7 +333,7 @@ const QuestionnaryHandler = function () {
                     ],
                 },
                 {
-                    status: { $nin: ['draft', 'expired'] },
+                    status: {$nin: ['draft', 'expired']},
                 },
                 {
                     dueDate: {
@@ -357,16 +359,16 @@ const QuestionnaryHandler = function () {
                     $locationMatch.$and.push({
                         $or: [
                             {
-                                [location]: { $in: personnel[location] },
+                                [location]: {$in: personnel[location]},
                             },
                             {
-                                [location]: { $eq: [] },
+                                [location]: {$eq: []},
                             },
                             {
-                                [location]: { $eq: null },
+                                [location]: {$eq: null},
                             },
                             {
-                                'createdBy.user': { $eq: personnel._id },
+                                'createdBy.user': {$eq: personnel._id},
                             },
                             {
                                 personnels: personnel._id,
@@ -392,16 +394,16 @@ const QuestionnaryHandler = function () {
                         },
                         {
                             $lookup: {
-                                from: 'branches',
-                                localField: 'branch',
+                                from        : 'branches',
+                                localField  : 'branch',
                                 foreignField: '_id',
-                                as: 'branch',
+                                as          : 'branch',
                             },
                         },
                         {
                             $project: {
                                 retailSegments: '$branch.retailSegment',
-                                outlets: '$branch.outlet',
+                                outlets       : '$branch.outlet',
                             },
                         },
                     ], cb);
@@ -420,13 +422,13 @@ const QuestionnaryHandler = function () {
                                     },
                                 },
                                 {
-                                    retailSegment: { $eq: [] },
+                                    retailSegment: {$eq: []},
                                 },
                                 {
-                                    retailSegment: { $eq: null },
+                                    retailSegment: {$eq: null},
                                 },
                                 {
-                                    'createdBy.user': { $eq: personnel._id },
+                                    'createdBy.user': {$eq: personnel._id},
                                 },
                                 {
                                     personnels: personnel._id,
@@ -444,13 +446,13 @@ const QuestionnaryHandler = function () {
                                     },
                                 },
                                 {
-                                    outlet: { $eq: [] },
+                                    outlet: {$eq: []},
                                 },
                                 {
-                                    outlet: { $eq: null },
+                                    outlet: {$eq: null},
                                 },
                                 {
-                                    'createdBy.user': { $eq: personnel._id },
+                                    'createdBy.user': {$eq: personnel._id},
                                 },
                                 {
                                     personnels: personnel._id,
@@ -480,8 +482,8 @@ const QuestionnaryHandler = function () {
                     pipeline.push({
                         $addFields: {
                             creationDate: '$createdBy.date',
-                            updateDate: '$editedBy.date',
-                            lastDate: {
+                            updateDate  : '$editedBy.date',
+                            lastDate    : {
                                 $ifNull: [
                                     '$editedBy.date',
                                     '$createdBy.date',
@@ -563,7 +565,7 @@ const QuestionnaryHandler = function () {
 
             const queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.QUESTIONNARIES,
-                filter: queryFilter,
+                filter     : queryFilter,
             });
 
             if (queryObject.globalSearch) {
@@ -595,6 +597,10 @@ const QuestionnaryHandler = function () {
             const $generalMatch = {
                 $and: [],
             };
+            const allowedAccessRoles = [
+                ACL_CONSTANTS.TRADE_MARKETER,
+                ACL_CONSTANTS.MASTER_ADMIN,
+            ];
 
             if (isMobile) {
                 // user sees only ongoing questionnaire via mobile app
@@ -607,14 +613,18 @@ const QuestionnaryHandler = function () {
                 queryObject.status = {
                     $nin: ['draft', 'expired'],
                 };
-            } else if (accessRoleLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+            } else if (allowedAccessRoles.includes(accessRoleLevel)) {
                 $generalMatch.$and.push({
                     $or: [
                         {
                             'createdBy.user': personnel._id,
-                            status: { $in: ['draft', 'expired'] },
+                            status          : {
+                                $in: ['draft', 'expired'],
+                            },
                         }, {
-                            status: { $nin: ['draft', 'expired'] },
+                            status: {
+                                $ne: 'draft',
+                            },
                         },
                     ],
                 });
@@ -623,9 +633,13 @@ const QuestionnaryHandler = function () {
                     $or: [
                         {
                             'createdBy.user': personnel._id,
-                            status: { $in: ['draft'] },
+                            status          : {
+                                $in: ['draft', 'expired'],
+                            },
                         }, {
-                            status: { $nin: ['draft'] },
+                            status: {
+                                $nin: ['draft', 'expired'],
+                            },
                         },
                     ],
                 });
@@ -658,16 +672,16 @@ const QuestionnaryHandler = function () {
                     $locationMatch.$and.push({
                         $or: [
                             {
-                                [location]: { $in: personnel[location] },
+                                [location]: {$in: personnel[location]},
                             },
                             {
-                                [location]: { $eq: [] },
+                                [location]: {$eq: []},
                             },
                             {
-                                [location]: { $eq: null },
+                                [location]: {$eq: null},
                             },
                             {
-                                'createdBy.user': { $eq: personnel._id },
+                                'createdBy.user': {$eq: personnel._id},
                             },
                             {
                                 personnels: personnel._id,
@@ -693,16 +707,16 @@ const QuestionnaryHandler = function () {
                         },
                         {
                             $lookup: {
-                                from: 'branches',
-                                localField: 'branch',
+                                from        : 'branches',
+                                localField  : 'branch',
                                 foreignField: '_id',
-                                as: 'branch',
+                                as          : 'branch',
                             },
                         },
                         {
                             $project: {
                                 retailSegments: '$branch.retailSegment',
-                                outlets: '$branch.outlet',
+                                outlets       : '$branch.outlet',
                             },
                         },
                     ], cb);
@@ -721,13 +735,13 @@ const QuestionnaryHandler = function () {
                                     },
                                 },
                                 {
-                                    retailSegment: { $eq: [] },
+                                    retailSegment: {$eq: []},
                                 },
                                 {
-                                    retailSegment: { $eq: null },
+                                    retailSegment: {$eq: null},
                                 },
                                 {
-                                    'createdBy.user': { $eq: personnel._id },
+                                    'createdBy.user': {$eq: personnel._id},
                                 },
                                 {
                                     personnels: personnel._id,
@@ -745,13 +759,13 @@ const QuestionnaryHandler = function () {
                                     },
                                 },
                                 {
-                                    outlet: { $eq: [] },
+                                    outlet: {$eq: []},
                                 },
                                 {
-                                    outlet: { $eq: null },
+                                    outlet: {$eq: null},
                                 },
                                 {
-                                    'createdBy.user': { $eq: personnel._id },
+                                    'createdBy.user': {$eq: personnel._id},
                                 },
                                 {
                                     personnels: personnel._id,
@@ -760,7 +774,7 @@ const QuestionnaryHandler = function () {
                         });
                     }
 
-                    if (accessRoleLevel !== ACL_CONSTANTS.MASTER_ADMIN) {
+                    if (!allowedAccessRoles.includes(accessRoleLevel)) {
                         pipeline.push({
                             $match: {
                                 $or: [
@@ -776,40 +790,40 @@ const QuestionnaryHandler = function () {
                     }
 
                     // remove for onLeave functionality
-                   /* $generalMatch.$and.push({
-                        $or: [
-                            {
-                                personnels: personnel._id,
-                            },
-                            {
-                                personnels: [],
-                            },
-                            {
-                                personnels: null,
-                            },
-                            {
-                                'createdBy.user': { $eq: personnel._id },
-                            },
-                        ],
-                    });*/
+                    /* $generalMatch.$and.push({
+                         $or: [
+                             {
+                                 personnels: personnel._id,
+                             },
+                             {
+                                 personnels: [],
+                             },
+                             {
+                                 personnels: null,
+                             },
+                             {
+                                 'createdBy.user': { $eq: personnel._id },
+                             },
+                         ],
+                     });*/
 
                     pipeline.push({
                         $match: $generalMatch,
                     });
 
                     pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'personnels',
-                        key: 'createdBy.user',
-                        isArray: false,
-                        addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                        includeSiblings: { createdBy: { date: 1 } },
+                        from           : 'personnels',
+                        key            : 'createdBy.user',
+                        isArray        : false,
+                        addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                        includeSiblings: {createdBy: {date: 1}},
                     }));
 
                     pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'personnels',
-                        key: 'personnels',
+                        from             : 'personnels',
+                        key              : 'personnels',
                         addMainProjection: ['position'],
-                        isArray: true,
+                        isArray          : true,
                     }));
 
                     if (positionFilter) {
@@ -828,35 +842,35 @@ const QuestionnaryHandler = function () {
                     }
 
                     pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'accessRoles',
-                        key: 'createdBy.user.accessRole',
-                        isArray: false,
-                        addProjection: ['_id', 'name', 'level'],
+                        from           : 'accessRoles',
+                        key            : 'createdBy.user.accessRole',
+                        isArray        : false,
+                        addProjection  : ['_id', 'name', 'level'],
                         includeSiblings: {
                             createdBy: {
                                 date: 1,
                                 user: {
-                                    _id: 1,
-                                    position: 1,
+                                    _id      : 1,
+                                    position : 1,
                                     firstName: 1,
-                                    lastName: 1,
+                                    lastName : 1,
                                 },
                             },
                         },
                     }));
 
                     pipeline.push(...aggregateHelper.aggregationPartMaker({
-                        from: 'positions',
-                        key: 'createdBy.user.position',
-                        isArray: false,
+                        from           : 'positions',
+                        key            : 'createdBy.user.position',
+                        isArray        : false,
                         includeSiblings: {
                             createdBy: {
                                 date: 1,
                                 user: {
-                                    _id: 1,
+                                    _id       : 1,
                                     accessRole: 1,
-                                    firstName: 1,
-                                    lastName: 1,
+                                    firstName : 1,
+                                    lastName  : 1,
                                 },
                             },
                         },
@@ -864,43 +878,43 @@ const QuestionnaryHandler = function () {
 
                     if (isMobile) {
                         pipeline.push(...aggregateHelper.aggregationPartMaker({
-                            from: 'personnels',
-                            key: 'editedBy.user',
-                            isArray: false,
-                            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
-                            includeSiblings: { editedBy: { date: 1 } },
+                            from           : 'personnels',
+                            key            : 'editedBy.user',
+                            isArray        : false,
+                            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                            includeSiblings: {editedBy: {date: 1}},
                         }));
 
                         pipeline.push(...aggregateHelper.aggregationPartMaker({
-                            from: 'accessRoles',
-                            key: 'editedBy.user.accessRole',
-                            isArray: false,
-                            addProjection: ['_id', 'name', 'level'],
+                            from           : 'accessRoles',
+                            key            : 'editedBy.user.accessRole',
+                            isArray        : false,
+                            addProjection  : ['_id', 'name', 'level'],
                             includeSiblings: {
                                 editedBy: {
                                     date: 1,
                                     user: {
-                                        _id: 1,
-                                        position: 1,
+                                        _id      : 1,
+                                        position : 1,
                                         firstName: 1,
-                                        lastName: 1,
+                                        lastName : 1,
                                     },
                                 },
                             },
                         }));
 
                         pipeline.push(...aggregateHelper.aggregationPartMaker({
-                            from: 'positions',
-                            key: 'editedBy.user.position',
-                            isArray: false,
+                            from           : 'positions',
+                            key            : 'editedBy.user.position',
+                            isArray        : false,
                             includeSiblings: {
                                 editedBy: {
                                     date: 1,
                                     user: {
-                                        _id: 1,
+                                        _id       : 1,
                                         accessRole: 1,
-                                        firstName: 1,
-                                        lastName: 1,
+                                        firstName : 1,
+                                        lastName  : 1,
                                     },
                                 },
                             },
@@ -909,7 +923,7 @@ const QuestionnaryHandler = function () {
 
                     pipeline.push({
                         $unwind: {
-                            path: '$personnels',
+                            path                      : '$personnels',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
@@ -1182,7 +1196,7 @@ const QuestionnaryHandler = function () {
                         const eventPayload = {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: result.toJSON(),
+                            body            : result.toJSON(),
                         };
 
                         if (body.send) {
@@ -1378,7 +1392,7 @@ const QuestionnaryHandler = function () {
                         const eventPayload = {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: result.toJSON(),
+                            body            : result.toJSON(),
                         };
 
                         ActivityLog.emit('marketing:al-alali-questionnaire:updated', eventPayload);
@@ -1444,7 +1458,7 @@ const QuestionnaryHandler = function () {
                 user: userId,
                 date: Date.now()
             };
-            QuestionnaryAnswerModel.findByIdAndUpdate(id, body, { new: true }).exec(callback);
+            QuestionnaryAnswerModel.findByIdAndUpdate(id, body, {new: true}).exec(callback);
         };
 
         async.waterfall([
@@ -1468,18 +1482,18 @@ const QuestionnaryHandler = function () {
             res.status(200).send(body);
         });
     };
-    
+
     this.removeItem = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const id = req.params.id;
-        
+
         const queryRun = (callback) => {
             async.waterfall([
-                
+
                 (cb) => {
-                    QuestionnaryAnswerModel.findOne({ _id : id }).lean().exec(cb);
+                    QuestionnaryAnswerModel.findOne({_id: id}).lean().exec(cb);
                 },
                 (removeItem, cb) => {
                     const eventModel = new EventModel();
@@ -1501,27 +1515,27 @@ const QuestionnaryHandler = function () {
                         if (!res.headersSent) {
                             next(err);
                         }
-                        
+
                         return logger.error(err);
                     }
-    
+
                     QuestionnaryAnswerModel.findOneAndRemove({_id: id}, callback)
                 },
             ], (err, body) => {
                 if (err) {
                     return next(err);
                 }
-                
+
                 res.status(200).send(body);
             });
         };
-        
+
         async.waterfall([
-            
+
             (cb) => {
                 access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_QUESTIONNAIRE, cb);
             },
-            
+
             (allowed, personnel, cb) => {
                 queryRun(cb);
             }
@@ -1529,7 +1543,7 @@ const QuestionnaryHandler = function () {
             if (err) {
                 return next(err);
             }
-            
+
             res.status(200).send(body);
         });
     };
@@ -1624,7 +1638,7 @@ const QuestionnaryHandler = function () {
 
                 next({
                     status: 200,
-                    body: result,
+                    body  : result,
                 });
             });
         }
@@ -1684,7 +1698,7 @@ const QuestionnaryHandler = function () {
                         sendEventThatAnswerIsPublished({
                             actionOriginator: userId,
                             accessRoleLevel,
-                            questionnaireId: item.questionnaryId,
+                            questionnaireId : item.questionnaryId,
                         });
                         cb();
                     },

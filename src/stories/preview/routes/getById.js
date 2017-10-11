@@ -21,7 +21,7 @@ module.exports = (req, res, next) => {
         },
 
         (result, cb) => {
-            if (!result) {
+            if (!result || !result.base64) {
                 const error = new Error();
 
                 error.status = 404;

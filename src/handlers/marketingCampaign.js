@@ -18,6 +18,7 @@ var BrandingActivity = function () {
     var OTHER_CONSTANTS = require('../public/js/constants/otherConstants.js');
     var PROMOTION_STATUSES = OTHER_CONSTANTS.PROMOTION_STATUSES;
     var ObjectId = mongoose.Types.ObjectId;
+    var ACL_CONSTANTS = require('../constants/aclRolesNames');
 
     var self = this;
 
@@ -54,30 +55,45 @@ var BrandingActivity = function () {
         var forSync = options.forSync;
         var searchFieldsArray = options.searchFieldsArray;
         var filterSearch = options.filterSearch;
+        var currentUserLevel = options.currentUserLevel;
 
         var positionFilter;
         var mainFilter = {};
 
         var isMatch = false;
+        var allowedAccessRoles = [
+            ACL_CONSTANTS.TRADE_MARKETER,
+            ACL_CONSTANTS.MASTER_ADMIN,
+        ];
 
         // fix do not show draft to other users
         if (isMobile) {
             mainFilter.status = {
-                $nin: ['draft', 'expired']
+                $nin: ['draft', 'expired'],
             };
         } else {
-            pipeLine.push({
-                $match: {
-                    $or: [
-                        {
-                            'createdBy.user': personnel._id,
-                            status          : {$in: ['draft', 'expired']}
-                        }, {
-                            status: {$nin: ['draft', 'expired']}
-                        }
-                    ]
-                }
-            });
+            const $match = {
+                $or: [{
+                    'createdBy.user': personnel._id,
+
+                    status: {
+                        $in: ['draft', 'expired'],
+                    },
+                }, {
+                    status: {
+                        $nin: ['draft', 'expired'],
+                    },
+                }],
+            };
+
+            if (allowedAccessRoles.includes(currentUserLevel)) {
+
+                $match.$or.push({
+                    status: 'expired',
+                });
+            }
+
+            pipeLine.push({$match});
         }
 
         if (queryObject.position) {
@@ -226,7 +242,7 @@ var BrandingActivity = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -244,7 +260,7 @@ var BrandingActivity = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -263,7 +279,7 @@ var BrandingActivity = function () {
                         position : 1,
                         firstName: 1,
                         lastName : 1,
-                        imageSrc: 1,
+                        imageSrc : 1,
                     }
                 }
             }
@@ -281,7 +297,7 @@ var BrandingActivity = function () {
                         accessRole: 1,
                         firstName : 1,
                         lastName  : 1,
-                        imageSrc: 1,
+                        imageSrc  : 1,
                     }
                 }
             }
@@ -310,6 +326,7 @@ var BrandingActivity = function () {
             const CONSTANTS = require('../constants/mainConstants');
             var query = req.query;
             var isMobile = req.isMobile;
+            var currentUserLevel = req.session.level;
             var filter = query.filter || {};
             var page = query.page || 1;
             var limit = query.count * 1 || parseInt(CONSTANTS.LIST_COUNT, 10);
@@ -367,7 +384,8 @@ var BrandingActivity = function () {
                 filterSearch     : filterSearch,
                 skip             : skip,
                 limit            : limit,
-                isMobile         : isMobile
+                isMobile         : isMobile,
+                currentUserLevel : currentUserLevel,
             });
 
             aggregation = MarketingCampaignModel.aggregate(pipeLine);
@@ -381,7 +399,7 @@ var BrandingActivity = function () {
                     return next(err);
                 }
 
-                const body = result.length ? result[0] : { data: [], total: 0 };
+                const body = result.length ? result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     element.description = {
@@ -478,7 +496,7 @@ var BrandingActivity = function () {
                     return next(err);
                 }
 
-                const body = result.length ? result[0] : { data: [], total: 0 };
+                const body = result.length ? result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     element.description = {
@@ -592,7 +610,7 @@ var BrandingActivity = function () {
                 ActivityLog.emit('marketing:al-alali-marketing-campaigns:published', {
                     actionOriginator: userId,
                     accessRoleLevel,
-                    body: result,
+                    body            : result,
                 });
 
                 res.status(201).send(result);
@@ -741,7 +759,7 @@ var BrandingActivity = function () {
                                         ActivityLog.emit('marketing:al-alali-marketing-campaigns:updated', {
                                             actionOriginator: userId,
                                             accessRoleLevel,
-                                            body: result.toJSON(),
+                                            body            : result.toJSON(),
                                         });
 
                                         return callback(null, deletedAttachments);
