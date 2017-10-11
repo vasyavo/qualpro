@@ -8331,11 +8331,18 @@ table:not(.ui-datepicker-calendar) thead tr td {
 }
 .productLaunchList .textContainer .newBrandAr {
     display: inline-block;
-    padding-left: 35px;
+    padding-left: 45px;
 }
 .productLaunchList .textContainer .newBrandAr:after {
     top: 0;
     left: 0;
+}
+.productLaunchList .locationTitle.newBrandAr:after {
+    top: 0;
+    left: 0;
+}
+.productLaunchList .locationTitle.newBrandAr {
+    padding-left: 45px;
 }
 .fixedHeight {
     overflow: hidden;

@@ -423,7 +423,7 @@ var TopBarView = Backbone.View.extend({
             currentUserId: this.sendPassForCurrentUser,
             App: App,
         }));
-
+//
         $thisEl.find('#' + this.tabName).addClass('viewBarTabActive');
 
         this.$actionButton = $thisEl.find('.actionBtn');

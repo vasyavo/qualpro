@@ -1,7 +1,6 @@
 const ERROR_MSG = require('./errorMessages');
 const errorDescriptions = {};
 
-
 /*
  * GLOBAL
  */
@@ -70,7 +69,6 @@ errorDescriptions[ERROR_MSG.FORBIDDEN_LOGIN_FROM_APP] = {
     ar: 'You can not login from application.'
 };
 
-
 errorDescriptions[ERROR_MSG.USER_LOCATION_IS_NOT_SPECIFIED] = {
     en: 'You have no location. Please contact with administration.',
     ar: 'متصلة، يرجى التواصل بمسئول النظام  ليس لديك أي مواقع.'
@@ -99,6 +97,15 @@ errorDescriptions[ERROR_MSG.INCORRECT_USERNAME_OR_PASSWORD] = {
 errorDescriptions[ERROR_MSG.ERROR_ACCESS_DENIED_MESSAGE] = {
     en: 'You cannot access the app while being on leave.',
     ar: ' لا يمكنك الوصول إلى التطبيق أثناء إجازة الخاص بك',
+};
+
+/*
+ * PLANOGRAM CREATION
+ */
+
+errorDescriptions[ERROR_MSG.PLANOGRAM_SAME_PARAMETERS] = {
+    en: 'Planogram with the same parameters already exists.',
+    ar: 'بلانوغرام مع نفس المعايير موجودة بالفعل',
 };
 
 module.exports = errorDescriptions;

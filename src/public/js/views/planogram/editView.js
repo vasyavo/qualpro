@@ -29,7 +29,7 @@ module.exports = BaseView.extend({
     bodyChange              : null,
 
     events: {
-        'change #inputImg': 'changeImage',
+        'change #inputImg' : 'changeImage',
         'change .createOwn': 'setOwnValue'
     },
 
@@ -45,7 +45,7 @@ module.exports = BaseView.extend({
 
         modelJSON = this.currentModel.toJSON();
         countryId = modelJSON.country._id;
-        retailSegments = modelJSON.retailSegment.map(function(item) {
+        retailSegments = modelJSON.retailSegment.map(function (item) {
             return item._id;
         });
 
@@ -89,19 +89,18 @@ module.exports = BaseView.extend({
 
     savePlanogram: function () {
         var self = this;
-        var model = this.model.toJSON();
         this.body = {};
 
-        if (this.selectedCountryId && this.selectedCountryId !== model.country._id) {
+        if (this.selectedCountryId) {
             this.body.country = this.selectedCountryId;
         }
-        if (this.selectedRetailSegmentId && this.selectedRetailSegmentId !== model.retailSegment._id) {
+        if (this.selectedRetailSegmentId) {
             this.body.retailSegment = this.selectedRetailSegmentId;
         }
-        if (this.selectedProductId && this.selectedProductId !== model.product._id) {
+        if (this.selectedProductId) {
             this.body.product = this.selectedProductId;
         }
-        if (this.selectedConfigurationId && this.selectedConfigurationId !== model.configuration._id) {
+        if (this.selectedConfigurationId) {
             this.body.configuration = this.selectedConfigurationId;
         }
         if (this.selectedDisplayType && this.selectedDisplayType._id) {
@@ -122,7 +121,7 @@ module.exports = BaseView.extend({
         });
     },
 
-    setOwnValue : function (e){
+    setOwnValue: function (e) {
         var $target = $(e.target);
         var type = $target.attr('data-property');
         var value = $target.val();
@@ -134,10 +133,11 @@ module.exports = BaseView.extend({
         if (type === 'displayType' && value) {
             this.selectedDisplayType = {
                 _id : 'otherId',
-                name : {
+                name: {
                     ar: value,
                     en: value
-                }};
+                }
+            };
             self.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
         }
     },
@@ -157,7 +157,11 @@ module.exports = BaseView.extend({
                 var model = new planogramModel(xhr, {parse: true});
                 context.$el.dialog('close').dialog('destroy').remove();
                 context.trigger('modelSaved', model);
-            }
+            },
+            error      : function (xhr) {
+                var message = xhr.responseJSON.description && xhr.responseJSON.description[App.currentUser.currentLanguage];
+                App.render({type: 'error', message: message});
+            },
         });
     },
 
@@ -185,16 +189,16 @@ module.exports = BaseView.extend({
 
         this.displayTypeCollection = new filterCollection();
 
-        if (modelJSON.displayType && !modelJSON.displayType._id){
+        if (modelJSON.displayType && !modelJSON.displayType._id) {
             modelJSON.displayType._id = 'otherId';
         }
 
         this.displayTypeDropDownView = new dropDownView({
-            translation : this.translation,
-            dropDownList: this.displayTypeCollection,
-            selectedValues : [modelJSON.displayType],
-            displayText : this.translation.displayType,
-            contentType : CONTENT_TYPES.DISPLAYTYPE
+            translation   : this.translation,
+            dropDownList  : this.displayTypeCollection,
+            selectedValues: [modelJSON.displayType],
+            displayText   : this.translation.displayType,
+            contentType   : CONTENT_TYPES.DISPLAYTYPE
         });
 
         this.displayTypeCollection.reset(OTHER_CONSTANTS.DISPLAY_TYPE_DD[App.currentUser.currentLanguage]);
@@ -202,16 +206,16 @@ module.exports = BaseView.extend({
             var modelId = data.model._id;
             var input = data.$selector;
 
-            if (modelId === 'otherId'){
+            if (modelId === 'otherId') {
                 input.addClass('createOwn');
                 self.displayTypeDropDownView.selectedValues = [];
                 input.focus();
             } else {
                 self.selectedDisplayType = {
                     _id : modelId,
-                    name : {
-                        en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : modelId}).name,
-                        ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : modelId}).name
+                    name: {
+                        en: _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id: modelId}).name,
+                        ar: _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id: modelId}).name
                     }
                 };
             }
@@ -265,14 +269,14 @@ module.exports = BaseView.extend({
         $formString.find('#countrySelect').append(this.countryDropDownView.el);
 
         this.retailSegmentDropDownView = new dropDownView({
-            translation   : this.translation,
-            dropDownList  : this.retailSegmentCollection,
-            selectedValues: modelJSON.retailSegment,
-            displayText   : this.translation.retailSegment,
-            contentType   : CONTENT_TYPES.RETAILSEGMENT,
-            multiSelect   : true,
-            noSingleSelectEvent : true,
-            noAutoSelectOne : true
+            translation        : this.translation,
+            dropDownList       : this.retailSegmentCollection,
+            selectedValues     : modelJSON.retailSegment,
+            displayText        : this.translation.retailSegment,
+            contentType        : CONTENT_TYPES.RETAILSEGMENT,
+            multiSelect        : true,
+            noSingleSelectEvent: true,
+            noAutoSelectOne    : true
         });
 
         this.retailSegmentDropDownView.on('changeItem', function (data) {

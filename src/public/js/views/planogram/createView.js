@@ -52,7 +52,7 @@ module.exports = BaseView.extend({
         this.render();
     },
 
-    setOwnValue : function (e){
+    setOwnValue: function (e) {
         var $target = $(e.target);
         var type = $target.attr('data-property');
         var value = $target.val();
@@ -63,10 +63,11 @@ module.exports = BaseView.extend({
         if (type === 'displayType' && value) {
             this.selectedDisplayType = {
                 _id : 'otherId',
-                name : {
+                name: {
                     ar: value,
                     en: value
-                }};
+                }
+            };
             this.displayTypeDropDownView.selectedValues = [this.selectedDisplayType.name];
         }
     },
@@ -134,7 +135,11 @@ module.exports = BaseView.extend({
                 var model = new Model(xhr, {parse: true});
                 context.$el.dialog('close').dialog('destroy').remove();
                 context.trigger('modelSaved', model);
-            }
+            },
+            error      : function (xhr) {
+                var message = xhr.responseJSON.description && xhr.responseJSON.description[App.currentUser.currentLanguage];
+                App.render({type: 'error', message: message});
+            },
         });
     },
 
@@ -189,16 +194,16 @@ module.exports = BaseView.extend({
         } else if (itemName === 'configuration') {
             this.selectedConfigurationId = itemId;
         } else if (itemName === 'displayType') {
-            if (itemId === 'otherId'){
+            if (itemId === 'otherId') {
                 input.addClass('createOwn');
                 input.attr('placeholder', 'Enter display type');
                 this.displayTypeDropDownView.selectedValues = [];
             } else {
                 this.selectedDisplayType = {
                     _id : itemId,
-                    name : {
-                        en : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id : itemId}).name,
-                        ar : _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id : itemId}).name
+                    name: {
+                        en: _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.en, {_id: itemId}).name,
+                        ar: _.find(OTHER_CONSTANTS.DISPLAY_TYPE_DD.ar, {_id: itemId}).name
                     }
                 };
             }
@@ -236,13 +241,13 @@ module.exports = BaseView.extend({
         $formString.find('#displayTypeSelect').append(this.displayTypeDropDownView.el);
 
         this.retailSegmentDropDownView = new DropDownView({
-            translation : this.translation,
-            dropDownList: this.retailSegmentCollection,
-            displayText : this.translation.retailSegment,
-            contentType : CONTENT_TYPES.RETAILSEGMENT,
-            multiSelect : true,
-            noSingleSelectEvent : true,
-            noAutoSelectOne : true
+            translation        : this.translation,
+            dropDownList       : this.retailSegmentCollection,
+            displayText        : this.translation.retailSegment,
+            contentType        : CONTENT_TYPES.RETAILSEGMENT,
+            multiSelect        : true,
+            noSingleSelectEvent: true,
+            noAutoSelectOne    : true
         });
 
         this.retailSegmentDropDownView.on('changeItem', this.selectItem, this);
@@ -287,7 +292,6 @@ module.exports = BaseView.extend({
         });
 
         this.$el.find('#createPlanogramForm').on('submit', {body: this.body, context: this}, this.submitForm);
-
 
         this.delegateEvents(this.events);
 
