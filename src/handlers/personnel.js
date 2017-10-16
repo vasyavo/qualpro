@@ -42,41 +42,41 @@ const Personnel = function () {
     const PreviewModel = require('./../stories/preview/model.business');
 
     const $defProjection = {
-        _id: 1,
-        position: 1,
-        avgRating: 1,
-        manager: 1,
-        lastAccess: 1,
-        firstName: 1,
-        lastName: 1,
-        email: 1,
-        phoneNumber: 1,
-        accessRole: 1,
-        createdBy: 1,
-        editedBy: 1,
-        vacation: 1,
-        status: 1,
-        region: 1,
-        subRegion: 1,
-        retailSegment: 1,
-        outlet: 1,
-        branch: 1,
-        country: 1,
-        currentLanguage: 1,
-        super: 1,
-        archived: 1,
-        temp: 1,
-        confirmed: 1,
-        translated: 1,
-        dateJoined: 1,
-        beforeAccess: 1,
+        _id             : 1,
+        position        : 1,
+        avgRating       : 1,
+        manager         : 1,
+        lastAccess      : 1,
+        firstName       : 1,
+        lastName        : 1,
+        email           : 1,
+        phoneNumber     : 1,
+        accessRole      : 1,
+        createdBy       : 1,
+        editedBy        : 1,
+        vacation        : 1,
+        status          : 1,
+        region          : 1,
+        subRegion       : 1,
+        retailSegment   : 1,
+        outlet          : 1,
+        branch          : 1,
+        country         : 1,
+        currentLanguage : 1,
+        super           : 1,
+        archived        : 1,
+        temp            : 1,
+        confirmed       : 1,
+        translated      : 1,
+        dateJoined      : 1,
+        beforeAccess    : 1,
         lasMonthEvaluate: 1,
-        covered: 1,
-        token: 1,
-        imageSrc: 1,
+        covered         : 1,
+        token           : 1,
+        imageSrc        : 1,
     };
 
-    const convertDomainsToObjectIdArray = function(body) {
+    const convertDomainsToObjectIdArray = function (body) {
         if (body.country) {
             body.country = body.country.objectID();
         }
@@ -102,7 +102,7 @@ const Personnel = function () {
         }
     };
 
-    const unselectable = function(currentLevel, context, instoreObjective) {
+    const unselectable = function (currentLevel, context, instoreObjective) {
         const obj = {
             1: [],
             2: ['country'],
@@ -113,7 +113,7 @@ const Personnel = function () {
         let value;
 
         if (instoreObjective) {
-            return { $literal: false };
+            return {$literal: false};
         }
 
         if (obj[currentLevel]) {
@@ -123,15 +123,15 @@ const Personnel = function () {
             if (index !== -1) {
                 value = true;
             }
-            return { $literal: value };
+            return {$literal: value};
         }
 
-        return { $literal: false };
+        return {$literal: false};
     };
 
     const personnelFindByIdAndPopulate = (options, callback) => {
         const id = ObjectId(options.id);
-        const { isMobile } = options;
+        const {isMobile} = options;
 
         const pipeline = [{
             $match: {
@@ -139,24 +139,24 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'accessRoles',
-                localField: 'accessRole',
+                from        : 'accessRoles',
+                localField  : 'accessRole',
                 foreignField: '_id',
-                as: 'accessRole',
+                as          : 'accessRole',
             },
         }, {
             $lookup: {
-                from: 'positions',
-                localField: 'position',
+                from        : 'positions',
+                localField  : 'position',
                 foreignField: '_id',
-                as: 'position',
+                as          : 'position',
             },
         }, {
             $lookup: {
-                from: 'domains',
-                localField: 'country',
+                from        : 'domains',
+                localField  : 'country',
                 foreignField: '_id',
-                as: 'country',
+                as          : 'country',
             },
         }, {
             $addFields: {
@@ -164,10 +164,10 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'domains',
-                localField: 'region',
+                from        : 'domains',
+                localField  : 'region',
                 foreignField: '_id',
-                as: 'region',
+                as          : 'region',
             },
         }, {
             $addFields: {
@@ -175,10 +175,10 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'domains',
-                localField: 'subRegion',
+                from        : 'domains',
+                localField  : 'subRegion',
                 foreignField: '_id',
-                as: 'subRegion',
+                as          : 'subRegion',
             },
         }, {
             $addFields: {
@@ -186,10 +186,10 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'branches',
-                localField: 'branch',
+                from        : 'branches',
+                localField  : 'branch',
                 foreignField: '_id',
-                as: 'branch',
+                as          : 'branch',
             },
         }, {
             $addFields: {
@@ -197,51 +197,51 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         }, {
             $lookup: {
-                from: 'personnels',
-                localField: 'manager',
+                from        : 'personnels',
+                localField  : 'manager',
                 foreignField: '_id',
-                as: 'manager',
+                as          : 'manager',
             },
         }, {
             $addFields: {
-                pass: null,
-                accessRole: {
+                pass            : null,
+                accessRole      : {
                     $let: {
                         vars: {
                             accessRole: {
                                 $arrayElemAt: ['$accessRole', 0],
                             },
                         },
-                        in: {
-                            _id: '$$accessRole._id',
-                            name: '$$accessRole.name',
+                        in  : {
+                            _id  : '$$accessRole._id',
+                            name : '$$accessRole.name',
                             level: '$$accessRole.level',
                         },
                     },
                 },
-                position: {
+                position        : {
                     $let: {
                         vars: {
                             position: {
                                 $arrayElemAt: ['$position', 0],
                             },
                         },
-                        in: {
-                            _id: '$$position._id',
+                        in  : {
+                            _id : '$$position._id',
                             name: '$$position.name',
                         },
                     },
                 },
                 'createdBy.user': {
                     $cond: {
-                        if: {
+                        if  : {
                             $gt: [{
                                 $size: '$createdBy.user',
                             }, 0],
@@ -253,21 +253,21 @@ const Personnel = function () {
                                         $arrayElemAt: ['$createdBy.user', 0],
                                     },
                                 },
-                                in: {
-                                    _id: '$$createdBy._id',
-                                    firstName: '$$createdBy.firstName',
-                                    lastName: '$$createdBy.lastName',
+                                in  : {
+                                    _id       : '$$createdBy._id',
+                                    firstName : '$$createdBy.firstName',
+                                    lastName  : '$$createdBy.lastName',
                                     accessRole: '$$createdBy.accessRole',
-                                    position: '$$createdBy.position',
+                                    position  : '$$createdBy.position',
                                 },
                             },
                         },
                         else: null,
                     },
                 },
-                manager: {
+                manager         : {
                     $cond: {
-                        if: {
+                        if  : {
                             $gt: [{
                                 $size: '$manager',
                             }, 0],
@@ -279,12 +279,12 @@ const Personnel = function () {
                                         $arrayElemAt: ['$manager', 0],
                                     },
                                 },
-                                in: {
-                                    _id: '$$manager._id',
-                                    firstName: '$$manager.firstName',
-                                    lastName: '$$manager.lastName',
+                                in  : {
+                                    _id       : '$$manager._id',
+                                    firstName : '$$manager.firstName',
+                                    lastName  : '$$manager.lastName',
                                     accessRole: '$$manager.accessRole',
-                                    position: '$$manager.position',
+                                    position  : '$$manager.position',
                                 },
                             },
                         },
@@ -294,10 +294,10 @@ const Personnel = function () {
             },
         }, {
             $lookup: {
-                from: 'personnels',
-                localField: '_id',
+                from        : 'personnels',
+                localField  : '_id',
                 foreignField: 'vacation.cover',
-                as: 'covered',
+                as          : 'covered',
             },
         }, {
             $unwind: {
@@ -420,15 +420,15 @@ const Personnel = function () {
                 lasMonthEvaluate: '$_id.lasMonthEvaluate',
                 token           : '$_id.token',
                 imageSrc        : '$_id.imageSrc',
-                covered: 1
+                covered         : 1
             }
         }, {
             $addFields: {
                 covered: {
                     $filter: {
                         input: '$covered',
-                        as: 'item',
-                        cond: {
+                        as   : 'item',
+                        cond : {
                             $gt: ['$$item._id', '']
                         },
                     },
@@ -439,30 +439,30 @@ const Personnel = function () {
                 covered: {
                     $map: {
                         input: '$covered',
-                        as: 'item',
-                        in: {
-                            _id: '$$item._id',
-                            firstName: '$$item.firstName',
-                            lastName: '$$item.lastName',
-                            accessRole: '$$item.accessRole',
-                            position: '$$item.position',
-                            country: '$$item.country',
-                            region: '$$item.region',
-                            subRegion: '$$item.subRegion',
-                            branch: '$$item.branch',
+                        as   : 'item',
+                        in   : {
+                            _id          : '$$item._id',
+                            firstName    : '$$item.firstName',
+                            lastName     : '$$item.lastName',
+                            accessRole   : '$$item.accessRole',
+                            position     : '$$item.position',
+                            country      : '$$item.country',
+                            region       : '$$item.region',
+                            subRegion    : '$$item.subRegion',
+                            branch       : '$$item.branch',
                             retailSegment: '$$item.retailSegment',
-                            outlet: '$$item.outlet',
-                            onLeave: '$$item.vacation.onLeave',
+                            outlet       : '$$item.outlet',
+                            onLeave      : '$$item.vacation.onLeave',
                         },
                     },
                 },
             },
         }, {
             $lookup: {
-                from: 'personnels',
-                localField: 'vacation.cover',
+                from        : 'personnels',
+                localField  : 'vacation.cover',
                 foreignField: '_id',
-                as: 'cover',
+                as          : 'cover',
             },
         }, {
             $addFields: {
@@ -497,16 +497,16 @@ const Personnel = function () {
         async.waterfall([
             (cb) => {
                 require('./../stories/personnel/reusable-components/getLocation')({
-                    setCountry: personnel.country,
-                    setRegion: personnel.region,
+                    setCountry  : personnel.country,
+                    setRegion   : personnel.region,
                     setSubRegion: personnel.subRegion,
                 }, cb);
             },
             (result, cb) => {
                 const groups = result.length ?
                     result.slice().pop() : {
-                        setCountry: [],
-                        setRegion: [],
+                        setCountry  : [],
+                        setRegion   : [],
                         setSubRegion: [],
                     };
                 personnel.country = groups.setCountry;
@@ -517,15 +517,15 @@ const Personnel = function () {
             (cb) => {
                 require('./../stories/personnel/reusable-components/getBranches')({
                     setSubRegion: personnel.subRegion,
-                    setBranch: personnel.branch,
+                    setBranch   : personnel.branch,
                 }, cb);
             },
             (result, cb) => {
                 const groups = result.length ?
                     result.slice().pop() : {
-                        setBranch: [],
+                        setBranch       : [],
                         setRetailSegment: [],
-                        setOutlet: [],
+                        setOutlet       : [],
                     };
                 personnel.branch = groups.setBranch;
                 personnel.retailSegment = groups.setRetailSegment;
@@ -535,7 +535,7 @@ const Personnel = function () {
         ], cb);
     };
 
-    this.getForDD = function(req, res, next) {
+    this.getForDD = function (req, res, next) {
         function queryRun() {
             const query = req.query;
             const queryObject = query || {};
@@ -564,7 +564,7 @@ const Personnel = function () {
         });
     };
 
-    this.getForTree = function(req, res, next) {
+    this.getForTree = function (req, res, next) {
         function queryRun() {
             const query = req.query;
             const currentLevel = req.session.level;
@@ -586,11 +586,11 @@ const Personnel = function () {
 
             async.waterfall([
 
-                function(cb) {
+                function (cb) {
                     PersonnelModel
                         .findById(queryObject.ids[0])
                         .populate([{
-                            path: 'accessRole',
+                            path  : 'accessRole',
                             select: 'level',
                         }])
                         .exec((err, personnelModel) => {
@@ -622,8 +622,7 @@ const Personnel = function () {
                         });
                 },
 
-
-                function(level, cb) {
+                function (level, cb) {
                     if (level === ACL_CONSTANTS.MASTER_ADMIN) {
                         return cb(null, []);
                     }
@@ -635,7 +634,7 @@ const Personnel = function () {
 
                     queryObject.ids = queryObject.ids.objectID();
 
-                    $matchObject._id = { $in: queryObject.ids };
+                    $matchObject._id = {$in: queryObject.ids};
 
                     pipeLine.push({
                         $match: $matchObject,
@@ -643,210 +642,210 @@ const Personnel = function () {
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$country',
+                            path                      : '$country',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$region',
+                            path                      : '$region',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$subRegion',
+                            path                      : '$subRegion',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$branch',
+                            path                      : '$branch',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'domains',
-                            localField: 'country',
+                            from        : 'domains',
+                            localField  : 'country',
                             foreignField: '_id',
-                            as: 'country',
+                            as          : 'country',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             country: {
-                                _id: { $arrayElemAt: ['$country._id', 0] },
-                                title: { $arrayElemAt: [`$country.name.${currentLanguage}`, 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
+                                _id         : {$arrayElemAt: ['$country._id', 0]},
+                                title       : {$arrayElemAt: [`$country.name.${currentLanguage}`, 0]},
+                                expanded    : {$literal: true},
+                                selected    : {$literal: false},
                                 unselectable: unselectable(currentLevel, 'country', instoreObjective),
-                                contentType: { $literal: 'country' },
-                                key: { $arrayElemAt: ['$country._id', 0] },
+                                contentType : {$literal: 'country'},
+                                key         : {$arrayElemAt: ['$country._id', 0]},
                             },
                         }),
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'domains',
-                            localField: 'region',
+                            from        : 'domains',
+                            localField  : 'region',
                             foreignField: '_id',
-                            as: 'region',
+                            as          : 'region',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             region: {
-                                _id: { $arrayElemAt: ['$region._id', 0] },
-                                title: { $arrayElemAt: [`$region.name.${currentLanguage}`, 0] },
-                                parent: { $arrayElemAt: ['$region.parent', 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
+                                _id         : {$arrayElemAt: ['$region._id', 0]},
+                                title       : {$arrayElemAt: [`$region.name.${currentLanguage}`, 0]},
+                                parent      : {$arrayElemAt: ['$region.parent', 0]},
+                                expanded    : {$literal: true},
+                                selected    : {$literal: false},
                                 unselectable: unselectable(currentLevel, 'region', instoreObjective),
-                                contentType: { $literal: 'region' },
-                                key: { $arrayElemAt: ['$region._id', 0] },
+                                contentType : {$literal: 'region'},
+                                key         : {$arrayElemAt: ['$region._id', 0]},
                             },
                         }),
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'domains',
-                            localField: 'subRegion',
+                            from        : 'domains',
+                            localField  : 'subRegion',
                             foreignField: '_id',
-                            as: 'subRegion',
+                            as          : 'subRegion',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             subRegion: {
-                                _id: { $arrayElemAt: ['$subRegion._id', 0] },
-                                title: { $arrayElemAt: [`$subRegion.name.${currentLanguage}`, 0] },
-                                parent: { $arrayElemAt: ['$subRegion.parent', 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
+                                _id         : {$arrayElemAt: ['$subRegion._id', 0]},
+                                title       : {$arrayElemAt: [`$subRegion.name.${currentLanguage}`, 0]},
+                                parent      : {$arrayElemAt: ['$subRegion.parent', 0]},
+                                expanded    : {$literal: true},
+                                selected    : {$literal: false},
                                 unselectable: unselectable(currentLevel, 'subRegion', instoreObjective),
-                                contentType: { $literal: 'subRegion' },
-                                key: { $arrayElemAt: ['$subRegion._id', 0] },
+                                contentType : {$literal: 'subRegion'},
+                                key         : {$arrayElemAt: ['$subRegion._id', 0]},
                             },
                         }),
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'branches',
-                            localField: 'branch',
+                            from        : 'branches',
+                            localField  : 'branch',
                             foreignField: '_id',
-                            as: 'branch',
+                            as          : 'branch',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
-                            branch: {
-                                _id: { $arrayElemAt: ['$branch._id', 0] },
-                                subRegion: { $arrayElemAt: ['$branch.subRegion', 0] },
-                                title: { $arrayElemAt: [`$branch.name.${currentLanguage}`, 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
-                                contentType: { $literal: 'branch' },
-                                key: { $arrayElemAt: ['$branch._id', 0] },
+                            branch       : {
+                                _id        : {$arrayElemAt: ['$branch._id', 0]},
+                                subRegion  : {$arrayElemAt: ['$branch.subRegion', 0]},
+                                title      : {$arrayElemAt: [`$branch.name.${currentLanguage}`, 0]},
+                                expanded   : {$literal: true},
+                                selected   : {$literal: false},
+                                contentType: {$literal: 'branch'},
+                                key        : {$arrayElemAt: ['$branch._id', 0]},
                             },
-                            retailSegment: { $arrayElemAt: ['$branch.retailSegment', 0] },
-                            outlet: { $arrayElemAt: ['$branch.outlet', 0] },
+                            retailSegment: {$arrayElemAt: ['$branch.retailSegment', 0]},
+                            outlet       : {$arrayElemAt: ['$branch.outlet', 0]},
                         }),
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'retailSegments',
-                            localField: 'retailSegment',
+                            from        : 'retailSegments',
+                            localField  : 'retailSegment',
                             foreignField: '_id',
-                            as: 'retailSegment',
+                            as          : 'retailSegment',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             retailSegment: {
-                                _id: { $arrayElemAt: ['$retailSegment._id', 0] },
-                                title: { $arrayElemAt: [`$retailSegment.name.${currentLanguage}`, 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
-                                contentType: { $literal: 'retailSegment' },
-                                key: { $arrayElemAt: ['$retailSegment._id', 0] },
+                                _id        : {$arrayElemAt: ['$retailSegment._id', 0]},
+                                title      : {$arrayElemAt: [`$retailSegment.name.${currentLanguage}`, 0]},
+                                expanded   : {$literal: true},
+                                selected   : {$literal: false},
+                                contentType: {$literal: 'retailSegment'},
+                                key        : {$arrayElemAt: ['$retailSegment._id', 0]},
                             },
                         }),
                     });
 
                     pipeLine.push({
                         $lookup: {
-                            from: 'outlets',
-                            localField: 'outlet',
+                            from        : 'outlets',
+                            localField  : 'outlet',
                             foreignField: '_id',
-                            as: 'outlet',
+                            as          : 'outlet',
                         },
                     });
 
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             outlet: {
-                                _id: { $arrayElemAt: ['$outlet._id', 0] },
-                                title: { $arrayElemAt: [`$outlet.name.${currentLanguage}`, 0] },
-                                expanded: { $literal: true },
-                                selected: { $literal: false },
-                                contentType: { $literal: 'outlet' },
-                                key: { $arrayElemAt: ['$outlet._id', 0] },
+                                _id        : {$arrayElemAt: ['$outlet._id', 0]},
+                                title      : {$arrayElemAt: [`$outlet.name.${currentLanguage}`, 0]},
+                                expanded   : {$literal: true},
+                                selected   : {$literal: false},
+                                contentType: {$literal: 'outlet'},
+                                key        : {$arrayElemAt: ['$outlet._id', 0]},
                             },
                         }),
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$country',
+                            path                      : '$country',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$region',
+                            path                      : '$region',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$subRegion',
+                            path                      : '$subRegion',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$retailSegment',
+                            path                      : '$retailSegment',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$outlet',
+                            path                      : '$outlet',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
 
                     pipeLine.push({
                         $unwind: {
-                            path: '$branch',
+                            path                      : '$branch',
                             preserveNullAndEmptyArrays: true,
                         },
                     });
@@ -855,32 +854,32 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: '$country._id',
-                            title: { $first: '$country.title' },
-                            expanded: { $first: '$country.expanded' },
-                            selected: { $first: '$country.selected' },
-                            unselectable: { $first: '$country.unselectable' },
-                            contentType: { $first: '$country.contentType' },
-                            key: { $first: '$country.key' },
-                            children: {
+                            _id         : '$country._id',
+                            title       : {$first: '$country.title'},
+                            expanded    : {$first: '$country.expanded'},
+                            selected    : {$first: '$country.selected'},
+                            unselectable: {$first: '$country.unselectable'},
+                            contentType : {$first: '$country.contentType'},
+                            key         : {$first: '$country.key'},
+                            children    : {
                                 $addToSet: {
                                     $cond: {
-                                        if: {
+                                        if  : {
                                             $eq: ['$region.parent', '$country._id'],
                                         },
                                         then: {
-                                            _id: '$region._id',
-                                            title: '$region.title',
-                                            expanded: '$region.expanded',
-                                            selected: '$region.selected',
+                                            _id         : '$region._id',
+                                            title       : '$region.title',
+                                            expanded    : '$region.expanded',
+                                            selected    : '$region.selected',
                                             unselectable: '$region.unselectable',
-                                            contentType: '$region.contentType',
-                                            key: '$region.key',
-                                            children: {
+                                            contentType : '$region.contentType',
+                                            key         : '$region.key',
+                                            children    : {
                                                 $filter: {
                                                     input: '$children',
-                                                    as: 'item',
-                                                    cond: {
+                                                    as   : 'item',
+                                                    cond : {
                                                         $ne: ['$$item', false],
                                                     },
                                                 },
@@ -895,31 +894,31 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
+                            _id     : {
                                 countryId: '$country._id',
-                                regionId: '$region._id',
+                                regionId : '$region._id',
                             },
-                            region: { $first: '$region' },
-                            country: { $first: '$country' },
+                            region  : {$first: '$region'},
+                            country : {$first: '$country'},
                             children: {
                                 $addToSet: {
                                     $cond: {
-                                        if: {
+                                        if  : {
                                             $eq: ['$subRegion.parent', '$region._id'],
                                         },
                                         then: {
-                                            _id: '$subRegion._id',
-                                            title: '$subRegion.title',
-                                            expanded: '$subRegion.expanded',
-                                            selected: '$subRegion.selected',
+                                            _id         : '$subRegion._id',
+                                            title       : '$subRegion.title',
+                                            expanded    : '$subRegion.expanded',
+                                            selected    : '$subRegion.selected',
                                             unselectable: '$subRegion.unselectable',
-                                            contentType: '$subRegion.contentType',
-                                            key: '$subRegion.key',
-                                            children: {
+                                            contentType : '$subRegion.contentType',
+                                            key         : '$subRegion.key',
+                                            children    : {
                                                 $filter: {
                                                     input: '$children',
-                                                    as: 'item',
-                                                    cond: {
+                                                    as   : 'item',
+                                                    cond : {
                                                         $ne: [
                                                             {
                                                                 $size: '$$item.children',
@@ -939,27 +938,27 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                countryId: '$country._id',
-                                regionId: '$region._id',
+                            _id      : {
+                                countryId  : '$country._id',
+                                regionId   : '$region._id',
                                 subRegionId: '$subRegion._id',
                             },
-                            subRegion: { $first: '$subRegion' },
-                            country: { $first: '$country' },
-                            region: { $first: '$region' },
-                            children: {
+                            subRegion: {$first: '$subRegion'},
+                            country  : {$first: '$country'},
+                            region   : {$first: '$region'},
+                            children : {
                                 $addToSet: {
-                                    _id: '$retailSegment._id',
-                                    title: '$retailSegment.title',
-                                    expanded: '$retailSegment.expanded',
-                                    selected: '$retailSegment.selected',
+                                    _id        : '$retailSegment._id',
+                                    title      : '$retailSegment.title',
+                                    expanded   : '$retailSegment.expanded',
+                                    selected   : '$retailSegment.selected',
                                     contentType: '$retailSegment.contentType',
-                                    key: '$retailSegment.key',
-                                    children: {
+                                    key        : '$retailSegment.key',
+                                    children   : {
                                         $filter: {
                                             input: '$children',
-                                            as: 'item',
-                                            cond: {
+                                            as   : 'item',
+                                            cond : {
                                                 $ne: [
                                                     {
                                                         $size: '$$item.children',
@@ -976,29 +975,29 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                                subRegionId: '$subRegion._id',
+                            _id          : {
+                                countryId      : '$country._id',
+                                regionId       : '$region._id',
+                                subRegionId    : '$subRegion._id',
                                 retailSegmentId: '$retailSegment._id',
                             },
-                            country: { $first: '$country' },
-                            region: { $first: '$region' },
-                            subRegion: { $first: '$subRegion' },
-                            retailSegment: { $first: '$retailSegment' },
-                            children: {
+                            country      : {$first: '$country'},
+                            region       : {$first: '$region'},
+                            subRegion    : {$first: '$subRegion'},
+                            retailSegment: {$first: '$retailSegment'},
+                            children     : {
                                 $addToSet: {
-                                    _id: '$outlet._id',
-                                    title: '$outlet.title',
-                                    expanded: '$outlet.expanded',
-                                    selected: '$outlet.selected',
+                                    _id        : '$outlet._id',
+                                    title      : '$outlet.title',
+                                    expanded   : '$outlet.expanded',
+                                    selected   : '$outlet.selected',
                                     contentType: '$outlet.contentType',
-                                    key: '$outlet.key',
-                                    children: {
+                                    key        : '$outlet.key',
+                                    children   : {
                                         $filter: {
                                             input: '$children',
-                                            as: 'item',
-                                            cond: {
+                                            as   : 'item',
+                                            cond : {
                                                 $ne: ['$$item', false],
                                             },
                                         },
@@ -1010,31 +1009,31 @@ const Personnel = function () {
 
                     pipeArray.push({
                         $group: {
-                            _id: {
-                                countryId: '$country._id',
-                                regionId: '$region._id',
-                                subRegionId: '$subRegion._id',
+                            _id          : {
+                                countryId      : '$country._id',
+                                regionId       : '$region._id',
+                                subRegionId    : '$subRegion._id',
                                 retailSegmentId: '$retailSegment._id',
-                                outletId: '$outlet._id',
+                                outletId       : '$outlet._id',
                             },
-                            country: { $first: '$country' },
-                            region: { $first: '$region' },
-                            subRegion: { $first: '$subRegion' },
-                            outlet: { $first: '$outlet' },
-                            retailSegment: { $first: '$retailSegment' },
-                            children: {
+                            country      : {$first: '$country'},
+                            region       : {$first: '$region'},
+                            subRegion    : {$first: '$subRegion'},
+                            outlet       : {$first: '$outlet'},
+                            retailSegment: {$first: '$retailSegment'},
+                            children     : {
                                 $addToSet: {
                                     $cond: {
-                                        if: {
+                                        if  : {
                                             $eq: ['$branch.subRegion', '$subRegion._id'],
                                         },
                                         then: {
-                                            _id: '$branch._id',
-                                            title: '$branch.title',
-                                            expanded: '$branch.expanded',
-                                            selected: '$branch.selected',
+                                            _id        : '$branch._id',
+                                            title      : '$branch.title',
+                                            expanded   : '$branch.expanded',
+                                            selected   : '$branch.selected',
                                             contentType: '$branch.contentType',
-                                            key: '$branch.key',
+                                            key        : '$branch.key',
                                         },
                                         else: false,
                                     },
@@ -1098,7 +1097,7 @@ const Personnel = function () {
         });
     };
 
-    this.getStatusForDD = function(req, res, next) {
+    this.getStatusForDD = function (req, res, next) {
         function queryRun() {
             PersonnelModel.distinct('status', '_id firstName lastName fullName phoneNumber email').exec((err, result) => {
                 if (err) {
@@ -1121,7 +1120,7 @@ const Personnel = function () {
         });
     };
 
-    this.createSuper = function(req, res, next) {
+    this.createSuper = function (req, res, next) {
         const body = req.body;
         const password = body.pass;
 
@@ -1145,18 +1144,18 @@ const Personnel = function () {
         };
         const salt = bcrypt.genSaltSync(10);
         const su = {
-            firstName: { en: 'Super' },
-            lastName: { en: 'Admin' },
-            email: email.toLowerCase(),
-            super: true,
+            firstName: {en: 'Super'},
+            lastName : {en: 'Admin'},
+            email    : email.toLowerCase(),
+            super    : true,
             createdBy,
-            editedBy: createdBy,
-            token: generator.generate(),
-            status: PERSONNEL_STATUSES.INACTIVE._id,
-            pass: bcrypt.hashSync(password, salt),
+            editedBy : createdBy,
+            token    : generator.generate(),
+            status   : PERSONNEL_STATUSES.INACTIVE._id,
+            pass     : bcrypt.hashSync(password, salt),
         };
 
-        PersonnelModel.findOne({ super: true }, (err, result) => {
+        PersonnelModel.findOne({super: true}, (err, result) => {
             if (err) {
                 return res.status(400).send('Query is invalid');
             }
@@ -1193,9 +1192,9 @@ const Personnel = function () {
                     const personnel = personnelModel.toJSON();
                     const options = {
                         firstName: personnel.firstName,
-                        lastName: personnel.lastName,
+                        lastName : personnel.lastName,
                         password,
-                        email: personnel.email,
+                        email    : personnel.email,
                     };
                     const personnelId = personnel._id;
 
@@ -1218,7 +1217,7 @@ const Personnel = function () {
         });
     };
 
-    this.create = function(req, res, next) {
+    this.create = function (req, res, next) {
         const body = req.body;
         const accessLevel = req.session.level;
         const uId = req.session.uId;
@@ -1300,11 +1299,11 @@ const Personnel = function () {
                     };
 
                     if (body.email) {
-                        query.$or.push({ email: body.email });
+                        query.$or.push({email: body.email});
                     }
 
                     if (body.phoneNumber) {
-                        query.$or.push({ phoneNumber: body.phoneNumber });
+                        query.$or.push({phoneNumber: body.phoneNumber});
                     }
 
                     PersonnelModel.findOne(query, cb);
@@ -1328,13 +1327,13 @@ const Personnel = function () {
 
                     ActivityLog.emit('personnel:created', {
                         actionOriginator: uId,
-                        accessRoleLevel: accessLevel,
-                        body: personnel.toJSON(),
+                        accessRoleLevel : accessLevel,
+                        body            : personnel.toJSON(),
                     });
 
                     PreviewModel.setNewPreview({
-                        model: personnel,
-                        base64: imageSrc,
+                        model      : personnel,
+                        base64     : imageSrc,
                         contentType: CONTENT_TYPES.PERSONNEL,
                     }, (err) => {
                         if (err) {
@@ -1376,7 +1375,7 @@ const Personnel = function () {
         });
     };
 
-    this.login = function(req, res, next) {
+    this.login = function (req, res, next) {
         const session = req.session;
         const body = req.body;
 
@@ -1405,52 +1404,52 @@ const Personnel = function () {
 
         const genericPipeline = [{
             $project: {
-                email: 1,
+                email       : 1,
                 mobileNumber: 1,
-                pass: 1,
-                super: 1,
-                confirmed: 1,
-                archived: 1,
-                vacation: 1,
-                accessRole: 1,
-                position: 1,
+                pass        : 1,
+                super       : 1,
+                confirmed   : 1,
+                archived    : 1,
+                vacation    : 1,
+                accessRole  : 1,
+                position    : 1,
             },
         }, {
             $lookup: {
-                from: 'accessRoles',
-                localField: 'accessRole',
+                from        : 'accessRoles',
+                localField  : 'accessRole',
                 foreignField: '_id',
-                as: 'accessRole',
+                as          : 'accessRole',
             },
         }, {
             $unwind: {
-                path: '$accessRole',
+                path                      : '$accessRole',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'positions',
-                localField: 'position',
+                from        : 'positions',
+                localField  : 'position',
                 foreignField: '_id',
-                as: 'position',
+                as          : 'position',
             },
         }, {
             $unwind: {
-                path: '$position',
+                path                      : '$position',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                email: 1,
-                mobileNumber: 1,
-                pass: 1,
-                super: 1,
-                confirmed: 1,
-                archived: 1,
-                vacation: 1,
+                email             : 1,
+                mobileNumber      : 1,
+                pass              : 1,
+                super             : 1,
+                confirmed         : 1,
+                archived          : 1,
+                vacation          : 1,
                 'accessRole.level': 1,
-                'accessRole.name': 1,
-                'position.name': 1,
+                'accessRole.name' : 1,
+                'position.name'   : 1,
             },
         }];
 
@@ -1506,8 +1505,7 @@ const Personnel = function () {
                     ACL_CONSTANTS.CASH_VAN,
                     ACL_CONSTANTS.PROMOTER,
                 ];
-                const notAllowedLevelsMobile = [
-                ];
+                const notAllowedLevelsMobile = [];
 
                 if (notAllowedLevelsCMS.indexOf(level) !== -1 && !req.isMobile) {
                     return errorSender.forbidden(next, ERROR_MESSAGES.FORBIDDEN_LOGIN_TO_CMS);
@@ -1570,15 +1568,15 @@ const Personnel = function () {
 
                 // Salesman, Merchandiser and Cash Van ca\'t access app during vacation
                 if (onLeave && [
-                    ACL_CONSTANTS.SALES_MAN,
-                    ACL_CONSTANTS.MERCHANDISER,
-                    ACL_CONSTANTS.CASH_VAN,
-                ].indexOf(level) > -1) {
+                        ACL_CONSTANTS.SALES_MAN,
+                        ACL_CONSTANTS.MERCHANDISER,
+                        ACL_CONSTANTS.CASH_VAN,
+                    ].indexOf(level) > -1) {
                     return errorSender.badRequest(next, ERROR_MESSAGES.ERROR_ACCESS_DENIED_MESSAGE);
                 }
 
-                PersonnelModel.findByIdAndUpdate(personnel._id, update, { new: true })
-                    .select({ _id: 1 })
+                PersonnelModel.findByIdAndUpdate(personnel._id, update, {new: true})
+                    .select({_id: 1})
                     .lean()
                     .exec(cb);
             },
@@ -1607,7 +1605,7 @@ const Personnel = function () {
         });
     };
 
-    this.remove = function(req, res, next) {
+    this.remove = function (req, res, next) {
         const id = req.params.id;
         let error;
         let query;
@@ -1627,7 +1625,7 @@ const Personnel = function () {
          return next(error);
          }*/
 
-        query = PersonnelModel.remove({ _id: id });
+        query = PersonnelModel.remove({_id: id});
         query.exec((err) => {
             if (err) {
                 return next(err);
@@ -1638,8 +1636,8 @@ const Personnel = function () {
         /* });*/
     };
 
-    this.deviceId = function(req, res, next) {
-        const { body } = req;
+    this.deviceId = function (req, res, next) {
+        const {body} = req;
 
         if (!req.session.loggedIn) {
             return errorSender.notAuthorized(next);
@@ -1655,10 +1653,10 @@ const Personnel = function () {
 
         req.session.deviceId = body.deviceId;
 
-        res.status(200).send({ message: 'OK Set' });
+        res.status(200).send({message: 'OK Set'});
     };
 
-    this.archive = function(req, res, next) {
+    this.archive = function (req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
@@ -1667,11 +1665,11 @@ const Personnel = function () {
             const setIdToArchive = req.body.ids.objectID();
             const archived = req.body.archived === 'false' ? false : !!req.body.archived;
             const options = [{
-                idsToArchive: setIdToArchive,
+                idsToArchive   : setIdToArchive,
                 keyForCondition: '_id',
                 archived,
-                topArchived: archived,
-                model: PersonnelModel,
+                topArchived    : archived,
+                model          : PersonnelModel,
             }];
             const activityType = archived ? 'archived' : 'unarchived';
 
@@ -1681,9 +1679,7 @@ const Personnel = function () {
                     archiver.archive(userId, options, cb);
                 },
 
-                (done, cb) => {
-                    callback();
-
+                (cb) => {
                     PersonnelModel.find({
                         _id: {
                             $in: setIdToArchive,
@@ -1696,13 +1692,12 @@ const Personnel = function () {
                         ActivityLog.emit(`personnel:${activityType}`, {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body: personnel,
+                            body            : personnel,
                         });
                         eachCb();
                     }, cb);
                 },
-
-            ]);
+            ], callback);
         };
 
         async.waterfall([
@@ -1724,7 +1719,7 @@ const Personnel = function () {
         });
     };
 
-    this.getById = function(req, res, next) {
+    this.getById = function (req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const isMobile = req.isMobile;
@@ -1765,10 +1760,10 @@ const Personnel = function () {
                             personnel.subRegion = (personnelWithLoc.subRegion.length) ? _.union(personnel.subRegion, personnelWithLoc.subRegion) : [];
                             personnel.branch = (personnelWithLoc.branch.length) ? _.union(personnel.branch, personnelWithLoc.branch) : [];
                             personnel.retailSegment = (personnelWithLoc.retailSegment.length) ? _.union(personnel.retailSegment, personnelWithLoc.retailSegment) : [];
-                            personnel.outlet = (personnelWithLoc.outlet.length) ?  _.union(personnel.outlet, personnelWithLoc.outlet) : [];
+                            personnel.outlet = (personnelWithLoc.outlet.length) ? _.union(personnel.outlet, personnelWithLoc.outlet) : [];
                             eachCb();
                         });
-                    }, function() {
+                    }, function () {
                         cb(null, personnel);
                     });
                 },
@@ -1796,7 +1791,7 @@ const Personnel = function () {
 
             next({
                 status: 200,
-                body: personnel,
+                body  : personnel,
             });
         });
     };
@@ -1852,9 +1847,9 @@ const Personnel = function () {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'accessRole',
-            isArray: false,
+            from         : 'accessRoles',
+            key          : 'accessRole',
+            isArray      : false,
             addProjection: 'level',
         }));
 
@@ -1873,7 +1868,7 @@ const Personnel = function () {
             if (queryObject.hasOwnProperty('archived') && (!queryObject.archived || !queryObject.archived.$in[0])) {
                 queryObjectTemp = _.omit(queryObject, '_id', 'status', 'lasMonthEvaluate');
                 queryObject = _.pick(queryObject, '_id', 'status', 'lasMonthEvaluate');
-                queryObject.$or = [queryObjectTemp, { temp: true }];
+                queryObject.$or = [queryObjectTemp, {temp: true}];
             }
 
             pipeLine.push({
@@ -1894,8 +1889,8 @@ const Personnel = function () {
                                 country: queryObject.country,
                             },
                             {
-                                country: { $eq: [] },
-                                'accessRole.level': { $in: [ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.TRADE_MARKETER] },
+                                country           : {$eq: []},
+                                'accessRole.level': {$in: [ACL_CONSTANTS.MASTER_ADMIN, ACL_CONSTANTS.TRADE_MARKETER]},
                             },
                             {
                                 temp: true, // TODO, limit by country for mobile
@@ -1924,8 +1919,8 @@ const Personnel = function () {
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'position',
+            from   : 'positions',
+            key    : 'position',
             isArray: false,
         }));
 
@@ -1973,7 +1968,7 @@ const Personnel = function () {
 
             pipeLine.push({
                 $match: {
-                    'accessRole.level': { $in: accessLevels },
+                    'accessRole.level': {$in: accessLevels},
                 },
             });
         }
@@ -1981,13 +1976,13 @@ const Personnel = function () {
         domainsArray.forEach((element) => {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                 from: 'domains',
-                key: element,
+                key : element,
             }));
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'branches',
-            key: 'branch',
+            from             : 'branches',
+            key              : 'branch',
             addMainProjection: ['retailSegment', 'outlet'],
         }));
 
@@ -1999,99 +1994,99 @@ const Personnel = function () {
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'retailSegments',
-            key: 'retailSegment',
+            key : 'retailSegment',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
             from: 'outlets',
-            key: 'outlet',
+            key : 'outlet',
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'createdBy.user',
-            isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings: { createdBy: { date: 1 } },
+            from           : 'personnels',
+            key            : 'createdBy.user',
+            isArray        : false,
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: {createdBy: {date: 1}},
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'editedBy.user',
-            isArray: false,
-            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings: { editedBy: { date: 1 } },
+            from           : 'personnels',
+            key            : 'editedBy.user',
+            isArray        : false,
+            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: {editedBy: {date: 1}},
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'createdBy.user.accessRole',
-            isArray: false,
-            addProjection: ['_id', 'name', 'level'],
+            from           : 'accessRoles',
+            key            : 'createdBy.user.accessRole',
+            isArray        : false,
+            addProjection  : ['_id', 'name', 'level'],
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id: 1,
-                        position: 1,
+                        _id      : 1,
+                        position : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
             },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'createdBy.user.position',
-            isArray: false,
+            from           : 'positions',
+            key            : 'createdBy.user.position',
+            isArray        : false,
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id       : 1,
                         accessRole: 1,
-                        firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        firstName : 1,
+                        lastName  : 1,
+                        imageSrc  : 1,
                     },
                 },
             },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'accessRoles',
-            key: 'editedBy.user.accessRole',
-            isArray: false,
-            addProjection: ['_id', 'name', 'level'],
+            from           : 'accessRoles',
+            key            : 'editedBy.user.accessRole',
+            isArray        : false,
+            addProjection  : ['_id', 'name', 'level'],
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id: 1,
-                        position: 1,
+                        _id      : 1,
+                        position : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
             },
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'positions',
-            key: 'editedBy.user.position',
-            isArray: false,
+            from           : 'positions',
+            key            : 'editedBy.user.position',
+            isArray        : false,
             includeSiblings: {
                 editedBy: {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id       : 1,
                         accessRole: 1,
-                        firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        firstName : 1,
+                        lastName  : 1,
+                        imageSrc  : 1,
                     },
                 },
             },
@@ -2106,12 +2101,12 @@ const Personnel = function () {
                                 valAdjusted: {
                                     $add: [
                                         '$avgRating.monthly',
-                                        { $cond: [{ $gte: ['$avgRating.monthly', 0] }, 0.5, -0.5] },
+                                        {$cond: [{$gte: ['$avgRating.monthly', 0]}, 0.5, -0.5]},
                                     ],
                                 },
                             },
-                            in: {
-                                $subtract: ['$$valAdjusted', { $mod: ['$$valAdjusted', 1] }],
+                            in  : {
+                                $subtract: ['$$valAdjusted', {$mod: ['$$valAdjusted', 1]}],
                             },
                         },
                     },
@@ -2121,43 +2116,43 @@ const Personnel = function () {
 
         pipeLine.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'manager',
+                from        : 'personnels',
+                localField  : 'manager',
                 foreignField: '_id',
-                as: 'manager',
+                as          : 'manager',
             },
         });
 
         pipeLine.push({
             $project: aggregateHelper.getProjection({
-                manager: { $arrayElemAt: ['$manager', 0] },
+                manager: {$arrayElemAt: ['$manager', 0]},
             }),
         });
 
         pipeLine.push({
             $project: aggregateHelper.getProjection({
                 manager: {
-                    _id: '$manager._id',
+                    _id      : '$manager._id',
                     firstName: '$manager.firstName',
-                    lastName: '$manager.lastName',
-                    imageSrc: '$manager.imageSrc',
+                    lastName : '$manager.lastName',
+                    imageSrc : '$manager.imageSrc',
                 },
             }),
         });
 
         pipeLine.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'vacation.cover',
+                from        : 'personnels',
+                localField  : 'vacation.cover',
                 foreignField: '_id',
-                as: 'vacation.cover',
+                as          : 'vacation.cover',
             },
         });
 
         pipeLine.push({
             $project: aggregateHelper.getProjection({
                 vacation: {
-                    cover: { $arrayElemAt: ['$vacation.cover', 0] },
+                    cover  : {$arrayElemAt: ['$vacation.cover', 0]},
                     onLeave: 1,
                 },
             }),
@@ -2166,11 +2161,11 @@ const Personnel = function () {
         pipeLine.push({
             $project: aggregateHelper.getProjection({
                 vacation: {
-                    cover: {
-                        _id: '$vacation.cover._id',
+                    cover  : {
+                        _id      : '$vacation.cover._id',
                         firstName: '$vacation.cover.firstName',
-                        lastName: '$vacation.cover.lastName',
-                        imageSrc: '$vacation.cover.imageSrc',
+                        lastName : '$vacation.cover.lastName',
+                        imageSrc : '$vacation.cover.imageSrc',
                     },
                     onLeave: 1,
                 },
@@ -2185,43 +2180,43 @@ const Personnel = function () {
 
         pipeLine.push({
             $unwind: {
-                path: '$country',
+                path                      : '$country',
                 preserveNullAndEmptyArrays: true,
             },
         });
 
         pipeLine.push({
             $group: {
-                _id: '$_id',
-                position: { $first: '$position' },
-                avgRating: { $first: '$avgRating' },
-                manager: { $first: '$manager' },
-                lastAccess: { $first: '$lastAccess' },
-                beforeAccess: { $first: '$beforeAccess' },
-                firstName: { $first: '$firstName' },
-                lastName: { $first: '$lastName' },
-                email: { $first: '$email' },
-                phoneNumber: { $first: '$phoneNumber' },
-                accessRole: { $first: '$accessRole' },
-                dateJoined: { $first: '$dateJoined' },
-                createdBy: { $first: '$createdBy' },
-                editedBy: { $first: '$editedBy' },
-                vacation: { $first: '$vacation' },
-                status: { $first: '$status' },
-                region: { $first: '$region' },
-                subRegion: { $first: '$subRegion' },
-                retailSegment: { $first: '$retailSegment' },
-                outlet: { $first: '$outlet' },
-                branch: { $first: '$branch' },
-                country: { $addToSet: '$country' },
-                currentLanguage: { $first: '$currentLanguage' },
-                super: { $first: '$super' },
-                archived: { $first: '$archived' },
-                temp: { $first: '$temp' },
-                confirmed: { $first: '$confirmed' },
-                translated: { $first: '$translated' },
-                covered: { $first: '$covered' },
-                imageSrc: { $first: '$imageSrc' },
+                _id            : '$_id',
+                position       : {$first: '$position'},
+                avgRating      : {$first: '$avgRating'},
+                manager        : {$first: '$manager'},
+                lastAccess     : {$first: '$lastAccess'},
+                beforeAccess   : {$first: '$beforeAccess'},
+                firstName      : {$first: '$firstName'},
+                lastName       : {$first: '$lastName'},
+                email          : {$first: '$email'},
+                phoneNumber    : {$first: '$phoneNumber'},
+                accessRole     : {$first: '$accessRole'},
+                dateJoined     : {$first: '$dateJoined'},
+                createdBy      : {$first: '$createdBy'},
+                editedBy       : {$first: '$editedBy'},
+                vacation       : {$first: '$vacation'},
+                status         : {$first: '$status'},
+                region         : {$first: '$region'},
+                subRegion      : {$first: '$subRegion'},
+                retailSegment  : {$first: '$retailSegment'},
+                outlet         : {$first: '$outlet'},
+                branch         : {$first: '$branch'},
+                country        : {$addToSet: '$country'},
+                currentLanguage: {$first: '$currentLanguage'},
+                super          : {$first: '$super'},
+                archived       : {$first: '$archived'},
+                temp           : {$first: '$temp'},
+                confirmed      : {$first: '$confirmed'},
+                translated     : {$first: '$translated'},
+                covered        : {$first: '$covered'},
+                imageSrc       : {$first: '$imageSrc'},
             },
         });
 
@@ -2281,7 +2276,7 @@ const Personnel = function () {
 
             (result, cb) => {
                 const body = result && result[0] ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.firstName) {
@@ -2305,7 +2300,7 @@ const Personnel = function () {
         ], callback);
     }
 
-    this.getAllForSync = function(req, res, next) {
+    this.getAllForSync = function (req, res, next) {
         function queryRun(personnel, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
@@ -2357,7 +2352,7 @@ const Personnel = function () {
                 forSync: true,
                 isMobile,
                 sort,
-                level: req.session.level,
+                level  : req.session.level,
 
             });
 
@@ -2389,7 +2384,7 @@ const Personnel = function () {
         });
     };
 
-    this.getAll = function(req, res, next) {
+    this.getAll = function (req, res, next) {
         function queryRun(personnel, onlineUsers, callback) {
             const query = req.query;
             const isMobile = req.isMobile;
@@ -2493,9 +2488,11 @@ const Personnel = function () {
                     };
                 } else {
                     queryObject.status.$in.splice(onlineStatus, 1);
-                    queryObject.$or = [{ _id: {
-                        $in: onlineUserIds,
-                    } }, {
+                    queryObject.$or = [{
+                        _id: {
+                            $in: onlineUserIds,
+                        }
+                    }, {
                         status: queryObject.status,
                     }];
 
@@ -2523,7 +2520,7 @@ const Personnel = function () {
                 skip,
                 sort,
                 level: req.session.level,
-                uId: req.session.uId,
+                uId  : req.session.uId,
                 isMobile,
                 supervisorFilter,
             });
@@ -2594,7 +2591,7 @@ const Personnel = function () {
         });
     };
 
-    this.getPersonnelTasks = function(req, res, next) {
+    this.getPersonnelTasks = function (req, res, next) {
         function queryRun(personnel) {
             const query = req.query;
             const filter = query.filter || {};
@@ -2603,40 +2600,40 @@ const Personnel = function () {
             const OBJECTIVE_STATUSES = OTHER_CONSTANTS.OBJECTIVE_STATUSES;
 
             const $defProjection = {
-                _id: 1,
-                title: 1,
-                companyObjective: 1,
-                description: 1,
-                objectiveType: 1,
-                priority: 1,
-                status: 1,
-                assignedTo: 1,
-                complete: 1,
-                parent: 1,
-                level: 1,
-                countSubTasks: 1,
+                _id              : 1,
+                title            : 1,
+                companyObjective : 1,
+                description      : 1,
+                objectiveType    : 1,
+                priority         : 1,
+                status           : 1,
+                assignedTo       : 1,
+                complete         : 1,
+                parent           : 1,
+                level            : 1,
+                countSubTasks    : 1,
                 completedSubTasks: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                dateClosed: 1,
-                comments: 1,
-                attachments: 1,
-                editedBy: 1,
-                createdBy: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                location: 1,
-                form: 1,
-                history: 1,
-                efforts: 1,
-                context: 1,
-                creationDate: 1,
-                updateDate: 1,
-                imageSrc: 1,
+                dateStart        : 1,
+                dateEnd          : 1,
+                dateClosed       : 1,
+                comments         : 1,
+                attachments      : 1,
+                editedBy         : 1,
+                createdBy        : 1,
+                country          : 1,
+                region           : 1,
+                subRegion        : 1,
+                retailSegment    : 1,
+                outlet           : 1,
+                branch           : 1,
+                location         : 1,
+                form             : 1,
+                history          : 1,
+                efforts          : 1,
+                context          : 1,
+                creationDate     : 1,
+                updateDate       : 1,
+                imageSrc         : 1,
             };
 
             const page = query.page || 1;
@@ -2710,11 +2707,11 @@ const Personnel = function () {
                     $match: {
                         $or: [
                             {
-                                assignedTo: { $nin: [id] },
+                                assignedTo: {$nin: [id]},
                             },
                             {
-                                assignedTo: { $in: [id] },
-                                status: { $nin: [OBJECTIVE_STATUSES.DRAFT] },
+                                assignedTo: {$in: [id]},
+                                status    : {$nin: [OBJECTIVE_STATUSES.DRAFT]},
                             },
                         ],
                     },
@@ -2738,58 +2735,58 @@ const Personnel = function () {
                 }
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'personnels',
-                    key: 'assignedTo',
+                    from         : 'personnels',
+                    key          : 'assignedTo',
                     addProjection: ['firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'files',
-                    key: 'attachments',
+                    from         : 'files',
+                    key          : 'attachments',
                     addProjection: ['contentType', 'originalName', 'createdBy', 'preview'],
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'domains',
-                    key: 'country',
+                    key : 'country',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'domains',
-                    key: 'region',
+                    key : 'region',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'domains',
-                    key: 'subRegion',
+                    key : 'subRegion',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'retailSegments',
-                    key: 'retailSegment',
+                    key : 'retailSegment',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'outlets',
-                    key: 'outlet',
+                    key : 'outlet',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
                     from: 'branches',
-                    key: 'branch',
+                    key : 'branch',
                 }));
 
                 pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                    from: 'personnels',
-                    key: 'createdBy.user',
-                    isArray: false,
-                    addProjection: ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
-                    includeSiblings: { createdBy: { date: 1 } },
+                    from           : 'personnels',
+                    key            : 'createdBy.user',
+                    isArray        : false,
+                    addProjection  : ['_id', 'firstName', 'lastName', 'imageSrc'].concat(isMobile ? [] : ['position', 'accessRole']),
+                    includeSiblings: {createdBy: {date: 1}},
                 }));
 
                 pipeLine.push({
                     $unwind: {
-                        path: '$assignedTo',
+                        path                      : '$assignedTo',
                         preserveNullAndEmptyArrays: true,
                     },
                 });
@@ -2802,32 +2799,32 @@ const Personnel = function () {
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from: 'accessRoles',
-                        key: 'assignedTo.accessRole',
-                        isArray: false,
-                        addProjection: ['_id', 'name', 'level'],
+                        from           : 'accessRoles',
+                        key            : 'assignedTo.accessRole',
+                        isArray        : false,
+                        addProjection  : ['_id', 'name', 'level'],
                         includeSiblings: {
                             assignedTo: {
-                                _id: 1,
-                                position: 1,
+                                _id      : 1,
+                                position : 1,
                                 firstName: 1,
-                                lastName: 1,
-                                imageSrc: 1,
+                                lastName : 1,
+                                imageSrc : 1,
                             },
                         },
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from: 'positions',
-                        key: 'assignedTo.position',
-                        isArray: false,
+                        from           : 'positions',
+                        key            : 'assignedTo.position',
+                        isArray        : false,
                         includeSiblings: {
                             assignedTo: {
-                                _id: 1,
+                                _id       : 1,
                                 accessRole: 1,
-                                firstName: 1,
-                                lastName: 1,
-                                imageSrc: 1,
+                                firstName : 1,
+                                lastName  : 1,
+                                imageSrc  : 1,
                             },
                         },
                     }));
@@ -2835,43 +2832,43 @@ const Personnel = function () {
 
                 pipeLine.push({
                     $group: aggregateHelper.getGroupObject({
-                        assignedTo: { $addToSet: '$assignedTo' },
+                        assignedTo: {$addToSet: '$assignedTo'},
                     }),
                 });
 
                 if (!isMobile) {
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from: 'accessRoles',
-                        key: 'createdBy.user.accessRole',
-                        isArray: false,
-                        addProjection: ['_id', 'name', 'level'],
+                        from           : 'accessRoles',
+                        key            : 'createdBy.user.accessRole',
+                        isArray        : false,
+                        addProjection  : ['_id', 'name', 'level'],
                         includeSiblings: {
                             createdBy: {
                                 date: 1,
                                 user: {
-                                    _id: 1,
-                                    position: 1,
+                                    _id      : 1,
+                                    position : 1,
                                     firstName: 1,
-                                    lastName: 1,
-                                    imageSrc: 1,
+                                    lastName : 1,
+                                    imageSrc : 1,
                                 },
                             },
                         },
                     }));
 
                     pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                        from: 'positions',
-                        key: 'createdBy.user.position',
-                        isArray: false,
+                        from           : 'positions',
+                        key            : 'createdBy.user.position',
+                        isArray        : false,
                         includeSiblings: {
                             createdBy: {
                                 date: 1,
                                 user: {
-                                    _id: 1,
+                                    _id       : 1,
                                     accessRole: 1,
-                                    firstName: 1,
-                                    lastName: 1,
-                                    imageSrc: 1,
+                                    firstName : 1,
+                                    lastName  : 1,
+                                    imageSrc  : 1,
                                 },
                             },
                         },
@@ -2899,7 +2896,7 @@ const Personnel = function () {
                     pipeLine.push({
                         $project: aggregateHelper.getProjection({
                             creationDate: '$createdBy.date',
-                            updateDate: '$editedBy.date',
+                            updateDate  : '$editedBy.date',
                         }),
                     });
                 }
@@ -2928,7 +2925,7 @@ const Personnel = function () {
 
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.INSTORETASKS,
-                filter: query.filter || {},
+                filter     : query.filter || {},
             });
 
             if (query._ids) {
@@ -2981,7 +2978,7 @@ const Personnel = function () {
                 }
 
                 const body = result.length ?
-                    result[0] : { data: [], total: 0 };
+                    result[0] : {data: [], total: 0};
 
                 body.data.forEach(model => {
                     if (model.title) {
@@ -3026,7 +3023,7 @@ const Personnel = function () {
         });
     };
 
-    this.update = function(req, res, next) {
+    this.update = function (req, res, next) {
         const personnelId = req.params.id;
         const body = req.body;
         const accessLevel = req.session.level;
@@ -3115,7 +3112,6 @@ const Personnel = function () {
             let phone;
             let isPhoneValid;
 
-
             if (body.phoneNumber) {
                 phone = body.phoneNumber;
                 isPhoneValid = phone === '' || false;
@@ -3151,11 +3147,11 @@ const Personnel = function () {
             function updateCover(model, cb) {
                 const id = model._id;
                 const data = {
-                    position: model.position || null,
-                    country: model.country || null,
-                    region: model.region || null,
+                    position : model.position || null,
+                    country  : model.country || null,
+                    region   : model.region || null,
                     subRegion: model.subRegion || null,
-                    branch: model.branch || null,
+                    branch   : model.branch || null,
                 };
 
                 PersonnelModel.findByIdAndUpdate(id, data, cb);
@@ -3188,12 +3184,12 @@ const Personnel = function () {
 
                         async.waterfall([
                             (cb) => {
-                                PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, { new: true }, cb);
+                                PersonnelModel.findByIdAndUpdate(currentUserIdNew, body, {new: true}, cb);
                             },
                             (model, cb) => {
                                 PreviewModel.setNewPreview({
                                     model,
-                                    base64: imageSrc,
+                                    base64     : imageSrc,
                                     contentType: CONTENT_TYPES.PERSONNEL,
                                 }, cb);
                             },
@@ -3249,12 +3245,12 @@ const Personnel = function () {
                                 }
 
                                 updateCover({
-                                    _id: coverUserId,
-                                    country: model.country,
-                                    region: model.region,
+                                    _id      : coverUserId,
+                                    country  : model.country,
+                                    region   : model.region,
                                     subRegion: model.subRegion,
-                                    branch: model.branch,
-                                    position: model.position,
+                                    branch   : model.branch,
+                                    position : model.position,
                                 }, (err, personnel) => {
                                     if (err) {
                                         return parallelCb(err);
@@ -3290,7 +3286,6 @@ const Personnel = function () {
                 });
             }
 
-
             async.waterfall([
 
                 // find personnel by id
@@ -3314,7 +3309,7 @@ const Personnel = function () {
 
                     if ((body.accessRole && oldAccessRole !== body.accessRole) || body.archived) {
                         someEvents.personnelArchived({
-                            ids: personnelId,
+                            ids    : personnelId,
                             Session: SessionModel,
                         });
                     }
@@ -3355,23 +3350,23 @@ const Personnel = function () {
             if (!body.currentLanguage && !body.newPass && !body.vacation && !body.manager) {
                 ActivityLog.emit('personnel:updated', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel: accessLevel,
-                    body: personnel,
+                    accessRoleLevel : accessLevel,
+                    body            : personnel,
                 });
             }
             if (body.vacation) {
                 ActivityLog.emit('personnel:on-leave', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel: accessLevel,
-                    body: personnel,
+                    accessRoleLevel : accessLevel,
+                    body            : personnel,
                     coveredUsers,
                 });
             }
             if (coverUserId) {
                 ActivityLog.emit('personnel:cover', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel: accessLevel,
-                    body: personnel,
+                    accessRoleLevel : accessLevel,
+                    body            : personnel,
                     coveredUsers,
                 });
             }
@@ -3379,8 +3374,8 @@ const Personnel = function () {
                 coveredUsers.push(personnel.manager);
                 ActivityLog.emit('personnel:assigned', {
                     actionOriginator: currentUserId,
-                    accessRoleLevel: accessLevel,
-                    body: personnel,
+                    accessRoleLevel : accessLevel,
+                    body            : personnel,
                     coveredUsers,
                 });
             }
@@ -3391,13 +3386,13 @@ const Personnel = function () {
             }
 
             const messageOptions = {
-                firstName: personnel.firstName,
-                lastName: personnel.lastName,
-                email: personnel.email,
+                firstName  : personnel.firstName,
+                lastName   : personnel.lastName,
+                email      : personnel.email,
                 phoneNumber: `+${personnel.phoneNumber}`,
-                password: generatedPassword,
-                token: personnel.token,
-                language: currentLanguage,
+                password   : generatedPassword,
+                token      : personnel.token,
+                language   : currentLanguage,
             };
 
             if (body.type === 'email') {
@@ -3408,7 +3403,7 @@ const Personnel = function () {
         });
     };
 
-    this.forgotPassword = function(req, res, next) {
+    this.forgotPassword = function (req, res, next) {
         const body = req.body;
         let login = body.login;
         const option = body.ifPhone;
@@ -3433,7 +3428,7 @@ const Personnel = function () {
 
         PersonnelModel
             .findOne({
-                $or: [{ email: login }, { phoneNumber: login }],
+                $or: [{email: login}, {phoneNumber: login}],
             })
             .lean()
             .exec((err, result) => {
@@ -3447,10 +3442,10 @@ const Personnel = function () {
 
                 PersonnelModel.findOneAndUpdate(
                     {
-                        $or: [{ email: login }, { phoneNumber: login }],
+                        $or: [{email: login}, {phoneNumber: login}],
                     },
                     {
-                        $set: { forgotToken },
+                        $set: {forgotToken},
                     },
                     {
                         new: true,
@@ -3468,7 +3463,7 @@ const Personnel = function () {
                                 resultJSON = result.toJSON();
                                 smsOptions = {
                                     phoneNumber: `+${resultJSON.phoneNumber}`,
-                                    resetCode: resultJSON.forgotToken,
+                                    resetCode  : resultJSON.forgotToken,
                                 };
 
                                 smsSender.forgotPassword(smsOptions, res, (err, message) => {
@@ -3485,14 +3480,14 @@ const Personnel = function () {
             });
     };
 
-    this.confirm = function(req, res, next) {
+    this.confirm = function (req, res, next) {
         const token = req.params.token;
 
         const query = PersonnelModel.findOneAndUpdate({
             token,
         }, {
-            token: '',
-            status: PERSONNEL_STATUSES.NEVERLOGIN._id,
+            token    : '',
+            status   : PERSONNEL_STATUSES.NEVERLOGIN._id,
             confirmed: new Date(),
         });
 
@@ -3527,14 +3522,14 @@ const Personnel = function () {
             }
 
             if (isMobile) {
-                res.status(200).send({ status: 'ok' });
+                res.status(200).send({status: 'ok'});
             } else {
                 res.status(200).send(url);
             }
         });
     };
 
-    this.changePassword = function(req, res, next) {
+    this.changePassword = function (req, res, next) {
         const forgotToken = req.params.forgotToken;
         let currentLanguage;
         const body = req.body;
@@ -3566,7 +3561,7 @@ const Personnel = function () {
             url = `${config.localhost}/passwordChangeNotification/${JSON.stringify(objToSend)}`;
 
             if (isMobile) {
-                res.status(200).send({ status: 'ok' });
+                res.status(200).send({status: 'ok'});
             } else {
                 res.status(200).send(url);
             }
@@ -3578,7 +3573,7 @@ const Personnel = function () {
                     forgotToken,
                 },
                 {
-                    $set: { pass },
+                    $set: {pass},
                 },
                 {
                     new: true,
@@ -3604,7 +3599,7 @@ const Personnel = function () {
                     forgotToken,
                 },
                 {
-                    $set: { forgotToken: '' },
+                    $set: {forgotToken: ''},
                 },
                 {
                     new: true,
@@ -3619,8 +3614,8 @@ const Personnel = function () {
         }
     };
 
-    this.existSuperAdmin = function(req, res, next) {
-        PersonnelModel.findOne({ super: true }, (err, user) => {
+    this.existSuperAdmin = function (req, res, next) {
+        PersonnelModel.findOne({super: true}, (err, user) => {
             if (err) {
                 return next(err);
             }
@@ -3633,17 +3628,17 @@ const Personnel = function () {
         });
     };
 
-    this.logout = function(req, res, next) {
+    this.logout = function (req, res, next) {
         if (req.session) {
             req.session.destroy((err) => {
                 if (err) {
                     return next(err);
                 }
 
-                res.status(200).send({ status: 'ok' });
+                res.status(200).send({status: 'ok'});
             });
         } else {
-            res.status(200).send({ status: 'ok' });
+            res.status(200).send({status: 'ok'});
         }
 
         res.clearCookie();
