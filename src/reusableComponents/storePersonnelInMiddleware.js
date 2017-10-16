@@ -72,7 +72,9 @@ module.exports = (req, res, next) => {
                             },
                             in  : {
                                 $cond: [{
-                                    $eq: [{$size: '$$array'}, 0],
+                                    $eq: [{
+                                        $size: '$$array',
+                                    }, 0],
                                 },
                                     false,
                                     true,
@@ -109,7 +111,9 @@ module.exports = (req, res, next) => {
                             },
                             in  : {
                                 $cond: [{
-                                    $eq: [{$size: '$$array'}, 0],
+                                    $eq: [{
+                                        $size: '$$array',
+                                    }, 0],
                                 },
                                     false,
                                     true,
@@ -146,7 +150,9 @@ module.exports = (req, res, next) => {
                             },
                             in  : {
                                 $cond: [{
-                                    $eq: [{$size: '$$array'}, 0],
+                                    $eq: [{
+                                        $size: '$$array',
+                                    }, 0],
                                 },
                                     false,
                                     true,
@@ -183,7 +189,9 @@ module.exports = (req, res, next) => {
                             },
                             in  : {
                                 $cond: [{
-                                    $eq: [{$size: '$$array'}, 0],
+                                    $eq: [{
+                                        $size: '$$array',
+                                    }, 0],
                                 },
                                     false,
                                     true,
