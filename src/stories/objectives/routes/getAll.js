@@ -104,7 +104,7 @@ module.exports = (req, res, next) => {
             delete queryObject.position;
         }
 
-        queryObject.context = CONTENT_TYPES.OBJECTIVES
+        queryObject.context = CONTENT_TYPES.OBJECTIVES;
 
         const setSubordinateId = [];
 
@@ -2436,6 +2436,8 @@ module.exports = (req, res, next) => {
                             comments: '$data.comments',
                             attachments: '$data.attachments',
                             editedBy: '$data.editedBy.user',
+                            updateDate: '$data.editedBy.date',
+                            creationDate: '$data.createdBy.date',
                             createdBy: '$data.createdBy.user',
                             country: '$data.country',
                             region: '$data.region',
@@ -2447,8 +2449,6 @@ module.exports = (req, res, next) => {
                             form: '$data.form',
                             efforts: '$data.efforts',
                             context: '$data.context',
-                            creationDate: '$data.creationDate',
-                            updateDate: '$data.updateDate',
                             archived: '$data.archived',
                             total: 1,
                         },
@@ -3096,8 +3096,8 @@ module.exports = (req, res, next) => {
                                 form: 1,
                                 efforts: 1,
                                 context: 1,
-                                creationDate: 1,
-                                updateDate: 1,
+                                creationDate: '$createdBy.date',
+                                updateDate: '$editedBy.date',
                                 archived: 1,
                             },
                         },
