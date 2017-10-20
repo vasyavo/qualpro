@@ -15,15 +15,15 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -47,7 +47,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -56,6 +56,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         filters.forEach((filterName) => {
@@ -82,7 +87,7 @@ module.exports = (req, res, next) => {
         }
 
         pipeline.push({
-            $match: { category: { $ne: [] } },
+            $match: {category: {$ne: []}},
         });
 
         if ($generalMatch.$and.length) {
@@ -95,8 +100,8 @@ module.exports = (req, res, next) => {
             $or: timeFilter.map((frame) => {
                 return {
                     $and: [
-                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
-                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                        {'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d}},
+                        {'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d}},
                     ],
                 };
             }),
@@ -108,7 +113,7 @@ module.exports = (req, res, next) => {
             });
         }
 
-        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length){
+        if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
             pipeline.push({
                 $addFields: {
                     category: {
@@ -116,11 +121,11 @@ module.exports = (req, res, next) => {
                             vars: {
                                 allowedCategory: queryFilter[CONTENT_TYPES.CATEGORY] || [],
                             },
-                            in: {
+                            in  : {
                                 $filter: {
-                                    input: { $ifNull: ['$category', []] },
-                                    as: 'category',
-                                    cond: {
+                                    input: {$ifNull: ['$category', []]},
+                                    as   : 'category',
+                                    cond : {
                                         $setIsSubset: [['$$category'], '$$allowedCategory'],
                                     },
                                 },
@@ -131,13 +136,12 @@ module.exports = (req, res, next) => {
             });
         }
 
-
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
@@ -147,13 +151,13 @@ module.exports = (req, res, next) => {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            in  : {
+                                _id     : '$$user._id',
+                                name    : {
+                                    en: {$concat: ['$$user.firstName.en', ' ', '$$user.lastName.en']},
+                                    ar: {$concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar']},
                                 },
                                 position: '$$user.position',
                             },

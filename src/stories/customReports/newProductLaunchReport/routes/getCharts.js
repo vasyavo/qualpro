@@ -13,15 +13,15 @@ const ajv = new Ajv();
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -38,7 +38,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -47,6 +47,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         // map set String ID to set ObjectID
@@ -80,7 +85,7 @@ module.exports = (req, res, next) => {
         ], queryFilter);
 
         if ($locationMatch.$and.length) {
-            pipeline.push({ $match: $locationMatch });
+            pipeline.push({$match: $locationMatch});
         }
 
         const $generalMatch = generalFiler([
@@ -111,20 +116,20 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ category: { $in: setObjectId } });
+                $or.push({category: {$in: setObjectId}});
             }
 
             if (setString.length) {
                 $or.push({
                     $or: [
-                        { 'category_name.en': { $in: setString } },
-                        { 'category_name.ar': { $in: setString } },
+                        {'category_name.en': {$in: setString}},
+                        {'category_name.ar': {$in: setString}},
                     ],
                 });
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -143,15 +148,15 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ 'brand._id': { $in: setObjectId } });
+                $or.push({'brand._id': {$in: setObjectId}});
             }
 
             if (setString.length) {
-                $or.push({ 'brand.name': { $in: setString } });
+                $or.push({'brand.name': {$in: setString}});
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -170,15 +175,15 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ 'variant._id': { $in: setObjectId } });
+                $or.push({'variant._id': {$in: setObjectId}});
             }
 
             if (setString.length) {
-                $or.push({ 'variant.name': { $in: setString } });
+                $or.push({'variant.name': {$in: setString}});
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -203,8 +208,8 @@ module.exports = (req, res, next) => {
             $or: timeFilter.map((frame) => {
                 return {
                     $and: [
-                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
-                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                        {'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d}},
+                        {'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d}},
                     ],
                 };
             }),
@@ -242,17 +247,17 @@ module.exports = (req, res, next) => {
 
             pipeline.push({
                 $match: {
-                    shelfLifePeriod: { $gte: queryFilter.shelfLife },
+                    shelfLifePeriod: {$gte: queryFilter.shelfLife},
                 },
             });
         }
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
@@ -262,13 +267,13 @@ module.exports = (req, res, next) => {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            in  : {
+                                _id     : '$$user._id',
+                                name    : {
+                                    en: {$concat: ['$$user.firstName.en', ' ', '$$user.lastName.en']},
+                                    ar: {$concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar']},
                                 },
                                 position: '$$user.position',
                             },
@@ -313,7 +318,7 @@ module.exports = (req, res, next) => {
         if (response) {
             response = {
                 barChart: {
-                    labels: response.labels,
+                    labels  : response.labels,
                     datasets: [{
                         data: response.data,
                     }],
@@ -322,7 +327,7 @@ module.exports = (req, res, next) => {
         } else {
             response = {
                 barChart: {
-                    labels: [],
+                    labels  : [],
                     datasets: [],
                 },
             };

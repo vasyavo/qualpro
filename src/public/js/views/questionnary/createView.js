@@ -104,7 +104,7 @@ module.exports = BaseView.extend({
         $list.append(this.listOptionTemplate({
             option     : option || '',
             translation: this.translation,
-            App: App,
+            App        : App,
         }));
     },
 
@@ -130,7 +130,6 @@ module.exports = BaseView.extend({
         };
         var inputView;
 
-
         if (e) {
             e.preventDefault();
         }
@@ -140,7 +139,7 @@ module.exports = BaseView.extend({
             question         : question || {},
             someIdForCheckBox: this.someIdForCheckBox,
             translation      : this.translation,
-            App: App,
+            App              : App,
         }));
 
         if (question) {
@@ -266,7 +265,6 @@ module.exports = BaseView.extend({
         var dueDate = $curEl.find('#dueDate').val();
         var questionModel = new QuestionModel();
         var model;
-        var editDate;
         var optionsForModelSave = {
             validate: false,
             wait    : true,
@@ -286,12 +284,12 @@ module.exports = BaseView.extend({
         this.body.dueDate = dueDate ? moment.utc(dueDate, 'DD.MM.YYYY').toISOString() : null;
         this.body.questions = $questionsRows.length;
         this.setLocations();
-        if (this.edit && this.model) {
+        /*if (this.edit && this.model) {
             this.body.location = {
                 en: 'Location',
                 ar: 'Location'
             };
-        }
+        }*/
         this.model.setFieldsNames(this.translation, this.body);
         this.model.validate(this.body, function (err) {
             if (err && err.length) {
@@ -338,24 +336,22 @@ module.exports = BaseView.extend({
             if (self.edit) {
                 optionsForModelSave.patch = true;
                 model = self.model.toJSON();
-                editDate = custom.dateFormater('DD.MM.YYYY', self.body.dueDate);
 
                 if (!self.valueWasChanged) {
                     delete self.body.questions;
                 }
-                if (editDate === model.dueDate) {
-                    delete self.body.dueDate;
-                }
-                if (self.edit && model) {
+                /*if (self.edit && model) {
                     delete self.body.location;
-                }
+                }*/
             }
 
             if (!Object.keys(self.body).length && !options.send) {
                 return cb();
             }
+
             self.body.send = options.send;
-            self.model.save(self.body, optionsForModelSave);
+            self.model.set(self.body);
+            self.model.save(null, optionsForModelSave);
         });
     },
 
@@ -380,7 +376,7 @@ module.exports = BaseView.extend({
             title      : title,
             translation: this.translation,
             edit       : this.edit,
-            App: App,
+            App        : App,
         });
         var self = this;
         var $curEl;

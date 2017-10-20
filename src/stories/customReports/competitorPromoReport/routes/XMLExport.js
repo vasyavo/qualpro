@@ -17,15 +17,15 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -53,7 +53,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -62,6 +62,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         filters.forEach((filterName) => {
@@ -101,10 +106,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d},
                         },
                         {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d},
                         },
                     ],
                 });
@@ -120,27 +125,27 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
         pipeline.push({
             $addFields: {
-                packing: { $concat: ['$packing', ' ', '$packingType'] },
+                packing  : {$concat: ['$packing', ' ', '$packingType']},
                 createdBy: {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            in  : {
+                                _id     : '$$user._id',
+                                name    : {
+                                    en: {$concat: ['$$user.firstName.en', ' ', '$$user.lastName.en']},
+                                    ar: {$concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar']},
                                 },
                                 position: '$$user.position',
                             },
@@ -163,128 +168,128 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'category',
+                from        : 'categories',
+                localField  : 'category',
                 foreignField: '_id',
-                as: 'category',
+                as          : 'category',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'brands',
-                localField: 'brand',
+                from        : 'brands',
+                localField  : 'brand',
                 foreignField: '_id',
-                as: 'brand',
+                as          : 'brand',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'origins',
-                localField: 'origin',
+                from        : 'origins',
+                localField  : 'origin',
                 foreignField: '_id',
-                as: 'origin',
+                as          : 'origin',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'displayTypes',
-                localField: 'displayType',
+                from        : 'displayTypes',
+                localField  : 'displayType',
                 foreignField: '_id',
-                as: 'displayType',
+                as          : 'displayType',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'country',
+                from        : 'domains',
+                localField  : 'country',
                 foreignField: '_id',
-                as: 'country',
+                as          : 'country',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'region',
+                from        : 'domains',
+                localField  : 'region',
                 foreignField: '_id',
-                as: 'region',
+                as          : 'region',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'subRegion',
+                from        : 'domains',
+                localField  : 'subRegion',
                 foreignField: '_id',
-                as: 'subRegion',
+                as          : 'subRegion',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'retailSegments',
-                localField: 'retailSegment',
+                from        : 'retailSegments',
+                localField  : 'retailSegment',
                 foreignField: '_id',
-                as: 'retailSegment',
+                as          : 'retailSegment',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'outlets',
-                localField: 'outlet',
+                from        : 'outlets',
+                localField  : 'outlet',
                 foreignField: '_id',
-                as: 'outlet',
+                as          : 'outlet',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'branches',
-                localField: 'branch',
+                from        : 'branches',
+                localField  : 'branch',
                 foreignField: '_id',
-                as: 'branch',
+                as          : 'branch',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'positions',
-                localField: 'createdBy.user.position',
+                from        : 'positions',
+                localField  : 'createdBy.user.position',
                 foreignField: '_id',
-                as: 'createdBy.user.position',
+                as          : 'createdBy.user.position',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'comments',
-                localField: '_id',
+                from        : 'comments',
+                localField  : '_id',
                 foreignField: 'taskId',
-                as: 'comments',
+                as          : 'comments',
             },
         });
 
         pipeline.push({
             $project: {
-                _id: 1,
-                description: 1,
-                promotion: 1,
-                packing: 1,
-                expiry: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                price: 1,
-                comments: 1,
-                commentsUser: {
+                _id          : 1,
+                description  : 1,
+                promotion    : 1,
+                packing      : 1,
+                expiry       : 1,
+                dateStart    : 1,
+                dateEnd      : 1,
+                price        : 1,
+                comments     : 1,
+                commentsUser : {
                     $reduce: {
-                        input: '$comments',
+                        input       : '$comments',
                         initialValue: [],
-                        in: {
+                        in          : {
                             $setUnion: [
                                 ['$$this.createdBy.user'],
                                 '$$value',
@@ -292,35 +297,35 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                country: {
+                country      : {
                     $let: {
                         vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
+                            country: {$arrayElemAt: ['$country', 0]},
                         },
-                        in: {
-                            _id: '$$country._id',
+                        in  : {
+                            _id : '$$country._id',
                             name: '$$country.name',
                         },
                     },
                 },
-                region: {
+                region       : {
                     $let: {
                         vars: {
-                            region: { $arrayElemAt: ['$region', 0] },
+                            region: {$arrayElemAt: ['$region', 0]},
                         },
-                        in: {
-                            _id: '$$region._id',
+                        in  : {
+                            _id : '$$region._id',
                             name: '$$region.name',
                         },
                     },
                 },
-                subRegion: {
+                subRegion    : {
                     $let: {
                         vars: {
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            subRegion: {$arrayElemAt: ['$subRegion', 0]},
                         },
-                        in: {
-                            _id: '$$subRegion._id',
+                        in  : {
+                            _id : '$$subRegion._id',
                             name: '$$subRegion.name',
                         },
                     },
@@ -328,74 +333,74 @@ module.exports = (req, res, next) => {
                 retailSegment: {
                     $let: {
                         vars: {
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
                         },
-                        in: {
-                            _id: '$$retailSegment._id',
+                        in  : {
+                            _id : '$$retailSegment._id',
                             name: '$$retailSegment.name',
                         },
                     },
                 },
-                outlet: {
+                outlet       : {
                     $let: {
                         vars: {
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            outlet: {$arrayElemAt: ['$outlet', 0]},
                         },
-                        in: {
-                            _id: '$$outlet._id',
+                        in  : {
+                            _id : '$$outlet._id',
                             name: '$$outlet.name',
                         },
                     },
                 },
-                branch: {
+                branch       : {
                     $let: {
                         vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
+                            branch: {$arrayElemAt: ['$branch', 0]},
                         },
-                        in: {
-                            _id: '$$branch._id',
+                        in  : {
+                            _id : '$$branch._id',
                             name: '$$branch.name',
                         },
                     },
                 },
-                category: {
+                category     : {
                     $let: {
                         vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
+                            category: {$arrayElemAt: ['$category', 0]},
                         },
-                        in: {
-                            _id: '$$category._id',
+                        in  : {
+                            _id : '$$category._id',
                             name: '$$category.name',
                         },
                     },
                 },
-                brand: {
+                brand        : {
                     $let: {
                         vars: {
-                            brand: { $arrayElemAt: ['$brand', 0] },
+                            brand: {$arrayElemAt: ['$brand', 0]},
                         },
-                        in: {
-                            _id: '$$brand._id',
+                        in  : {
+                            _id : '$$brand._id',
                             name: '$$brand.name',
                         },
                     },
                 },
-                origin: {
+                origin       : {
                     $let: {
                         vars: {
-                            origin: { $arrayElemAt: ['$origin', 0] },
+                            origin: {$arrayElemAt: ['$origin', 0]},
                         },
-                        in: {
-                            _id: '$$origin._id',
+                        in  : {
+                            _id : '$$origin._id',
                             name: '$$origin.name',
                         },
                     },
                 },
-                displayType: {
+                displayType  : {
                     $reduce: {
-                        input: '$displayType',
-                        initialValue: { en: '', ar: '' },
-                        in: {
+                        input       : '$displayType',
+                        initialValue: {en: '', ar: ''},
+                        in          : {
                             en: {
                                 $concat: ['$$this.name.en', ' ', '$$value.en'],
                             },
@@ -405,17 +410,17 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                createdBy: {
+                createdBy    : {
                     user: {
-                        _id: 1,
-                        name: 1,
+                        _id     : 1,
+                        name    : 1,
                         position: {
                             $let: {
                                 vars: {
-                                    position: { $arrayElemAt: ['$createdBy.user.position', 0] },
+                                    position: {$arrayElemAt: ['$createdBy.user.position', 0]},
                                 },
-                                in: {
-                                    _id: '$$position._id',
+                                in  : {
+                                    _id : '$$position._id',
                                     name: '$$position.name',
                                 },
                             },
@@ -428,41 +433,41 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'commentsUser',
+                from        : 'personnels',
+                localField  : 'commentsUser',
                 foreignField: '_id',
-                as: 'commentsUser',
+                as          : 'commentsUser',
             },
         });
 
         pipeline.push({
             $project: {
-                _id: 1,
-                description: 1,
-                promotion: 1,
-                packing: 1,
-                expiry: 1,
-                dateStart: 1,
-                dateEnd: 1,
-                price: 1,
-                category: 1,
-                brand: 1,
-                origin: 1,
-                displayType: 1,
-                createdBy: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
+                _id          : 1,
+                description  : 1,
+                promotion    : 1,
+                packing      : 1,
+                expiry       : 1,
+                dateStart    : 1,
+                dateEnd      : 1,
+                price        : 1,
+                category     : 1,
+                brand        : 1,
+                origin       : 1,
+                displayType  : 1,
+                createdBy    : 1,
+                country      : 1,
+                region       : 1,
+                subRegion    : 1,
                 retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                comments: {
+                outlet       : 1,
+                branch       : 1,
+                comments     : {
                     $map: {
                         input: '$comments',
-                        as: 'item',
-                        in: {
-                            _id: '$$item._id',
-                            body: '$$item.body',
+                        as   : 'item',
+                        in   : {
+                            _id      : '$$item._id',
+                            body     : '$$item.body',
                             createdBy: {
                                 $arrayElemAt: [
                                     {
@@ -470,8 +475,8 @@ module.exports = (req, res, next) => {
                                             input: {
                                                 $filter: {
                                                     input: '$commentsUser',
-                                                    as: 'user',
-                                                    cond: {
+                                                    as   : 'user',
+                                                    cond : {
                                                         $setIsSubset: [
                                                             [
                                                                 '$$user._id',
@@ -481,11 +486,11 @@ module.exports = (req, res, next) => {
                                                     },
                                                 },
                                             },
-                                            as: 'user',
-                                            in: {
-                                                _id: '$$user._id',
+                                            as   : 'user',
+                                            in   : {
+                                                _id      : '$$user._id',
                                                 firstName: '$$user.firstName',
-                                                lastName: '$$user.lastName',
+                                                lastName : '$$user.lastName',
                                             },
                                         },
                                     },
@@ -495,7 +500,7 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                location: {
+                location     : {
                     $concat: [
                         '$country.name.en',
                         ' -> ',
@@ -564,22 +569,22 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
-                        const currentCountry = currency.defaultData.find((country) => {
-                            return country._id.toString() === item.country._id.toString();
-                        });
-                        const comments = item.comments.map(comment => {
-                            return `${comment.createdBy.firstName[currentLanguage]} ${comment.createdBy.lastName[currentLanguage]} : ${sanitizeHtml(comment.body)}`
-                        });
-                        const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
-                        const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
-                        item.price = Number(item.price);
-                        let price = item.price.toFixed(2);
-                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
-                            price = `${price} $`;
-                        } else {
-                            price = `${price} ${currentCountry.currency}`;
-                        }
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            const comments = item.comments.map(comment => {
+                return `${comment.createdBy.firstName[currentLanguage]} ${comment.createdBy.lastName[currentLanguage]} : ${sanitizeHtml(comment.body)}`
+            });
+            const dateStart = item.dateStart ? moment(item.dateStart).format('DD MMMM, YYYY') : 'N/A';
+            const dateEnd = item.dateEnd ? moment(item.dateEnd).format('DD MMMM, YYYY') : 'N/A';
+            item.price = Number(item.price);
+            let price = item.price.toFixed(2);
+            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
+                price = `${price} $`;
+            } else {
+                price = `${price} ${currentCountry.currency}`;
+            }
             return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -624,9 +629,9 @@ module.exports = (req, res, next) => {
                 const buf = Buffer.concat(bufs);
 
                 res.set({
-                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Type'       : 'application/vnd.ms-excel',
                     'Content-Disposition': `attachment; filename="competitorPromoReportExport_${new Date()}.xls"`,
-                    'Content-Length': buf.length,
+                    'Content-Length'     : buf.length,
                 }).status(200).send(buf);
             });
         });

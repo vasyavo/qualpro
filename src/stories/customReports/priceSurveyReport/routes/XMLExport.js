@@ -17,15 +17,15 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -53,7 +53,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -62,6 +62,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         filters.forEach((filterName) => {
@@ -81,10 +86,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d},
                         },
                         {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d},
                         },
                     ],
                 });
@@ -118,10 +123,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
@@ -131,10 +136,10 @@ module.exports = (req, res, next) => {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
+                            in  : {
+                                _id     : '$$user._id',
                                 position: '$$user.position',
                             },
                         },
@@ -180,192 +185,192 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id: {
-                    outlet: '$outlet',
-                    branch: '$branch',
-                    brand: '$items.brand',
-                    size: '$items.size',
+                _id          : {
+                    outlet  : '$outlet',
+                    branch  : '$branch',
+                    brand   : '$items.brand',
+                    size    : '$items.size',
                     category: '$category',
-                    variant: '$variant',
+                    variant : '$variant',
                 },
-                min: { $min: '$items.price' },
-                max: { $max: '$items.price' },
-                avg: { $avg: '$items.price' },
-                arrayOfPrice: { $push: '$items.price' },
-                country: { $first: '$country' },
-                region: { $first: '$region' },
-                subRegion: { $first: '$subRegion' },
-                retailSegment: { $first: '$retailSegment' },
+                min          : {$min: '$items.price'},
+                max          : {$max: '$items.price'},
+                avg          : {$avg: '$items.price'},
+                arrayOfPrice : {$push: '$items.price'},
+                country      : {$first: '$country'},
+                region       : {$first: '$region'},
+                subRegion    : {$first: '$subRegion'},
+                retailSegment: {$first: '$retailSegment'},
             },
         });
 
         pipeline.push({
             $project: {
-                outlet: '$_id.outlet',
-                branch: '$_id.branch',
-                brand: '$_id.brand',
-                size: '$_id.size',
-                category: '$_id.category',
-                variant: '$_id.variant',
-                arrayOfPrice: 1,
-                min: 1,
-                max: 1,
-                avg: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
+                outlet       : '$_id.outlet',
+                branch       : '$_id.branch',
+                brand        : '$_id.brand',
+                size         : '$_id.size',
+                category     : '$_id.category',
+                variant      : '$_id.variant',
+                arrayOfPrice : 1,
+                min          : 1,
+                max          : 1,
+                avg          : 1,
+                country      : 1,
+                region       : 1,
+                subRegion    : 1,
                 retailSegment: 1,
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'outlets',
-                localField: 'outlet',
+                from        : 'outlets',
+                localField  : 'outlet',
                 foreignField: '_id',
-                as: 'outlet',
+                as          : 'outlet',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'branches',
-                localField: 'branch',
+                from        : 'branches',
+                localField  : 'branch',
                 foreignField: '_id',
-                as: 'branch',
+                as          : 'branch',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'brands',
-                localField: 'brand',
+                from        : 'brands',
+                localField  : 'brand',
                 foreignField: '_id',
-                as: 'brand',
+                as          : 'brand',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'category',
+                from        : 'categories',
+                localField  : 'category',
                 foreignField: '_id',
-                as: 'category',
+                as          : 'category',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'variants',
-                localField: 'variant',
+                from        : 'variants',
+                localField  : 'variant',
                 foreignField: '_id',
-                as: 'variant',
+                as          : 'variant',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'country',
+                from        : 'domains',
+                localField  : 'country',
                 foreignField: '_id',
-                as: 'country',
+                as          : 'country',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'region',
+                from        : 'domains',
+                localField  : 'region',
                 foreignField: '_id',
-                as: 'region',
+                as          : 'region',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'subRegion',
+                from        : 'domains',
+                localField  : 'subRegion',
                 foreignField: '_id',
-                as: 'subRegion',
+                as          : 'subRegion',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'retailSegments',
-                localField: 'retailSegment',
+                from        : 'retailSegments',
+                localField  : 'retailSegment',
                 foreignField: '_id',
-                as: 'retailSegment',
+                as          : 'retailSegment',
             },
         });
 
         pipeline.push({
             $project: {
-                _id: 0,
-                min: 1,
-                max: 1,
-                avg: 1,
-                size: '$size',
-                arrayOfPrice: 1,
-                country: { $arrayElemAt: ['$country', 0] },
-                region: { $arrayElemAt: ['$region', 0] },
-                subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                outlet: { $arrayElemAt: ['$outlet', 0] },
-                branch: {
+                _id          : 0,
+                min          : 1,
+                max          : 1,
+                avg          : 1,
+                size         : '$size',
+                arrayOfPrice : 1,
+                country      : {$arrayElemAt: ['$country', 0]},
+                region       : {$arrayElemAt: ['$region', 0]},
+                subRegion    : {$arrayElemAt: ['$subRegion', 0]},
+                retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
+                outlet       : {$arrayElemAt: ['$outlet', 0]},
+                branch       : {
                     $let: {
                         vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
+                            branch: {$arrayElemAt: ['$branch', 0]},
                         },
-                        in: {
-                            _id: '$$branch._id',
+                        in  : {
+                            _id : '$$branch._id',
                             name: '$$branch.name',
                         },
                     },
                 },
-                brand: {
+                brand        : {
                     $let: {
                         vars: {
-                            brand: { $arrayElemAt: ['$brand', 0] },
+                            brand: {$arrayElemAt: ['$brand', 0]},
                         },
-                        in: {
-                            _id: '$$brand._id',
+                        in  : {
+                            _id : '$$brand._id',
                             name: '$$brand.name',
                         },
                     },
                 },
-                category: {
+                category     : {
                     $let: {
                         vars: {
-                            category: { $arrayElemAt: ['$category', 0] },
+                            category: {$arrayElemAt: ['$category', 0]},
                         },
-                        in: {
-                            _id: '$$category._id',
+                        in  : {
+                            _id : '$$category._id',
                             name: '$$category.name',
                         },
                     },
                 },
-                variant: {
+                variant      : {
                     $let: {
                         vars: {
-                            variant: { $arrayElemAt: ['$variant', 0] },
+                            variant: {$arrayElemAt: ['$variant', 0]},
                         },
-                        in: {
-                            _id: '$$variant._id',
+                        in  : {
+                            _id : '$$variant._id',
                             name: '$$variant.name',
                         },
                     },
                 },
-                location: {
+                location     : {
                     $let: {
                         vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
-                            region: { $arrayElemAt: ['$region', 0] },
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            country      : {$arrayElemAt: ['$country', 0]},
+                            region       : {$arrayElemAt: ['$region', 0]},
+                            subRegion    : {$arrayElemAt: ['$subRegion', 0]},
+                            retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
+                            outlet       : {$arrayElemAt: ['$outlet', 0]},
                         },
-                        in: {
+                        in  : {
                             $concat: [
                                 '$$country.name.en',
                                 ' -> ',
@@ -385,7 +390,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $sort: {
-                location: 1,
+                location        : 1,
                 'branch.name.en': 1,
             },
         });
@@ -393,7 +398,7 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $sort: {
                 'category.name.en': 1,
-                'brand.name.en': 1,
+                'brand.name.en'   : 1,
             },
         });
 
@@ -436,31 +441,31 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
-                        const currentCountry = currency.defaultData.find((country) => {
-                            return country._id.toString() === item.country._id.toString();
-                        });
-                        item.med = getMedian(item.arrayOfPrice);
-                        let medPrice = item.med.toFixed(2);
-                        let minPrice = item.min.toFixed(2);
-                        let avgPrice = item.avg.toFixed(2);
-                        let maxPrice = item.max.toFixed(2);
-                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            medPrice = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
-                            minPrice = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
-                            avgPrice = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
-                            maxPrice = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
-                            medPrice = `${medPrice} $`;
-                            minPrice = `${minPrice} $`;
-                            avgPrice = `${avgPrice} $`;
-                            maxPrice = `${maxPrice} $`;
-                        } else {
-                            medPrice = `${medPrice} ${currentCountry.currency}`;
-                            minPrice = `${minPrice} ${currentCountry.currency}`;
-                            avgPrice = `${avgPrice} ${currentCountry.currency}`;
-                            maxPrice = `${maxPrice} ${currentCountry.currency}`;
-                        }
-                        
-                        return `
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.med = getMedian(item.arrayOfPrice);
+            let medPrice = item.med.toFixed(2);
+            let minPrice = item.min.toFixed(2);
+            let avgPrice = item.avg.toFixed(2);
+            let maxPrice = item.max.toFixed(2);
+            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                medPrice = parseFloat(item.med * currentCountry.currencyInUsd).toFixed(2);
+                minPrice = parseFloat(item.min * currentCountry.currencyInUsd).toFixed(2);
+                avgPrice = parseFloat(item.avg * currentCountry.currencyInUsd).toFixed(2);
+                maxPrice = parseFloat(item.max * currentCountry.currencyInUsd).toFixed(2);
+                medPrice = `${medPrice} $`;
+                minPrice = `${minPrice} $`;
+                avgPrice = `${avgPrice} $`;
+                maxPrice = `${maxPrice} $`;
+            } else {
+                medPrice = `${medPrice} ${currentCountry.currency}`;
+                minPrice = `${minPrice} ${currentCountry.currency}`;
+                avgPrice = `${avgPrice} ${currentCountry.currency}`;
+                maxPrice = `${maxPrice} ${currentCountry.currency}`;
+            }
+
+            return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
                                 <td>${item.region.name[currentLanguage]}</td>
@@ -478,7 +483,7 @@ module.exports = (req, res, next) => {
                                 <td>${medPrice}</td>
                             </tr>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tbody>
             </table>
         `;
@@ -499,9 +504,9 @@ module.exports = (req, res, next) => {
                 const buf = Buffer.concat(bufs);
 
                 res.set({
-                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Type'       : 'application/vnd.ms-excel',
                     'Content-Disposition': `attachment; filename="priceSurveyReportExport_${new Date()}.xls"`,
-                    'Content-Length': buf.length,
+                    'Content-Length'     : buf.length,
                 }).status(200).send(buf);
             });
         });

@@ -5,11 +5,11 @@ module.exports = (err, req, res, next) => {
         status = 500,
         stack: stackTrace = '',
         message = 'unhandled_error',
-        description = { en: '', ar: ''}
+        description = { en: '', ar: '',},
     } = err;
     const {
         id: requestId,
-        session: {uId : userId} = {uId: null}
+        session: {uId : userId} = {uId: null},
     } = req;
 
     logger.error({
@@ -23,7 +23,7 @@ module.exports = (err, req, res, next) => {
         status,
         requestId,
         message,
-        description
+        description,
     };
 
     res.status(status).send(body);
