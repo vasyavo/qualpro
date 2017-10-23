@@ -99,7 +99,14 @@ module.exports = (req, res, next) => {
                         input: '$countries',
                         as: 'domain',
                         cond: {
-                            $ne: ['$$domain', null],
+                            $and: [
+                                {
+                                    $ne: ['$$domain', null],
+                                },
+                                {
+                                    $in: ['$$domain._id', countryFilter],
+                                },
+                            ],
                         },
                     },
                 },
