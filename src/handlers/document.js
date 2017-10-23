@@ -25,51 +25,51 @@ const Documents = function () {
     const getMainPipeline = () => {
         const pipeLine = [{
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'breadcrumbs',
-                as: 'breadcrumbs',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs',
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                total: 1,
-                createdBy: 1,
-                editedBy: 1,
+                _id       : 1,
+                title     : 1,
+                total     : 1,
+                createdBy : 1,
+                editedBy  : 1,
                 attachment: 1,
-                type: 1,
-                parent: 1,
-                deleted: 1,
-                archived: 1,
+                type      : 1,
+                parent    : 1,
+                deleted   : 1,
+                archived  : 1,
 
                 breadcrumbs: {
-                    _id: 1,
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $group: {
-                _id: '$_id',
-                total: { $first: '$total' },
-                title: { $first: '$title' },
-                createdBy: { $first: '$createdBy' },
-                editedBy: { $first: '$editedBy' },
-                attachment: { $first: '$attachment' },
-                type: { $first: '$type' },
-                parent: { $first: '$parent' },
-                deleted: { $first: '$deleted' },
-                archived: { $first: '$archived' },
+                _id       : '$_id',
+                total     : {$first: '$total'},
+                title     : {$first: '$title'},
+                createdBy : {$first: '$createdBy'},
+                editedBy  : {$first: '$editedBy'},
+                attachment: {$first: '$attachment'},
+                type      : {$first: '$type'},
+                parent    : {$first: '$parent'},
+                deleted   : {$first: '$deleted'},
+                archived  : {$first: '$archived'},
 
                 breadcrumbs: {
                     $push: '$breadcrumbs',
@@ -77,107 +77,107 @@ const Documents = function () {
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'parent',
-                as: 'parent',
+                localField  : 'parent',
+                as          : 'parent',
             },
         }, {
             $unwind: {
-                path: '$parent',
+                path                      : '$parent',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'createdBy.user',
-                as: 'createdBy.user',
+                localField  : 'createdBy.user',
+                as          : 'createdBy.user',
             },
         }, {
             $unwind: {
-                path: '$createdBy.user',
+                path                      : '$createdBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'editedBy.user',
-                as: 'editedBy.user',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user',
             },
         }, {
             $unwind: {
-                path: '$editedBy.user',
+                path                      : '$editedBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'files',
+                from        : 'files',
                 foreignField: '_id',
-                localField: 'attachment',
-                as: 'attachment',
+                localField  : 'attachment',
+                as          : 'attachment',
             },
         }, {
             $unwind: {
-                path: '$attachment',
+                path                      : '$attachment',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                total: 1,
-                title: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
-                attachment: {
-                    _id: 1,
-                    name: 1,
-                    contentType: 1,
+                _id        : 1,
+                total      : 1,
+                title      : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
+                attachment : {
+                    _id         : 1,
+                    name        : 1,
+                    contentType : 1,
                     originalName: 1,
-                    extension: 1,
-                    preview: 1,
+                    extension   : 1,
+                    preview     : 1,
                 },
                 breadcrumbs: 1,
-                createdBy: {
+                createdBy  : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                editedBy: {
+                editedBy   : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                parent: {
-                    _id: 1,
+                parent     : {
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $project: {
-                _id: 1,
-                total: 1,
-                title: 1,
-                createdBy: 1,
-                editedBy: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
+                _id        : 1,
+                total      : 1,
+                title      : 1,
+                createdBy  : 1,
+                editedBy   : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                attachment: {
+                attachment : {
                     $ifNull: ['$attachment', null],
                 },
-                parent: {
+                parent     : {
                     $ifNull: ['$parent', null],
                 },
             },
@@ -194,49 +194,49 @@ const Documents = function () {
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'breadcrumbs',
-                as: 'breadcrumbs',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs',
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                createdBy: 1,
-                editedBy: 1,
+                _id       : 1,
+                title     : 1,
+                createdBy : 1,
+                editedBy  : 1,
                 attachment: 1,
-                type: 1,
-                parent: 1,
-                deleted: 1,
-                archived: 1,
+                type      : 1,
+                parent    : 1,
+                deleted   : 1,
+                archived  : 1,
 
                 breadcrumbs: {
-                    _id: 1,
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $group: {
-                _id: '$_id',
-                title: { $first: '$title' },
-                createdBy: { $first: '$createdBy' },
-                editedBy: { $first: '$editedBy' },
-                attachment: { $first: '$attachment' },
-                type: { $first: '$type' },
-                parent: { $first: '$parent' },
-                deleted: { $first: '$deleted' },
-                archived: { $first: '$archived' },
+                _id       : '$_id',
+                title     : {$first: '$title'},
+                createdBy : {$first: '$createdBy'},
+                editedBy  : {$first: '$editedBy'},
+                attachment: {$first: '$attachment'},
+                type      : {$first: '$type'},
+                parent    : {$first: '$parent'},
+                deleted   : {$first: '$deleted'},
+                archived  : {$first: '$archived'},
 
                 breadcrumbs: {
                     $push: '$breadcrumbs',
@@ -244,105 +244,105 @@ const Documents = function () {
             },
         }, {
             $lookup: {
-                from: 'files',
+                from        : 'files',
                 foreignField: '_id',
-                localField: 'attachment',
-                as: 'attachment',
+                localField  : 'attachment',
+                as          : 'attachment',
             },
         }, {
             $unwind: {
-                path: '$attachment',
+                path                      : '$attachment',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'parent',
-                as: 'parent',
+                localField  : 'parent',
+                as          : 'parent',
             },
         }, {
             $unwind: {
-                path: '$parent',
+                path                      : '$parent',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'createdBy.user',
-                as: 'createdBy.user',
+                localField  : 'createdBy.user',
+                as          : 'createdBy.user',
             },
         }, {
             $unwind: {
-                path: '$createdBy.user',
+                path                      : '$createdBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'editedBy.user',
-                as: 'editedBy.user',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user',
             },
         }, {
             $unwind: {
-                path: '$editedBy.user',
+                path                      : '$editedBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
+                _id        : 1,
+                title      : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                createdBy: {
+                createdBy  : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                editedBy: {
+                editedBy   : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                attachment: {
-                    _id: 1,
-                    preview: 1,
-                    contentType: 1,
-                    extension: 1,
+                attachment : {
+                    _id         : 1,
+                    preview     : 1,
+                    contentType : 1,
+                    extension   : 1,
                     originalName: 1,
-                    name: 1,
+                    name        : 1,
                 },
-                parent: {
-                    _id: 1,
+                parent     : {
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                createdBy: 1,
-                editedBy: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
+                _id        : 1,
+                title      : 1,
+                createdBy  : 1,
+                editedBy   : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                attachment: {
+                attachment : {
                     $ifNull: ['$attachment', null],
                 },
-                parent: {
+                parent     : {
                     $ifNull: ['$parent', null],
                 },
             },
@@ -366,53 +366,53 @@ const Documents = function () {
     const getByIds = (_ids, cb) => {
         const pipeLine = [{
             $match: {
-                _id: { $in: _ids },
+                _id: {$in: _ids},
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'breadcrumbs',
-                as: 'breadcrumbs',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs',
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                createdBy: 1,
-                editedBy: 1,
+                _id       : 1,
+                title     : 1,
+                createdBy : 1,
+                editedBy  : 1,
                 attachment: 1,
-                type: 1,
-                parent: 1,
-                deleted: 1,
-                archived: 1,
+                type      : 1,
+                parent    : 1,
+                deleted   : 1,
+                archived  : 1,
 
                 breadcrumbs: {
-                    _id: 1,
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $group: {
-                _id: '$_id',
-                title: { $first: '$title' },
-                createdBy: { $first: '$createdBy' },
-                editedBy: { $first: '$editedBy' },
-                attachment: { $first: '$attachment' },
-                type: { $first: '$type' },
-                parent: { $first: '$parent' },
-                deleted: { $first: '$deleted' },
-                archived: { $first: '$archived' },
+                _id       : '$_id',
+                title     : {$first: '$title'},
+                createdBy : {$first: '$createdBy'},
+                editedBy  : {$first: '$editedBy'},
+                attachment: {$first: '$attachment'},
+                type      : {$first: '$type'},
+                parent    : {$first: '$parent'},
+                deleted   : {$first: '$deleted'},
+                archived  : {$first: '$archived'},
 
                 breadcrumbs: {
                     $push: '$breadcrumbs',
@@ -420,105 +420,105 @@ const Documents = function () {
             },
         }, {
             $lookup: {
-                from: 'files',
+                from        : 'files',
                 foreignField: '_id',
-                localField: 'attachment',
-                as: 'attachment',
+                localField  : 'attachment',
+                as          : 'attachment',
             },
         }, {
             $unwind: {
-                path: '$attachment',
+                path                      : '$attachment',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'parent',
-                as: 'parent',
+                localField  : 'parent',
+                as          : 'parent',
             },
         }, {
             $unwind: {
-                path: '$parent',
+                path                      : '$parent',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'createdBy.user',
-                as: 'createdBy.user',
+                localField  : 'createdBy.user',
+                as          : 'createdBy.user',
             },
         }, {
             $unwind: {
-                path: '$createdBy.user',
+                path                      : '$createdBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'editedBy.user',
-                as: 'editedBy.user',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user',
             },
         }, {
             $unwind: {
-                path: '$editedBy.user',
+                path                      : '$editedBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
+                _id        : 1,
+                title      : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                createdBy: {
+                createdBy  : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                editedBy: {
+                editedBy   : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
-                        imageSrc: 1,
+                        lastName : 1,
+                        imageSrc : 1,
                     },
                 },
-                attachment: {
-                    _id: 1,
-                    preview: 1,
-                    contentType: 1,
-                    extension: 1,
+                attachment : {
+                    _id         : 1,
+                    preview     : 1,
+                    contentType : 1,
+                    extension   : 1,
                     originalName: 1,
-                    name: 1,
+                    name        : 1,
                 },
-                parent: {
-                    _id: 1,
+                parent     : {
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                createdBy: 1,
-                editedBy: 1,
-                type: 1,
-                deleted: 1,
-                archived: 1,
+                _id        : 1,
+                title      : 1,
+                createdBy  : 1,
+                editedBy   : 1,
+                type       : 1,
+                deleted    : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                attachment: {
+                attachment : {
                     $ifNull: ['$attachment', null],
                 },
-                parent: {
+                parent     : {
                     $ifNull: ['$parent', null],
                 },
             },
@@ -529,7 +529,7 @@ const Documents = function () {
                 return cb(err);
             }
 
-            const result = docs && docs.length ? { data: docs } : null;
+            const result = docs && docs.length ? {data: docs} : null;
 
             if (!result) {
                 return errorSender.badRequest(cb, 'Documents not found');
@@ -552,7 +552,6 @@ const Documents = function () {
             sortOrder = -1,
             skip = 0,
             count = 20,
-            search = '',
             filter = null,
         } = options;
 
@@ -561,6 +560,8 @@ const Documents = function () {
                 'createdBy.user': ObjectId(personnelId),
             },
         };
+
+        const search = filter ? filter.globalSearch : null;
 
         if (isMobile) {
             // for sync only
@@ -609,7 +610,6 @@ const Documents = function () {
             }
         }
 
-
         pipeLine.push(matchObj);
 
         // search sor web only
@@ -619,7 +619,7 @@ const Documents = function () {
                 .map(elem => {
                     return {
                         title: {
-                            $regex: elem,
+                            $regex  : elem,
                             $options: 'xi',
                         },
                     };
@@ -632,62 +632,61 @@ const Documents = function () {
             });
         }
 
-
         pipeLine.push({
-            $group: {
-                _id: null,
-                total: { $sum: 1 },
-                root: { $push: '$$ROOT' },
+                $group: {
+                    _id  : null,
+                    total: {$sum: 1},
+                    root : {$push: '$$ROOT'},
+                },
+            }, {
+                $unwind: '$root',
+            }, {
+                $project: {
+                    _id        : '$root._id',
+                    title      : '$root.title',
+                    createdBy  : '$root.createdBy',
+                    editedBy   : '$root.editedBy',
+                    type       : '$root.type',
+                    deleted    : '$root.deleted',
+                    archived   : '$root.archived',
+                    breadcrumbs: '$root.breadcrumbs',
+                    attachment : '$root.attachment',
+                    parent     : '$root.parent',
+                    total      : 1,
+                },
+            }, {
+                $sort: {
+                    [sortBy]: sortOrder,
+                },
+            }, {
+                $skip: skip,
+            }, {
+                $limit: count,
             },
-        }, {
-            $unwind: '$root',
-        }, {
-            $project: {
-                _id: '$root._id',
-                title: '$root.title',
-                createdBy: '$root.createdBy',
-                editedBy: '$root.editedBy',
-                type: '$root.type',
-                deleted: '$root.deleted',
-                archived: '$root.archived',
-                breadcrumbs: '$root.breadcrumbs',
-                attachment: '$root.attachment',
-                parent: '$root.parent',
-                total: 1,
-            },
-        }, {
-            $sort: {
-                [sortBy]: sortOrder,
-            },
-        }, {
-            $skip: skip,
-        }, {
-            $limit: count,
-        },
             ...getMainPipeline(),
             {
                 $group: {
-                    _id: '$total',
+                    _id : '$total',
                     root: {
                         $push: {
-                            _id: '$_id',
-                            title: '$title',
-                            createdBy: '$createdBy',
-                            editedBy: '$editedBy',
-                            type: '$type',
-                            deleted: '$deleted',
-                            archived: '$archived',
+                            _id        : '$_id',
+                            title      : '$title',
+                            createdBy  : '$createdBy',
+                            editedBy   : '$editedBy',
+                            type       : '$type',
+                            deleted    : '$deleted',
+                            archived   : '$archived',
                             breadcrumbs: '$breadcrumbs',
-                            attachment: '$attachment',
-                            parent: '$parent',
+                            attachment : '$attachment',
+                            parent     : '$parent',
                         },
                     },
                 },
             }, {
                 $project: {
-                    _id: 0,
+                    _id  : 0,
                     total: '$_id',
-                    data: '$root',
+                    data : '$root',
                 },
             });
 
@@ -698,7 +697,7 @@ const Documents = function () {
 
             const result = docs && docs.length ? docs[0] : null;
 
-            cb(null, Object.assign({ total: 0, data: [] }, result));
+            cb(null, Object.assign({total: 0, data: []}, result));
         });
     };
 
@@ -712,30 +711,30 @@ const Documents = function () {
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'breadcrumbs',
-                as: 'breadcrumbs',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs',
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $group: {
-                _id: {
-                    _id: '$_id',
+                _id        : {
+                    _id  : '$_id',
                     title: '$title',
                 },
                 breadcrumbs: {
                     $push: {
-                        _id: '$breadcrumbs._id',
+                        _id  : '$breadcrumbs._id',
                         title: '$breadcrumbs.title',
                     },
                 },
@@ -743,10 +742,10 @@ const Documents = function () {
             },
         }, {
             $project: {
-                _id: 0,
+                _id        : 0,
                 breadcrumbs: {
                     $setDifference: [{
-                        $setUnion: ['$breadcrumbs', [{ _id: '$_id._id', title: '$_id.title' }]],
+                        $setUnion: ['$breadcrumbs', [{_id: '$_id._id', title: '$_id.title'}]],
                     }, [null, {}]],
                 },
             },
@@ -795,7 +794,7 @@ const Documents = function () {
         async.waterfall([
 
             (cb) => {
-                DocumentModel.distinct('_id', { breadcrumbs: { $in: [id] } }, (err, setId) => {
+                DocumentModel.distinct('_id', {breadcrumbs: {$in: [id]}}, (err, setId) => {
                     if (err) {
                         return cb(err);
                     }
@@ -809,7 +808,7 @@ const Documents = function () {
                     return cb(null, []);
                 }
 
-                DocumentModel.update({ _id: { $in: setId } }, updateObj, (err) => {
+                DocumentModel.update({_id: {$in: setId}}, updateObj, (err) => {
                     if (err) {
                         return cb(err);
                     }
@@ -840,96 +839,96 @@ const Documents = function () {
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'breadcrumbs',
-                as: 'breadcrumbs',
+                localField  : 'breadcrumbs',
+                as          : 'breadcrumbs',
             },
         }, {
             $unwind: {
-                path: '$breadcrumbs',
+                path                      : '$breadcrumbs',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                editedBy: 1,
-                archived: 1,
-                parent: 1,
+                _id        : 1,
+                title      : 1,
+                editedBy   : 1,
+                archived   : 1,
+                parent     : 1,
                 breadcrumbs: {
-                    _id: 1,
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $group: {
-                _id: '$_id',
-                title: { $first: '$title' },
-                editedBy: { $first: '$editedBy' },
-                attachment: { $first: '$attachment' },
-                parent: { $first: '$parent' },
-                archived: { $first: '$archived' },
+                _id        : '$_id',
+                title      : {$first: '$title'},
+                editedBy   : {$first: '$editedBy'},
+                attachment : {$first: '$attachment'},
+                parent     : {$first: '$parent'},
+                archived   : {$first: '$archived'},
                 breadcrumbs: {
                     $push: '$breadcrumbs',
                 },
             },
         }, {
             $lookup: {
-                from: 'documents',
+                from        : 'documents',
                 foreignField: '_id',
-                localField: 'parent',
-                as: 'parent',
+                localField  : 'parent',
+                as          : 'parent',
             },
         }, {
             $unwind: {
-                path: '$parent',
+                path                      : '$parent',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $lookup: {
-                from: 'personnels',
+                from        : 'personnels',
                 foreignField: '_id',
-                localField: 'editedBy.user',
-                as: 'editedBy.user',
+                localField  : 'editedBy.user',
+                as          : 'editedBy.user',
             },
         }, {
             $unwind: {
-                path: '$editedBy.user',
+                path                      : '$editedBy.user',
                 preserveNullAndEmptyArrays: true,
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
+                _id        : 1,
+                title      : 1,
                 breadcrumbs: 1,
-                archived: 1,
-                editedBy: {
+                archived   : 1,
+                editedBy   : {
                     date: 1,
                     user: {
-                        _id: 1,
+                        _id      : 1,
                         firstName: 1,
-                        lastName: 1,
+                        lastName : 1,
                     },
                 },
-                parent: {
-                    _id: 1,
+                parent     : {
+                    _id  : 1,
                     title: 1,
                 },
             },
         }, {
             $project: {
-                _id: 1,
-                title: 1,
-                editedBy: 1,
-                archived: 1,
+                _id        : 1,
+                title      : 1,
+                editedBy   : 1,
+                archived   : 1,
                 breadcrumbs: 1,
-                parent: {
+                parent     : {
                     $ifNull: ['$parent', null],
                 },
             },
@@ -986,7 +985,7 @@ const Documents = function () {
                     }
 
                     const updateObj = {
-                        parent: target,
+                        parent     : target,
                         breadcrumbs: newBreadcrumbsPart,
                         editedBy,
                     };
@@ -1017,7 +1016,7 @@ const Documents = function () {
                 }
 
                 const findObj = {
-                    deleted: false,
+                    deleted    : false,
                     breadcrumbs: {
                         $in: [parentId],
                     },
@@ -1069,7 +1068,7 @@ const Documents = function () {
 
         DocumentModel.find({
             deleted: false,
-            parent: parentModel.oldId,
+            parent : parentModel.oldId,
         }).lean().exec((err, needToCopyModels) => {
             if (err) {
                 return cb(err);
@@ -1086,13 +1085,13 @@ const Documents = function () {
                 };
 
                 const createObj = {
-                    archived: oldModel.archived,
-                    attachment: oldModel.attachment,
-                    title: oldModel.title,
-                    type: oldModel.type,
-                    parent: parentModel._id,
+                    archived   : oldModel.archived,
+                    attachment : oldModel.attachment,
+                    title      : oldModel.title,
+                    type       : oldModel.type,
+                    parent     : parentModel._id,
                     breadcrumbs: [...parentModel.breadcrumbs, parentModel._id],
-                    createdBy: editedBy,
+                    createdBy  : editedBy,
                     editedBy,
                 };
 
@@ -1150,13 +1149,13 @@ const Documents = function () {
                     }
 
                     const createObj = {
-                        title: title || model.title,
-                        archived: model.archived,
-                        attachment: model.attachment,
-                        type: model.type,
-                        parent: target,
+                        title      : title || model.title,
+                        archived   : model.archived,
+                        attachment : model.attachment,
+                        type       : model.type,
+                        parent     : target,
                         editedBy,
-                        createdBy: editedBy,
+                        createdBy  : editedBy,
                         breadcrumbs: newBreadcrumbsPart,
                     };
 
@@ -1271,10 +1270,10 @@ const Documents = function () {
 
                 pipeLine.push({
                     $lookup: {
-                        from: 'files',
-                        localField: 'attachment',
+                        from        : 'files',
+                        localField  : 'attachment',
                         foreignField: '_id',
-                        as: 'attachment',
+                        as          : 'attachment',
                     },
                 });
 
@@ -1288,7 +1287,7 @@ const Documents = function () {
 
                 pipeLine.push({
                     $match: {
-                        attachment: { $ne: null },
+                        attachment: {$ne: null},
                     },
                 });
 
@@ -1329,9 +1328,9 @@ const Documents = function () {
 
                 (breadcrumbs, cb) => {
                     const options = {
-                        title: _.escape(title),
+                        title     : _.escape(title),
                         attachment: type === 'file' ? attachment : null,
-                        editedBy: createdBy,
+                        editedBy  : createdBy,
                         parent,
                         type,
                         breadcrumbs,
@@ -1352,7 +1351,7 @@ const Documents = function () {
                     const eventPayload = {
                         actionOriginator: userId,
                         accessRoleLevel,
-                        body: model.toJSON(),
+                        body            : model.toJSON(),
                     };
 
                     if (isFile) {
@@ -1414,7 +1413,7 @@ const Documents = function () {
 
                 (cb) => {
                     const findObj = {
-                        _id: id,
+                        _id             : id,
                         'createdBy.user': userId,
                     };
                     const updateObj = {
@@ -1437,7 +1436,7 @@ const Documents = function () {
                         const id = model._id;
 
                         if (model.type === 'folder') {
-                            return updateAllChildDocuments(id, { editedBy }, (err, modified) => {
+                            return updateAllChildDocuments(id, {editedBy}, (err, modified) => {
                                 if (err) {
                                     logger.error(`Document: updating child documents error: ${err}`);
 
@@ -1456,7 +1455,7 @@ const Documents = function () {
                     ActivityLog.emit('documents:changes-applied', {
                         actionOriginator: userId,
                         accessRoleLevel,
-                        items: setModifiedId,
+                        items           : setModifiedId,
                     });
 
                     if (isMobile) {
@@ -1514,7 +1513,7 @@ const Documents = function () {
                 (cb) => {
                     const findObj = {
                         'createdBy.user': userId,
-                        $or: [
+                        $or             : [
                             {
                                 _id: {
                                     $in: ids,
@@ -1547,7 +1546,7 @@ const Documents = function () {
                         editedBy,
                     };
 
-                    DocumentModel.update({ _id: { $in: ids } }, updateObj, { multi: true }, (err) => {
+                    DocumentModel.update({_id: {$in: ids}}, updateObj, {multi: true}, (err) => {
                         if (err) {
                             return cb(err);
                         }
@@ -1562,7 +1561,7 @@ const Documents = function () {
                     return next(err);
                 }
 
-                res.status(200).send({ data });
+                res.status(200).send({data});
             });
         }
 
@@ -1907,7 +1906,7 @@ const Documents = function () {
                     res.status(200).send(result);
                 });
             } else {
-                res.status(200).send({ data: [] });
+                res.status(200).send({data: []});
             }
         }
 
@@ -1929,7 +1928,7 @@ const Documents = function () {
             const parentId = req.params.id ? ObjectId(req.params.id) : null;
 
             const {
-                session: { uId: personnelId } = { uId: null },
+                session: {uId: personnelId} = {uId: null},
             } = req;
             const {
                 page,
@@ -2019,7 +2018,7 @@ const Documents = function () {
     this.getRawFiles = function (req, res, next) {
         function queryRun(query) {
             const {
-                session: { uId: personnelId } = { uId: null },
+                session: {uId: personnelId} = {uId: null},
             } = req;
             const {
                 page,
@@ -2033,7 +2032,7 @@ const Documents = function () {
                 filesOnly: true,
                 skip,
                 count,
-                archived: false,
+                archived : false,
                 personnelId,
                 sortBy,
                 sortOrder,
@@ -2080,7 +2079,7 @@ const Documents = function () {
     this.getFilesForContract = function (req, res, next) {
         function queryRun(query) {
             const {
-                session: { uId: personnelId } = { uId: null },
+                session: {uId: personnelId} = {uId: null},
             } = req;
             const {
                 contractId,
@@ -2126,7 +2125,7 @@ const Documents = function () {
     this.getAllForMobile = function (req, res, next) {
         function queryRun(query) {
             const {
-                session: { uId: personnelId } = { uId: null },
+                session: {uId: personnelId} = {uId: null},
             } = req;
             const {
                 page,
@@ -2185,7 +2184,7 @@ const Documents = function () {
     this.getAllForSync = function (req, res, next) {
         function queryRun(query) {
             const {
-                session: { uId: personnelId } = { uId: null },
+                session: {uId: personnelId} = {uId: null},
             } = req;
             const {
                 lastLogOut,
@@ -2200,7 +2199,7 @@ const Documents = function () {
                 }
 
                 if (response.total === 0) {
-                    return next({ status: 200, body: response });
+                    return next({status: 200, body: response});
                 }
 
                 fillImagesIntoResult(response, (err, result) => {
@@ -2208,7 +2207,7 @@ const Documents = function () {
                         return next(err);
                     }
 
-                    next({ status: 200, body: result });
+                    next({status: 200, body: result});
                 });
             });
         }
@@ -2231,7 +2230,6 @@ const Documents = function () {
             });
         });
     };
-
 
     this.createDocIfNewContract = function (userId, files, callback) {
         const titles = Object.keys(files);
@@ -2268,12 +2266,12 @@ const Documents = function () {
 
                 function iterator(item, callback) {
                     DocumentModel.create({
-                        attachment: item._id,
+                        attachment : item._id,
                         breadcrumbs: [],
                         createdBy,
-                        editedBy: createdBy,
-                        title: titles[i],
-                        type: 'file',
+                        editedBy   : createdBy,
+                        title      : titles[i],
+                        type       : 'file',
                     }, (err, result) => {
                         if (err) {
                             return callback(err);
