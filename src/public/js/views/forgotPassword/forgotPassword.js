@@ -12,7 +12,7 @@ module.exports = Backbone.View.extend({
     $errrorHandler: null,
 
     errors: {
-        emptyPhoneInput : ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
+        emptyPhoneInput: ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
     },
 
     initialize: function (options) {
@@ -39,23 +39,16 @@ module.exports = Backbone.View.extend({
         var phoneRadio = this.$el.find('#phoneNumberRadio');
         var isPhone = phoneRadio.is(':checked');
         var regexp;
-        var filteredValue;
 
         this.errors = {};
 
-        // input field returns value with mask
-
-        if (isPhone) {
-            filteredValue = value.replace(/_/g, '');
-        }
-
-        if (!filteredValue || filteredValue.length <= 15) {
+        if (!value) {
             if (isPhone) {
                 this.errors.emptyPhoneInput = ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar;
             } else {
                 this.errors.emptyEmailInput = ERROR_MESSAGES.enterYourEmail.en + '<br>' + ERROR_MESSAGES.enterYourEmail.ar;
             }
-
+//
             return;
         }
 
@@ -65,7 +58,7 @@ module.exports = Backbone.View.extend({
             regexp = CONSTANTS.PHONE_REGEXP;
         }
 
-        if (!regexp.test(filteredValue)) {
+        if (!regexp.test(value)) {
             if (isPhone) {
                 this.errors.incorrectPhoneValue = ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.en + '<br>' + ERROR_MESSAGES.forgotPassword.incorrectPhoneNumber.ar;
             } else {
@@ -116,8 +109,8 @@ module.exports = Backbone.View.extend({
             errorKeys.map(function (key) {
                 if (errors.hasOwnProperty(key)) {
                     App.render({
-                        type : 'error',
-                        message : errors[key]
+                        type   : 'error',
+                        message: errors[key]
                     });
                 }
             });
@@ -144,7 +137,10 @@ module.exports = Backbone.View.extend({
             error  : function (err) {
                 form.addClass('notRegister');
 
-                App.render({type: 'error', message: ERROR_MESSAGES.invalidCredentials.en + '</br>' + ERROR_MESSAGES.invalidCredentials.ar});
+                App.render({
+                    type   : 'error',
+                    message: ERROR_MESSAGES.invalidCredentials.en + '</br>' + ERROR_MESSAGES.invalidCredentials.ar
+                });
             }
         });
     },
@@ -157,29 +153,29 @@ module.exports = Backbone.View.extend({
         $loginInput.attr('data-masked', true);
 
         if (!e || e.target.id === 'phoneNumberRadio') {
-            this.errors= {
-                emptyPhoneInput : ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
+            this.errors = {
+                emptyPhoneInput: ERROR_MESSAGES.enterYourPhoneNumber.en + '<br>' + ERROR_MESSAGES.enterYourPhoneNumber.ar
             };
 
             $loginInput.inputmask('+999(99)-999-9999');
             $loginInput.attr('placeholder', 'Enter phone number');
         } else {
-            this.errors= {
-                emptyEmailInput : ERROR_MESSAGES.enterYourEmail.en + '<br>' + ERROR_MESSAGES.enterYourEmail.ar
+            this.errors = {
+                emptyEmailInput: ERROR_MESSAGES.enterYourEmail.en + '<br>' + ERROR_MESSAGES.enterYourEmail.ar
             };
 
             $loginInput.inputmask({
-                mask  : '*{1,20}[.*{1,20}][.*{1,20}][.*{1,20}]@*{1,20}[.*{2,6}][.*{1,2}]',
-                greedy: false,
+                mask         : '*{1,20}[.*{1,20}][.*{1,20}][.*{1,20}]@*{1,20}[.*{2,6}][.*{1,2}]',
+                greedy       : false,
                 onBeforePaste: function (pastedValue, opts) {
                     pastedValue = pastedValue.toLowerCase();
                     return pastedValue.replace("mailto:", "");
                 },
-                definitions: {
+                definitions  : {
                     '*': {
-                        validator: "[0-9A-Za-z!#$%&'*+/=?^_`{|}~\-]",
+                        validator  : "[0-9A-Za-z!#$%&'*+/=?^_`{|}~\-]",
                         cardinality: 1,
-                        casing: "lower"
+                        casing     : "lower"
                     }
                 }
             });

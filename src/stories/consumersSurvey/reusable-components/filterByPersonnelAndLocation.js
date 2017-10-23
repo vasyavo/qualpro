@@ -5,7 +5,7 @@ module.exports = function (filter, personnelId, isMasterAdmin) {
         $addFields: {
             personnel: {
                 $cond: {
-                    if: {
+                    if  : {
                         $ifNull: ['$personnel', false],
                     },
                     then: '$personnel',
@@ -17,14 +17,14 @@ module.exports = function (filter, personnelId, isMasterAdmin) {
 
     pipeline.push({
         $group: {
-            _id: null,
+            _id              : null,
             setConsumerSurvey: {
                 $push: '$$ROOT',
             },
         },
     });
 
-    const $locationsFilterConditions = [
+    const $filterConditions = [
         {
             $ne: [
                 '$$consumerSurvey.createdBy.user',
@@ -40,6 +40,7 @@ module.exports = function (filter, personnelId, isMasterAdmin) {
             ],
         },
     ];
+    const $locationsFilterConditions = [];
 
     let $project;
 
@@ -48,27 +49,24 @@ module.exports = function (filter, personnelId, isMasterAdmin) {
             result: {
                 $filter: {
                     input: '$setConsumerSurvey',
-                    as: 'consumerSurvey',
-                    cond: {
-                        $or: [
+                    as   : 'consumerSurvey',
+                    cond : {
+                        $and: [
                             {
-                                $eq: [
-                                    '$$consumerSurvey.createdBy.user',
-                                    personnelId,
-                                ],
+                                $and: $locationsFilterConditions,
                             },
                             {
-                                $and: [
+                                $or: [
                                     {
-                                        $ne: [
+                                        $eq: [
                                             '$$consumerSurvey.createdBy.user',
                                             personnelId,
                                         ],
                                     },
+                                    {
+                                        $and: $filterConditions,
+                                    },
                                 ],
-                            },
-                            {
-                                $and: $locationsFilterConditions,
                             },
                         ],
                     },
@@ -80,44 +78,51 @@ module.exports = function (filter, personnelId, isMasterAdmin) {
             result: {
                 $filter: {
                     input: '$setConsumerSurvey',
-                    as: 'consumerSurvey',
-                    cond: {
-                        $or: [
+                    as   : 'consumerSurvey',
+                    cond : {
+                        $and: [
                             {
-                                $eq: [
-                                    '$$consumerSurvey.createdBy.user',
-                                    personnelId,
-                                ],
+                                $and: $locationsFilterConditions,
                             },
                             {
-                                $and: [
+                                $or: [
                                     {
-                                        $ne: [
+                                        $eq: [
                                             '$$consumerSurvey.createdBy.user',
                                             personnelId,
                                         ],
                                     },
                                     {
-                                        $ne: [
+                                        $and: [
                                             {
-                                                $filter: {
-                                                    input: '$$consumerSurvey.personnel',
-                                                    as: 'personnel',
-                                                    cond: {
-                                                        $eq: [
-                                                            '$$personnel',
-                                                            personnelId,
-                                                        ],
-                                                    },
-                                                },
+                                                $ne: [
+                                                    '$$consumerSurvey.createdBy.user',
+                                                    personnelId,
+                                                ],
                                             },
-                                            [],
+                                            {
+                                                $ne: [
+                                                    {
+                                                        $filter: {
+                                                            input: '$$consumerSurvey.personnel',
+                                                            as   : 'personnel',
+                                                            cond : {
+                                                                $eq: [
+                                                                    '$$personnel',
+                                                                    personnelId,
+                                                                ],
+                                                            },
+                                                        },
+                                                    },
+                                                    [],
+                                                ],
+                                            },
                                         ],
                                     },
+                                    {
+                                        $and: $filterConditions,
+                                    },
                                 ],
-                            },
-                            {
-                                $and: $locationsFilterConditions,
                             },
                         ],
                     },

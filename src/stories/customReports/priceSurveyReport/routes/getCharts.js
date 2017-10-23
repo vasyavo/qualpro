@@ -16,15 +16,15 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -50,21 +50,21 @@ module.exports = (req, res, next) => {
         // fixme: data structure should be like in Competitor Branding
         pipeline.push({
             $project: {
-                country: 1,
-                region: 1,
-                subRegion: 1,
+                country      : 1,
+                region       : 1,
+                subRegion    : 1,
                 retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                category: 1,
-                createdBy: 1,
-                items: 1,
+                outlet       : 1,
+                branch       : 1,
+                category     : 1,
+                createdBy    : 1,
+                items        : 1,
             },
         });
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -73,6 +73,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         filters.forEach((filterName) => {
@@ -112,10 +117,10 @@ module.exports = (req, res, next) => {
                 $timeMatch.$or.push({
                     $and: [
                         {
-                            'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d},
                         },
                         {
-                            'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d },
+                            'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d},
                         },
                     ],
                 });
@@ -132,7 +137,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.CATEGORY] && queryFilter[CONTENT_TYPES.CATEGORY].length) {
             pipeline.push({
                 $match: {
-                    category: { $in: queryFilter[CONTENT_TYPES.CATEGORY] },
+                    category: {$in: queryFilter[CONTENT_TYPES.CATEGORY]},
                 },
             });
         }
@@ -143,8 +148,8 @@ module.exports = (req, res, next) => {
                     items: {
                         $filter: {
                             input: '$items',
-                            as: 'item',
-                            cond: {
+                            as   : 'item',
+                            cond : {
                                 $in: ['$$item.brand', queryFilter[CONTENT_TYPES.BRAND]],
                             },
                         },
@@ -155,10 +160,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
@@ -168,13 +173,13 @@ module.exports = (req, res, next) => {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            in  : {
+                                _id     : '$$user._id',
+                                name    : {
+                                    en: {$concat: ['$$user.firstName.en', ' ', '$$user.lastName.en']},
+                                    ar: {$concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar']},
                                 },
                                 position: '$$user.position',
                             },
@@ -207,11 +212,11 @@ module.exports = (req, res, next) => {
                 timeFrames: {
                     $filter: {
                         input: timeFrames,
-                        as: 'timeFrameItem',
-                        cond: {
+                        as   : 'timeFrameItem',
+                        cond : {
                             $and: [
-                                { $gt: ['$createdBy.date', '$$timeFrameItem.from'] },
-                                { $lt: ['$createdBy.date', '$$timeFrameItem.to'] },
+                                {$gt: ['$createdBy.date', '$$timeFrameItem.from']},
+                                {$lt: ['$createdBy.date', '$$timeFrameItem.to']},
                             ],
                         },
                     },
@@ -222,7 +227,6 @@ module.exports = (req, res, next) => {
         pipeline.push({
             $unwind: '$timeFrames',
         });
-
 
         applyAnalyzeBy(pipeline, analyzeByParam);
 
@@ -278,10 +282,8 @@ module.exports = (req, res, next) => {
                 });
             });
 
-
             element.datasets = dataset;
         });
-
 
         res.status(200).send(response);
     });

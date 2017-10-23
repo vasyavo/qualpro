@@ -14,15 +14,15 @@ const ajv = new Ajv();
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type: 'object',
+        type      : 'object',
         properties: {
             timeFrames: {
-                type: 'array',
+                type : 'array',
                 items: {
-                    from: {
+                    from    : {
                         type: 'string',
                     },
-                    to: {
+                    to      : {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -40,7 +40,7 @@ module.exports = (req, res, next) => {
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
+            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -49,6 +49,11 @@ module.exports = (req, res, next) => {
 
                 return next(err);
             }
+        }
+
+        if (queryFilter.brands) {
+            queryFilter.brand = queryFilter.brands;
+            delete  queryFilter.brands;
         }
 
         // map set String ID to set ObjectID
@@ -82,7 +87,7 @@ module.exports = (req, res, next) => {
         ], queryFilter);
 
         if ($locationMatch.$and.length) {
-            pipeline.push({ $match: $locationMatch });
+            pipeline.push({$match: $locationMatch});
         }
 
         const $generalMatch = generalFiler([
@@ -113,20 +118,20 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ category: { $in: setObjectId } });
+                $or.push({category: {$in: setObjectId}});
             }
 
             if (setString.length) {
                 $or.push({
                     $or: [
-                        { 'category_name.en': { $in: setString } },
-                        { 'category_name.ar': { $in: setString } },
+                        {'category_name.en': {$in: setString}},
+                        {'category_name.ar': {$in: setString}},
                     ],
                 });
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -145,15 +150,15 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ 'brand._id': { $in: setObjectId } });
+                $or.push({'brand._id': {$in: setObjectId}});
             }
 
             if (setString.length) {
-                $or.push({ 'brand.name': { $in: setString } });
+                $or.push({'brand.name': {$in: setString}});
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -172,15 +177,15 @@ module.exports = (req, res, next) => {
             const $or = [];
 
             if (setObjectId.length) {
-                $or.push({ 'variant._id': { $in: setObjectId } });
+                $or.push({'variant._id': {$in: setObjectId}});
             }
 
             if (setString.length) {
-                $or.push({ 'variant.name': { $in: setString } });
+                $or.push({'variant.name': {$in: setString}});
             }
 
             if ($or.length) {
-                $generalMatch.$and.push({ $or });
+                $generalMatch.$and.push({$or});
             }
         }
 
@@ -205,8 +210,8 @@ module.exports = (req, res, next) => {
             $or: timeFilter.map((frame) => {
                 return {
                     $and: [
-                        { 'createdBy.date': { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
-                        { 'createdBy.date': { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
+                        {'createdBy.date': {$gt: moment(frame.from, 'MM/DD/YYYY')._d}},
+                        {'createdBy.date': {$lt: moment(frame.to, 'MM/DD/YYYY')._d}},
                     ],
                 };
             }),
@@ -244,17 +249,17 @@ module.exports = (req, res, next) => {
 
             pipeline.push({
                 $match: {
-                    shelfLifePeriod: { $gte: queryFilter.shelfLife },
+                    shelfLifePeriod: {$gte: queryFilter.shelfLife},
                 },
             });
         }
 
         pipeline.push({
             $lookup: {
-                from: 'personnels',
-                localField: 'createdBy.user',
+                from        : 'personnels',
+                localField  : 'createdBy.user',
                 foreignField: '_id',
-                as: 'createdBy.user',
+                as          : 'createdBy.user',
             },
         });
 
@@ -264,13 +269,13 @@ module.exports = (req, res, next) => {
                     user: {
                         $let: {
                             vars: {
-                                user: { $arrayElemAt: ['$createdBy.user', 0] },
+                                user: {$arrayElemAt: ['$createdBy.user', 0]},
                             },
-                            in: {
-                                _id: '$$user._id',
-                                name: {
-                                    en: { $concat: ['$$user.firstName.en', ' ', '$$user.lastName.en'] },
-                                    ar: { $concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar'] },
+                            in  : {
+                                _id     : '$$user._id',
+                                name    : {
+                                    en: {$concat: ['$$user.firstName.en', ' ', '$$user.lastName.en']},
+                                    ar: {$concat: ['$$user.firstName.ar', ' ', '$$user.lastName.ar']},
                                 },
                                 position: '$$user.position',
                             },
@@ -302,10 +307,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'categories',
-                localField: 'category',
+                from        : 'categories',
+                localField  : 'category',
                 foreignField: '_id',
-                as: 'category',
+                as          : 'category',
             },
         });
 
@@ -313,7 +318,7 @@ module.exports = (req, res, next) => {
             $addFields: {
                 category: {
                     $cond: {
-                        if: {
+                        if  : {
                             $gt: [{
                                 $size: '$category',
                             }, 0],
@@ -321,10 +326,10 @@ module.exports = (req, res, next) => {
                         then: {
                             $let: {
                                 vars: {
-                                    category: { $arrayElemAt: ['$category', 0] },
+                                    category: {$arrayElemAt: ['$category', 0]},
                                 },
-                                in: {
-                                    _id: '$$category._id',
+                                in  : {
+                                    _id : '$$category._id',
                                     name: {
                                         en: {
                                             $toUpper: '$$category.name.en',
@@ -337,9 +342,9 @@ module.exports = (req, res, next) => {
                             },
                         },
                         else: {
-                            _id: '$customCategory.en', // tip: the same as ar
+                            _id   : '$customCategory.en', // tip: the same as ar
                             custom: true,
-                            name: {
+                            name  : {
                                 en: {
                                     $toUpper: '$customCategory.en',
                                 },
@@ -355,7 +360,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                brand: '$brand._id',
+                brand      : '$brand._id',
                 customBrand: {
                     en: '$brand.name',
                     ar: '$brand.name',
@@ -365,10 +370,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'brands',
-                localField: 'brand',
+                from        : 'brands',
+                localField  : 'brand',
                 foreignField: '_id',
-                as: 'brand',
+                as          : 'brand',
             },
         });
 
@@ -376,7 +381,7 @@ module.exports = (req, res, next) => {
             $addFields: {
                 brand: {
                     $cond: {
-                        if: {
+                        if  : {
                             $gt: [{
                                 $size: '$brand',
                             }, 0],
@@ -384,10 +389,10 @@ module.exports = (req, res, next) => {
                         then: {
                             $let: {
                                 vars: {
-                                    brand: { $arrayElemAt: ['$brand', 0] },
+                                    brand: {$arrayElemAt: ['$brand', 0]},
                                 },
-                                in: {
-                                    _id: '$$brand._id',
+                                in  : {
+                                    _id : '$$brand._id',
                                     name: {
                                         $toUpper: '$$brand.name.en',
                                     },
@@ -395,9 +400,9 @@ module.exports = (req, res, next) => {
                             },
                         },
                         else: {
-                            _id: '$customBrand.en', // tip: same as ar
+                            _id   : '$customBrand.en', // tip: same as ar
                             custom: true,
-                            name: {
+                            name  : {
                                 $toUpper: '$customBrand.en',
                             },
                         },
@@ -408,7 +413,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                variant: '$variant._id',
+                variant      : '$variant._id',
                 customVariant: {
                     en: '$variant.name',
                     ar: '$variant.name',
@@ -418,10 +423,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from: 'variants',
-                localField: 'variant',
+                from        : 'variants',
+                localField  : 'variant',
                 foreignField: '_id',
-                as: 'variant',
+                as          : 'variant',
             },
         });
 
@@ -429,7 +434,7 @@ module.exports = (req, res, next) => {
             $addFields: {
                 variant: {
                     $cond: {
-                        if: {
+                        if  : {
                             $gt: [{
                                 $size: '$variant',
                             }, 0],
@@ -437,10 +442,10 @@ module.exports = (req, res, next) => {
                         then: {
                             $let: {
                                 vars: {
-                                    variant: { $arrayElemAt: ['$variant', 0] },
+                                    variant: {$arrayElemAt: ['$variant', 0]},
                                 },
-                                in: {
-                                    _id: '$$variant._id',
+                                in  : {
+                                    _id : '$$variant._id',
                                     name: {
                                         $toUpper: '$$variant.name.en',
                                     },
@@ -448,9 +453,9 @@ module.exports = (req, res, next) => {
                             },
                         },
                         else: {
-                            _id: '$customVariant.en', // tip: same as ar
+                            _id   : '$customVariant.en', // tip: same as ar
                             custom: true,
-                            name: {
+                            name  : {
                                 $toUpper: '$customVariant.en',
                             },
                         },
@@ -461,200 +466,200 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                _id: 1,
-                country: 1,
-                region: 1,
-                subRegion: 1,
-                retailSegment: 1,
-                outlet: 1,
-                branch: 1,
-                createdBy: 1,
-                brand: 1,
-                category: 1,
-                variant: 1,
-                packing: { $concat: ['$packing', ' ', '$packingType'] },
-                displayType: 1,
+                _id              : 1,
+                country          : 1,
+                region           : 1,
+                subRegion        : 1,
+                retailSegment    : 1,
+                outlet           : 1,
+                branch           : 1,
+                createdBy        : 1,
+                brand            : 1,
+                category         : 1,
+                variant          : 1,
+                packing          : {$concat: ['$packing', ' ', '$packingType']},
+                displayType      : 1,
                 additionalComment: 1,
-                price: 1,
-                origin: 1,
-                shelfLifeStart: 1,
-                shelfLifeEnd: 1,
-                distributor: 1,
-                attachments: 1,
+                price            : 1,
+                origin           : 1,
+                shelfLifeStart   : 1,
+                shelfLifeEnd     : 1,
+                distributor      : 1,
+                attachments      : 1,
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'country',
+                from        : 'domains',
+                localField  : 'country',
                 foreignField: '_id',
-                as: 'country',
+                as          : 'country',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'region',
+                from        : 'domains',
+                localField  : 'region',
                 foreignField: '_id',
-                as: 'region',
+                as          : 'region',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'domains',
-                localField: 'subRegion',
+                from        : 'domains',
+                localField  : 'subRegion',
                 foreignField: '_id',
-                as: 'subRegion',
+                as          : 'subRegion',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'retailSegments',
-                localField: 'retailSegment',
+                from        : 'retailSegments',
+                localField  : 'retailSegment',
                 foreignField: '_id',
-                as: 'retailSegment',
+                as          : 'retailSegment',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'outlets',
-                localField: 'outlet',
+                from        : 'outlets',
+                localField  : 'outlet',
                 foreignField: '_id',
-                as: 'outlet',
+                as          : 'outlet',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'branches',
-                localField: 'branch',
+                from        : 'branches',
+                localField  : 'branch',
                 foreignField: '_id',
-                as: 'branch',
+                as          : 'branch',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'displayTypes',
-                localField: 'displayType',
+                from        : 'displayTypes',
+                localField  : 'displayType',
                 foreignField: '_id',
-                as: 'displayType',
+                as          : 'displayType',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'origins',
-                localField: 'origin',
+                from        : 'origins',
+                localField  : 'origin',
                 foreignField: '_id',
-                as: 'origin',
+                as          : 'origin',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from: 'positions',
-                localField: 'createdBy.user.position',
+                from        : 'positions',
+                localField  : 'createdBy.user.position',
                 foreignField: '_id',
-                as: 'position',
+                as          : 'position',
             },
         });
 
         pipeline.push({
             $project: {
-                _id: 1,
+                _id              : 1,
                 additionalComment: 1,
-                country: {
+                country          : {
                     $let: {
                         vars: {
-                            country: { $arrayElemAt: ['$country', 0] },
+                            country: {$arrayElemAt: ['$country', 0]},
                         },
-                        in: {
-                            _id: '$$country._id',
+                        in  : {
+                            _id : '$$country._id',
                             name: '$$country.name',
                         },
                     },
                 },
-                region: {
+                region           : {
                     $let: {
                         vars: {
-                            region: { $arrayElemAt: ['$region', 0] },
+                            region: {$arrayElemAt: ['$region', 0]},
                         },
-                        in: '$$region.name',
+                        in  : '$$region.name',
                     },
                 },
-                subRegion: {
+                subRegion        : {
                     $let: {
                         vars: {
-                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
+                            subRegion: {$arrayElemAt: ['$subRegion', 0]},
                         },
-                        in: '$$subRegion.name',
+                        in  : '$$subRegion.name',
                     },
                 },
-                retailSegment: {
+                retailSegment    : {
                     $let: {
                         vars: {
-                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
+                            retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
                         },
-                        in: '$$retailSegment.name',
+                        in  : '$$retailSegment.name',
                     },
                 },
-                outlet: {
+                outlet           : {
                     $let: {
                         vars: {
-                            outlet: { $arrayElemAt: ['$outlet', 0] },
+                            outlet: {$arrayElemAt: ['$outlet', 0]},
                         },
-                        in: '$$outlet.name',
+                        in  : '$$outlet.name',
                     },
                 },
-                branch: {
+                branch           : {
                     $let: {
                         vars: {
-                            branch: { $arrayElemAt: ['$branch', 0] },
+                            branch: {$arrayElemAt: ['$branch', 0]},
                         },
-                        in: '$$branch.name',
+                        in  : '$$branch.name',
                     },
                 },
-                position: {
+                position         : {
                     $let: {
                         vars: {
-                            position: { $arrayElemAt: ['$position', 0] },
+                            position: {$arrayElemAt: ['$position', 0]},
                         },
-                        in: '$$position.name',
+                        in  : '$$position.name',
                     },
                 },
-                createdBy: 1,
-                brand: 1,
-                category: 1,
-                variant: 1,
-                packing: 1,
-                displayType: {
+                createdBy        : 1,
+                brand            : 1,
+                category         : 1,
+                variant          : 1,
+                packing          : 1,
+                displayType      : {
                     $reduce: {
-                        input: '$displayType',
-                        initialValue: { en: [], ar: [] },
-                        in: {
-                            en: { $concatArrays: ['$$value.en', ['$$this.name.en']] },
-                            ar: { $concatArrays: ['$$value.ar', ['$$this.name.ar']] },
+                        input       : '$displayType',
+                        initialValue: {en: [], ar: []},
+                        in          : {
+                            en: {$concatArrays: ['$$value.en', ['$$this.name.en']]},
+                            ar: {$concatArrays: ['$$value.ar', ['$$this.name.ar']]},
                         },
                     },
                 },
-                price: 1,
-                origin: {
+                price            : 1,
+                origin           : {
                     $let: {
                         vars: {
-                            origin: { $arrayElemAt: ['$origin', 0] },
+                            origin: {$arrayElemAt: ['$origin', 0]},
                         },
-                        in: '$$origin.name',
+                        in  : '$$origin.name',
                     },
                 },
-                shelfLifeStart: 1,
-                shelfLifeEnd: 1,
-                distributor: 1,
+                shelfLifeStart   : 1,
+                shelfLifeEnd     : 1,
+                distributor      : 1,
             },
         });
 
@@ -712,19 +717,19 @@ module.exports = (req, res, next) => {
                 </thead>
                 <tbody>
                     ${result.map(item => {
-    
-                        const currentCountry = currency.defaultData.find((country) => {
-                            return country._id.toString() === item.country._id.toString();
-                        });
-                        item.price = Number(item.price);
-                        let price = item.price.toFixed(2);
-                        if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
-                            price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
-                            price = `${price} $`;
-                        } else {
-                            price = `${price} ${currentCountry.currency}`;
-                        }
-    
+
+            const currentCountry = currency.defaultData.find((country) => {
+                return country._id.toString() === item.country._id.toString();
+            });
+            item.price = Number(item.price);
+            let price = item.price.toFixed(2);
+            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
+                price = `${price} $`;
+            } else {
+                price = `${price} ${currentCountry.currency}`;
+            }
+
             return `
                             <tr>
                                 <td>${item.country.name[currentLanguage]}</td>
@@ -748,10 +753,10 @@ module.exports = (req, res, next) => {
                                 <td>${moment(item.shelfLifeStart).format('DD MMMM, YYYY')}</td>
                                 <td>${moment(item.shelfLifeEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${item.distributor[currentLanguage]}</td>
-                                <td>${item.createdBy.user.name[currentLanguage] +': '+ item.additionalComment[currentLanguage]}</td>
+                                <td>${item.createdBy.user.name[currentLanguage] + ': ' + item.additionalComment[currentLanguage]}</td>
                             </tr>
                         `;
-                    }).join('')}
+        }).join('')}
                 </tbody>
             </table>
         `;
@@ -772,9 +777,9 @@ module.exports = (req, res, next) => {
                 const buf = Buffer.concat(bufs);
 
                 res.set({
-                    'Content-Type': 'application/vnd.ms-excel',
+                    'Content-Type'       : 'application/vnd.ms-excel',
                     'Content-Disposition': `attachment; filename="newProductLaunchReportExport_${new Date()}.xls"`,
-                    'Content-Length': buf.length,
+                    'Content-Length'     : buf.length,
                 }).status(200).send(buf);
             });
         });

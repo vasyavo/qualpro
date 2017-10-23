@@ -23,14 +23,14 @@ var App = require('../../appState');
 module.exports = BaseView.extend({
     contentType: 'createConsumersSurvey',
 
-    template                          : _.template(CreateTemplate),
-    createConsumersSurveyViewTemplate : _.template(CreateConsumersSurveyViewTemplate),
-    fullAnswerOptionsTemplate         : _.template(FullAnswerOptionsTemplate),
-    multiSelectOptionsTemplate        : _.template(MultiSelectOptionsTemplate),
-    singleSelectOptionsTemplate       : _.template(SingleSelectOptionsTemplate),
-    listOptionTemplate                : _.template(ListOptionTemplate),
-    someIdForCheckBox                 : 0,
-    create                            : false,
+    template                         : _.template(CreateTemplate),
+    createConsumersSurveyViewTemplate: _.template(CreateConsumersSurveyViewTemplate),
+    fullAnswerOptionsTemplate        : _.template(FullAnswerOptionsTemplate),
+    multiSelectOptionsTemplate       : _.template(MultiSelectOptionsTemplate),
+    singleSelectOptionsTemplate      : _.template(SingleSelectOptionsTemplate),
+    listOptionTemplate               : _.template(ListOptionTemplate),
+    someIdForCheckBox                : 0,
+    create                           : false,
 
     events: {
         'click #addConsumersSurvey'                                            : 'addConsumersSurvey',
@@ -39,7 +39,7 @@ module.exports = BaseView.extend({
         'click #consumersSurveyTable .js_question .js_options .removeOption'   : 'removeOption',
         'click #consumersSurveyTable .js_question input[type="checkbox"]'      : 'checkBoxClick',
         'input #consumersSurveyTable .js_question input'                       : 'changeValue',
-        'click .filterHeader'                      : 'toggleFilterHolder'
+        'click .filterHeader'                                                  : 'toggleFilterHolder'
     },
 
     initialize: function (options) {
@@ -122,7 +122,7 @@ module.exports = BaseView.extend({
         $list.append(this.listOptionTemplate({
             option     : option || '',
             translation: this.translation,
-            App: App,
+            App        : App,
         }));
     },
 
@@ -156,7 +156,7 @@ module.exports = BaseView.extend({
             question         : question || {},
             someIdForCheckBox: this.someIdForCheckBox,
             translation      : this.translation,
-            App: App,
+            App              : App,
         }));
 
         if (question) {
@@ -288,8 +288,6 @@ module.exports = BaseView.extend({
         var startDate = $curEl.find('#startDate').val();
         var questionModel = new QuestionModel();
         var model;
-        var editDate;
-        var editStartDate;
         var optionsForModelSave = {
             validate: false,
             wait    : true,
@@ -367,18 +365,11 @@ module.exports = BaseView.extend({
             if (self.edit) {
                 optionsForModelSave.patch = true;
                 model = self.model.toJSON();
-                editDate = custom.dateFormater('DD.MM.YYYY', self.body.dueDate);
-                editStartDate = custom.dateFormater('DD.MM.YYYY', self.body.startDate);
 
                 if (!self.valueWasChanged) {
                     delete self.body.questions;
                 }
-                if (editDate === model.dueDate) {
-                    delete self.body.dueDate;
-                }
-                if (editStartDate === model.startDate) {
-                    delete self.body.startDate;
-                }
+
                 if (self.body.title === model.title) {
                     delete self.body.title;
                 }
@@ -391,7 +382,8 @@ module.exports = BaseView.extend({
                 return cb();
             }
             self.body.send = options.send;
-            self.model.save(self.body, optionsForModelSave);
+            self.model.set(self.body);
+            self.model.save(null, optionsForModelSave);
         });
     },
 
@@ -422,7 +414,7 @@ module.exports = BaseView.extend({
             title      : title,
             translation: this.translation,
             edit       : this.edit,
-            App: App,
+            App        : App,
         });
 
         var self = this;
@@ -431,7 +423,7 @@ module.exports = BaseView.extend({
         var idToSearch = '#' + this.currentLanguage;
         var idToBind = this.currentLanguage === 'en' ? 'En' : 'Ar';
         var dateStart = jsonModel.startDate && moment(jsonModel.startDate, 'DD.MM.YYYY').toDate();
-        var startDate = dateStart && (dateStart < new Date()) ? dateStart :  new Date();
+        var startDate = dateStart && (dateStart < new Date()) ? dateStart : new Date();
         var dateEnd = jsonModel.dueDate && moment(jsonModel.dueDate, 'DD.MM.YYYY').toDate();
         var idToFind;
 
@@ -485,7 +477,7 @@ module.exports = BaseView.extend({
             minDate    : new Date(),
             maxDate    : dateEnd,
             onClose    : function (selectedDate) {
-                if (selectedDate){
+                if (selectedDate) {
                     $endDate.datepicker('option', 'minDate', selectedDate);
                 }
             }
@@ -497,7 +489,7 @@ module.exports = BaseView.extend({
             yearRange  : '-20y:c+10y',
             minDate    : dateStart,
             onClose    : function (selectedDate) {
-                if (selectedDate){
+                if (selectedDate) {
                     $startDate.datepicker('option', 'maxDate', selectedDate);
                 }
             }
