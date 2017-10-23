@@ -157,6 +157,22 @@ module.exports = (req, res, next) => {
             },
         });
 
+        if (regionFilter && regionFilter.length) {
+            pipeline.push({
+                $addFields: {
+                    regions: {
+                        $filter: {
+                            input: '$regions',
+                            as: 'region',
+                            cond: {
+                                $in: ['$$region._id', regionFilter],
+                            },
+                        },
+                    },
+                },
+            });
+        }
+
         pipeline.push({
             $addFields: {
                 subRegions: {
