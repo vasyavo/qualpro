@@ -94,7 +94,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $addFields: {
-                countries: {
+                countries: countryFilter ? {
                     $filter: {
                         input: '$countries',
                         as: 'domain',
@@ -105,6 +105,18 @@ module.exports = (req, res, next) => {
                                 },
                                 {
                                     $in: ['$$domain._id', countryFilter],
+                                },
+                            ],
+                        },
+                    },
+                } : {
+                    $filter: {
+                        input: '$countries',
+                        as: 'domain',
+                        cond: {
+                            $and: [
+                                {
+                                    $ne: ['$$domain', null],
                                 },
                             ],
                         },
