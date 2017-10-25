@@ -1212,7 +1212,11 @@ var BranchHandler = function () {
                     ActivityLog.emit('branch:updated', {
                         actionOriginator: req.session.uId,
                         accessRoleLevel : req.session.level,
-                        body            : result.toJSON()
+                        body            : {
+                            _id: result._id,
+                            subRegion: result.subRegion._id,
+                            name: result.name
+                        },
                     });
 
                     if (result) {

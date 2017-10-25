@@ -129,36 +129,40 @@ function updateArraysInRetSegmentAndOutlet(next) {
     });
 }
 function updateArray(next) {
-    const outletId = this.getUpdate().$set.outlet;
-    const retailSegmentId = this.getUpdate().$set.retailSegment;
-    const subRegionId = this.getUpdate().$set.subRegion;
+    if (this.getUpdate().$set) {
+        const outletId = this.getUpdate().$set.outlet;
+        const retailSegmentId = this.getUpdate().$set.retailSegment;
+        const subRegionId = this.getUpdate().$set.subRegion;
 
-    async.series([
+        async.series([
 
-        (cb) => {
-            RetailSegmentModel.findByIdAndUpdate(retailSegmentId, {
-                $addToSet: {
-                    subRegions: subRegionId,
-                },
-            }, cb);
-        },
+            (cb) => {
+                RetailSegmentModel.findByIdAndUpdate(retailSegmentId, {
+                    $addToSet: {
+                        subRegions: subRegionId,
+                    },
+                }, cb);
+            },
 
-        (cb) => {
-            OutletModel.findByIdAndUpdate(outletId, {
-                $addToSet: {
-                    subRegions: subRegionId,
-                    retailSegments: retailSegmentId,
-                },
-            }, cb);
-        },
+            (cb) => {
+                OutletModel.findByIdAndUpdate(outletId, {
+                    $addToSet: {
+                        subRegions: subRegionId,
+                        retailSegments: retailSegmentId,
+                    },
+                }, cb);
+            },
 
-    ], (err) => {
-        if (err) {
-            return next(err);
-        }
+        ], (err) => {
+            if (err) {
+                return next(err);
+            }
 
+            next();
+        });
+    } else {
         next();
-    });
+    }
 }
 
 schema.pre('save', updateArraysInRetSegmentAndOutlet);
