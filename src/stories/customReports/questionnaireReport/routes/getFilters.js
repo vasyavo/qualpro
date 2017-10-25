@@ -1724,49 +1724,49 @@ module.exports = (req, res, next) => {
             {
                 name: {
                     en: 'Country',
-                    ar: '',
+                    ar: 'بلد',
                 },
                 value: 'country',
             },
             {
                 name: {
                     en: 'Region',
-                    ar: '',
+                    ar: 'المنطقة',
                 },
                 value: 'region',
             },
             {
                 name: {
                     en: 'Sub Region',
-                    ar: '',
+                    ar: 'حدد المنطقة الفرعية',
                 },
                 value: 'subRegion',
             },
             {
                 name: {
                     en: 'Branch',
-                    ar: '',
+                    ar: 'الفرع',
                 },
                 value: 'branch',
             },
             {
                 name: {
                     en: 'Publisher',
-                    ar: '',
+                    ar: 'الناشر',
                 },
                 value: 'publisher',
             },
             {
                 name: {
                     en: 'Respondent Position',
-                    ar: '',
+                    ar: 'arr',
                 },
                 value: 'assigneePosition',
             },
             {
                 name: {
                     en: 'Respondent',
-                    ar: '',
+                    ar: 'arr',
                 },
                 value: 'assignee',
             },
