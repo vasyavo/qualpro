@@ -13,15 +13,15 @@ const ObjectId = mongoose.Types.ObjectId;
 
 module.exports = (req, res, next) => {
     const timeFilterSchema = {
-        type      : 'object',
+        type: 'object',
         properties: {
             timeFrames: {
-                type : 'array',
+                type: 'array',
                 items: {
-                    from    : {
+                    from: {
                         type: 'string',
                     },
-                    to      : {
+                    to: {
                         type: 'string',
                     },
                     required: ['from', 'to'],
@@ -46,22 +46,22 @@ module.exports = (req, res, next) => {
 
         const pipeline = [{
             $project: {
-                objective                 : 1,
-                branches                  : 1,
-                'items.category'          : 1,
-                'items.variant'           : 1,
-                'items.item'              : 1,
-                'items.branches.branch'   : 1,
+                objective: 1,
+                branches: 1,
+                'items.category': 1,
+                'items.variant': 1,
+                'items.item': 1,
+                'items.branches.branch': 1,
                 'items.branches.indicator': 1,
-                publisher                 : '$createdBy.user',
-                createdAt                 : '$createdBy.date',
-                updatedAt                 : '$editedBy.date',
+                publisher: '$createdBy.user',
+                createdAt: '$createdBy.date',
+                updatedAt: '$editedBy.date',
             },
         }];
 
         if (timeFilter) {
             const timeFilterValidate = ajv.compile(timeFilterSchema);
-            const timeFilterValid = timeFilterValidate({timeFrames: timeFilter});
+            const timeFilterValid = timeFilterValidate({ timeFrames: timeFilter });
 
             if (!timeFilterValid) {
                 const err = new Error(timeFilterValidate.errors[0].message);
@@ -84,8 +84,8 @@ module.exports = (req, res, next) => {
             $or: timeFilter.map((frame) => {
                 return {
                     $and: [
-                        {createdAt: {$gt: moment(frame.from, 'MM/DD/YYYY')._d}},
-                        {createdAt: {$lt: moment(frame.to, 'MM/DD/YYYY')._d}},
+                        { createdAt: { $gt: moment(frame.from, 'MM/DD/YYYY')._d } },
+                        { createdAt: { $lt: moment(frame.to, 'MM/DD/YYYY')._d } },
                     ],
                 };
             }),
@@ -109,10 +109,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'personnels',
-                localField  : 'publisher',
+                from: 'personnels',
+                localField: 'publisher',
                 foreignField: '_id',
-                as          : 'publisher',
+                as: 'publisher',
             },
         });
 
@@ -121,13 +121,13 @@ module.exports = (req, res, next) => {
                 publisher: {
                     $let: {
                         vars: {
-                            publisher: {$arrayElemAt: ['$publisher', 0]},
+                            publisher: { $arrayElemAt: ['$publisher', 0] },
                         },
-                        in  : {
-                            _id     : '$$publisher._id',
-                            name    : {
-                                en: {$concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en']},
-                                ar: {$concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar']},
+                        in: {
+                            _id: '$$publisher._id',
+                            name: {
+                                en: { $concat: ['$$publisher.firstName.en', ' ', '$$publisher.lastName.en'] },
+                                ar: { $concat: ['$$publisher.firstName.ar', ' ', '$$publisher.lastName.ar'] },
                             },
                             position: '$$publisher.position',
                         },
@@ -148,10 +148,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'positions',
-                localField  : 'publisher.position',
+                from: 'positions',
+                localField: 'publisher.position',
                 foreignField: '_id',
-                as          : 'publisher.position',
+                as: 'publisher.position',
             },
         });
 
@@ -160,10 +160,10 @@ module.exports = (req, res, next) => {
                 'publisher.position': {
                     $let: {
                         vars: {
-                            position: {$arrayElemAt: ['$publisher.position', 0]},
+                            position: { $arrayElemAt: ['$publisher.position', 0] },
                         },
-                        in  : {
-                            _id : '$$position._id',
+                        in: {
+                            _id: '$$position._id',
                             name: {
                                 en: '$$position.name.en',
                                 ar: '$$position.name.ar',
@@ -176,10 +176,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'objectives',
-                localField  : 'objective',
+                from: 'objectives',
+                localField: 'objective',
                 foreignField: '_id',
-                as          : 'objective',
+                as: 'objective',
             },
         });
 
@@ -188,17 +188,17 @@ module.exports = (req, res, next) => {
                 objective: {
                     $let: {
                         vars: {
-                            objective: {$arrayElemAt: ['$objective', 0]},
+                            objective: { $arrayElemAt: ['$objective', 0] },
                         },
-                        in  : '$$objective._id',
+                        in: '$$objective._id',
                     },
                 },
-                assignee : {
+                assignee: {
                     $let: {
                         vars: {
-                            objective: {$arrayElemAt: ['$objective', 0]},
+                            objective: { $arrayElemAt: ['$objective', 0] },
                         },
-                        in  : '$$objective.assignedTo',
+                        in: '$$objective.assignedTo',
                     },
                 },
             },
@@ -216,10 +216,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'personnels',
-                localField  : 'assignee',
+                from: 'personnels',
+                localField: 'assignee',
                 foreignField: '_id',
-                as          : 'assignee',
+                as: 'assignee',
             },
         });
 
@@ -228,13 +228,13 @@ module.exports = (req, res, next) => {
                 assignee: {
                     $let: {
                         vars: {
-                            assignee: {$arrayElemAt: ['$assignee', 0]},
+                            assignee: { $arrayElemAt: ['$assignee', 0] },
                         },
-                        in  : {
-                            _id     : '$$assignee._id',
-                            name    : {
-                                en: {$concat: ['$$assignee.firstName.en', ' ', '$$assignee.lastName.en']},
-                                ar: {$concat: ['$$assignee.firstName.ar', ' ', '$$assignee.lastName.ar']},
+                        in: {
+                            _id: '$$assignee._id',
+                            name: {
+                                en: { $concat: ['$$assignee.firstName.en', ' ', '$$assignee.lastName.en'] },
+                                ar: { $concat: ['$$assignee.firstName.ar', ' ', '$$assignee.lastName.ar'] },
                             },
                             position: '$$assignee.position',
                         },
@@ -245,7 +245,7 @@ module.exports = (req, res, next) => {
 
         // some objectives contains not existing users
         pipeline.push({
-            $match: {'assignee._id': {$ne: null}},
+            $match: { 'assignee._id': { $ne: null } },
         });
 
         if (queryFilter.executorPosition && queryFilter.executorPosition.length) {
@@ -260,10 +260,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'positions',
-                localField  : 'assignee.position',
+                from: 'positions',
+                localField: 'assignee.position',
                 foreignField: '_id',
-                as          : 'assignee.position',
+                as: 'assignee.position',
             },
         });
 
@@ -272,10 +272,10 @@ module.exports = (req, res, next) => {
                 'assignee.position': {
                     $let: {
                         vars: {
-                            position: {$arrayElemAt: ['$assignee.position', 0]},
+                            position: { $arrayElemAt: ['$assignee.position', 0] },
                         },
-                        in  : {
-                            _id : '$$position._id',
+                        in: {
+                            _id: '$$position._id',
                             name: {
                                 en: '$$position.name.en',
                                 ar: '$$position.name.ar',
@@ -327,7 +327,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.BRANCH] && queryFilter[CONTENT_TYPES.BRANCH].length) {
             pipeline.push({
                 $match: {
-                    'items.branches.branch': {$in: queryFilter[CONTENT_TYPES.BRANCH]},
+                    'items.branches.branch': { $in: queryFilter[CONTENT_TYPES.BRANCH] },
                 },
             });
         }
@@ -340,10 +340,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'branches',
-                localField  : 'items.branches.branch',
+                from: 'branches',
+                localField: 'items.branches.branch',
                 foreignField: '_id',
-                as          : 'branch',
+                as: 'branch',
             },
         });
 
@@ -352,14 +352,14 @@ module.exports = (req, res, next) => {
                 branch: {
                     $let: {
                         vars: {
-                            branch: {$arrayElemAt: ['$branch', 0]},
+                            branch: { $arrayElemAt: ['$branch', 0] },
                         },
-                        in  : {
-                            _id          : '$$branch._id',
-                            name         : '$$branch.name',
+                        in: {
+                            _id: '$$branch._id',
+                            name: '$$branch.name',
                             retailSegment: '$$branch.retailSegment',
-                            outlet       : '$$branch.outlet',
-                            subRegion    : '$$branch.subRegion',
+                            outlet: '$$branch.outlet',
+                            subRegion: '$$branch.subRegion',
                         },
                     },
                 },
@@ -369,7 +369,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.SUBREGION] && queryFilter[CONTENT_TYPES.SUBREGION].length) {
             pipeline.push({
                 $match: {
-                    'branch.subRegion': {$in: queryFilter[CONTENT_TYPES.SUBREGION]},
+                    'branch.subRegion': { $in: queryFilter[CONTENT_TYPES.SUBREGION] },
                 },
             });
         }
@@ -377,7 +377,7 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.RETAILSEGMENT] && queryFilter[CONTENT_TYPES.RETAILSEGMENT].length) {
             pipeline.push({
                 $match: {
-                    'branch.retailSegment': {$in: queryFilter[CONTENT_TYPES.RETAILSEGMENT]},
+                    'branch.retailSegment': { $in: queryFilter[CONTENT_TYPES.RETAILSEGMENT] },
                 },
             });
         }
@@ -385,17 +385,17 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.OUTLET] && queryFilter[CONTENT_TYPES.OUTLET].length) {
             pipeline.push({
                 $match: {
-                    'branch.outlet': {$in: queryFilter[CONTENT_TYPES.OUTLET]},
+                    'branch.outlet': { $in: queryFilter[CONTENT_TYPES.OUTLET] },
                 },
             });
         }
 
         pipeline.push({
             $lookup: {
-                from        : 'retailSegments',
-                localField  : 'branch.retailSegment',
+                from: 'retailSegments',
+                localField: 'branch.retailSegment',
                 foreignField: '_id',
-                as          : 'retailSegment',
+                as: 'retailSegment',
             },
         });
 
@@ -404,10 +404,10 @@ module.exports = (req, res, next) => {
                 retailSegment: {
                     $let: {
                         vars: {
-                            retailSegment: {$arrayElemAt: ['$retailSegment', 0]},
+                            retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
                         },
-                        in  : {
-                            _id : '$$retailSegment._id',
+                        in: {
+                            _id: '$$retailSegment._id',
                             name: '$$retailSegment.name',
                         },
                     },
@@ -417,10 +417,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'outlets',
-                localField  : 'branch.outlet',
+                from: 'outlets',
+                localField: 'branch.outlet',
                 foreignField: '_id',
-                as          : 'outlet',
+                as: 'outlet',
             },
         });
 
@@ -429,10 +429,10 @@ module.exports = (req, res, next) => {
                 outlet: {
                     $let: {
                         vars: {
-                            outlet: {$arrayElemAt: ['$outlet', 0]},
+                            outlet: { $arrayElemAt: ['$outlet', 0] },
                         },
-                        in  : {
-                            _id : '$$outlet._id',
+                        in: {
+                            _id: '$$outlet._id',
                             name: '$$outlet.name',
                         },
                     },
@@ -442,10 +442,10 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $lookup: {
-                from        : 'domains',
-                localField  : 'branch.subRegion',
+                from: 'domains',
+                localField: 'branch.subRegion',
                 foreignField: '_id',
-                as          : 'subRegion',
+                as: 'subRegion',
             },
         });
 
@@ -454,10 +454,10 @@ module.exports = (req, res, next) => {
                 subRegion: {
                     $let: {
                         vars: {
-                            subRegion: {$arrayElemAt: ['$subRegion', 0]},
+                            subRegion: { $arrayElemAt: ['$subRegion', 0] },
                         },
-                        in  : {
-                            name  : '$$subRegion.name',
+                        in: {
+                            name: '$$subRegion.name',
                             parent: '$$subRegion.parent',
                         },
                     },
@@ -468,17 +468,17 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.REGION] && queryFilter[CONTENT_TYPES.REGION].length) {
             pipeline.push({
                 $match: {
-                    'subRegion.parent': {$in: queryFilter[CONTENT_TYPES.REGION]},
+                    'subRegion.parent': { $in: queryFilter[CONTENT_TYPES.REGION] },
                 },
             });
         }
 
         pipeline.push({
             $lookup: {
-                from        : 'domains',
-                localField  : 'subRegion.parent',
+                from: 'domains',
+                localField: 'subRegion.parent',
                 foreignField: '_id',
-                as          : 'region',
+                as: 'region',
             },
         });
 
@@ -487,10 +487,10 @@ module.exports = (req, res, next) => {
                 region: {
                     $let: {
                         vars: {
-                            region: {$arrayElemAt: ['$region', 0]},
+                            region: { $arrayElemAt: ['$region', 0] },
                         },
-                        in  : {
-                            name  : '$$region.name',
+                        in: {
+                            name: '$$region.name',
                             parent: '$$region.parent',
                         },
                     },
@@ -501,17 +501,17 @@ module.exports = (req, res, next) => {
         if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length) {
             pipeline.push({
                 $match: {
-                    'region.parent': {$in: queryFilter[CONTENT_TYPES.COUNTRY]},
+                    'region.parent': { $in: queryFilter[CONTENT_TYPES.COUNTRY] },
                 },
             });
         }
 
         pipeline.push({
             $lookup: {
-                from        : 'domains',
-                localField  : 'region.parent',
+                from: 'domains',
+                localField: 'region.parent',
                 foreignField: '_id',
-                as          : 'country',
+                as: 'country',
             },
         });
 
@@ -520,9 +520,9 @@ module.exports = (req, res, next) => {
                 location: {
                     $let: {
                         vars: {
-                            country: {$arrayElemAt: ['$country', 0]},
+                            country: { $arrayElemAt: ['$country', 0] },
                         },
-                        in  : {
+                        in: {
                             en: {
                                 $concat: [
                                     '$$country.name.en',
@@ -556,33 +556,33 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $group: {
-                _id      : {
-                    variant  : '$items.variant',
-                    category : '$items.category',
-                    item     : '$items.item',
-                    location : '$location',
+                _id: {
+                    variant: '$items.variant',
+                    category: '$items.category',
+                    item: '$items.item',
+                    location: '$location',
                     publisher: '$publisher',
                 },
-                items    : {
+                items: {
                     $push: {
-                        branch       : '$branch',
-                        indicator    : '$items.branches.indicator',
+                        branch: '$branch',
+                        indicator: '$items.branches.indicator',
                         retailSegment: '$retailSegment',
-                        outlet       : '$outlet',
-                        timestamp    : '$editedAt',
-                        objective    : '$objective',
+                        outlet: '$outlet',
+                        timestamp: '$editedAt',
+                        objective: '$objective',
                     },
                 },
-                publisher: {$first: '$publisher'},
-                assignee : {$first: '$assignee'},
+                publisher: { $first: '$publisher' },
+                assignee: { $first: '$assignee' },
             },
         });
 
         pipeline.push({
             $group: {
-                _id    : null,
-                records: {$push: '$$ROOT'},
-                total  : {$sum: 1},
+                _id: null,
+                records: { $push: '$$ROOT' },
+                total: { $sum: 1 },
             },
         });
 
@@ -600,73 +600,73 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
-                group    : '$records._id',
-                items    : '$records.items',
+                group: '$records._id',
+                items: '$records.items',
                 publisher: '$records.publisher',
-                assignee : '$records.assignee',
-                total    : 1,
+                assignee: '$records.assignee',
+                total: 1,
             },
         });
 
         pipeline.push({
             $lookup: {
-                from        : 'variants',
-                localField  : 'group.variant',
+                from: 'variants',
+                localField: 'group.variant',
                 foreignField: '_id',
-                as          : 'variant',
+                as: 'variant',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from        : 'categories',
-                localField  : 'group.category',
+                from: 'categories',
+                localField: 'group.category',
                 foreignField: '_id',
-                as          : 'category',
+                as: 'category',
             },
         });
 
         pipeline.push({
             $lookup: {
-                from        : 'items',
-                localField  : 'group.item',
+                from: 'items',
+                localField: 'group.item',
                 foreignField: '_id',
-                as          : 'item',
+                as: 'item',
             },
         });
 
         pipeline.push({
             $project: {
-                location : '$group.location',
-                category : {
+                location: '$group.location',
+                category: {
                     $let: {
                         vars: {
-                            category: {$arrayElemAt: ['$category', 0]},
+                            category: { $arrayElemAt: ['$category', 0] },
                         },
-                        in  : {
-                            _id : '$$category._id',
+                        in: {
+                            _id: '$$category._id',
                             name: '$$category.name',
                         },
                     },
                 },
-                variant  : {
+                variant: {
                     $let: {
                         vars: {
-                            variant: {$arrayElemAt: ['$variant', 0]},
+                            variant: { $arrayElemAt: ['$variant', 0] },
                         },
-                        in  : {
-                            _id : '$$variant._id',
+                        in: {
+                            _id: '$$variant._id',
                             name: '$$variant.name',
                         },
                     },
                 },
-                item     : {
+                item: {
                     $let: {
                         vars: {
-                            item: {$arrayElemAt: ['$item', 0]},
+                            item: { $arrayElemAt: ['$item', 0] },
                         },
-                        in  : {
-                            _id : '$$item._id',
+                        in: {
+                            _id: '$$item._id',
                             name: {
                                 ar: {
                                     $concat: ['$$item.name.ar', ' -> ', '$$item.packing'],
@@ -678,18 +678,18 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
-                items    : '$items',
+                items: '$items',
                 publisher: '$publisher',
-                assignee : '$assignee',
-                total    : 1,
+                assignee: '$assignee',
+                total: 1,
             },
         });
 
         pipeline.push({
             $group: {
-                _id  : null,
-                total: {$first: '$total'},
-                data : {
+                _id: null,
+                total: { $first: '$total' },
+                data: {
                     $push: '$$ROOT',
                 },
             },
@@ -713,7 +713,7 @@ module.exports = (req, res, next) => {
         }
 
         const response = result.length ?
-            result[0] : {data: [], total: 0};
+            result[0] : { data: [], total: 0 };
 
         res.status(200).send(response);
     });

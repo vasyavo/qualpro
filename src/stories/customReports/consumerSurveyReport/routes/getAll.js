@@ -427,12 +427,12 @@ module.exports = (req, res, next) => {
                 createdBy: 1,
                 questions: 1,
                 countAnswered: 1,
-                branch: '$branch.name.en',
-                outlet: '$outlet.name.en',
-                retailSegment: '$retailSegment.name.en',
-                subRegion: '$subRegion.name.en',
-                region: '$region.name.en',
-                country: '$country.name.en',
+                branch: '$branch.name',
+                outlet: '$outlet.name',
+                retailSegment: '$retailSegment.name',
+                subRegion: '$subRegion.name',
+                region: '$region.name',
+                country: '$country.name',
                 startDate: '$startDate',
                 dueDate: '$dueDate',
                 title: 1,
@@ -472,104 +472,206 @@ module.exports = (req, res, next) => {
                             branch: { $arrayElemAt: ['$branch', 0] },
                         },
                         in: {
-                            $concat: [
-                                '$$country',
-                                {
-                                    $let: {
-                                        vars: {
-                                            region: '$$region',
-                                        },
-                                        in: {
-                                            $cond: {
-                                                if: { $not: ['$$region'] },
-                                                then: '',
-                                                else: {
-                                                    $concat: [
-                                                        '->',
-                                                        '$$region',
-                                                    ],
+                            en: {
+                                $concat: [
+                                    '$$country.en',
+                                    {
+                                        $let: {
+                                            vars: {
+                                                region: '$$region.en',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$region.en'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$region.en',
+                                                        ],
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                                {
-                                    $let: {
-                                        vars: {
-                                            subRegion: '$$subRegion',
-                                        },
-                                        in: {
-                                            $cond: {
-                                                if: { $not: ['$$subRegion'] },
-                                                then: '',
-                                                else: {
-                                                    $concat: [
-                                                        '->',
-                                                        '$$subRegion',
-                                                    ],
+                                    {
+                                        $let: {
+                                            vars: {
+                                                subRegion: '$$subRegion.en',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$subRegion.en'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$subRegion.en',
+                                                        ],
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                                {
-                                    $let: {
-                                        vars: {
-                                            retailSegment: '$$retailSegment',
-                                        },
-                                        in: {
-                                            $cond: {
-                                                if: { $not: ['$$retailSegment'] },
-                                                then: '',
-                                                else: {
-                                                    $concat: [
-                                                        '->',
-                                                        '$$retailSegment',
-                                                    ],
+                                    {
+                                        $let: {
+                                            vars: {
+                                                retailSegment: '$$retailSegment.en',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$retailSegment.en'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$retailSegment.en',
+                                                        ],
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                                {
-                                    $let: {
-                                        vars: {
-                                            outlet: '$$outlet',
-                                        },
-                                        in: {
-                                            $cond: {
-                                                if: { $not: ['$$outlet'] },
-                                                then: '',
-                                                else: {
-                                                    $concat: [
-                                                        '->',
-                                                        '$$outlet',
-                                                    ],
+                                    {
+                                        $let: {
+                                            vars: {
+                                                outlet: '$$outlet.en',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$outlet.en'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$outlet.en',
+                                                        ],
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                                {
-                                    $let: {
-                                        vars: {
-                                            branch: '$$branch',
-                                        },
-                                        in: {
-                                            $cond: {
-                                                if: { $not: ['$$branch'] },
-                                                then: '',
-                                                else: {
-                                                    $concat: [
-                                                        '->',
-                                                        '$$branch',
-                                                    ],
+                                    {
+                                        $let: {
+                                            vars: {
+                                                branch: '$$branch.en',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$branch.en'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$branch.en',
+                                                        ],
+                                                    },
                                                 },
                                             },
                                         },
                                     },
-                                },
-                            ],
+                                ],
+                            },
+                            ar: {
+                                $concat: [
+                                    '$$country.ar',
+                                    {
+                                        $let: {
+                                            vars: {
+                                                region: '$$region.ar',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$region.ar'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$region.ar',
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        $let: {
+                                            vars: {
+                                                subRegion: '$$subRegion.ar',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$subRegion.ar'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$subRegion.ar',
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        $let: {
+                                            vars: {
+                                                retailSegment: '$$retailSegment.ar',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$retailSegment.ar'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$retailSegment.ar',
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        $let: {
+                                            vars: {
+                                                outlet: '$$outlet.ar',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$outlet.ar'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$outlet.ar',
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                    {
+                                        $let: {
+                                            vars: {
+                                                branch: '$$branch.ar',
+                                            },
+                                            in: {
+                                                $cond: {
+                                                    if: { $not: ['$$branch.ar'] },
+                                                    then: '',
+                                                    else: {
+                                                        $concat: [
+                                                            '->',
+                                                            '$$branch.ar',
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
                         },
                     },
                 },
