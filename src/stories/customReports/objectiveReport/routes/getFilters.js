@@ -1765,56 +1765,56 @@ module.exports = (req, res, next) => {
             {
                 name: {
                     en: 'Country',
-                    ar: '',
+                    ar: 'بلد',
                 },
                 value: 'country',
             },
             {
                 name: {
                     en: 'Region',
-                    ar: '',
+                    ar: 'المنطقة',
                 },
                 value: 'region',
             },
             {
                 name: {
                     en: 'Sub Region',
-                    ar: '',
+                    ar: 'حدد المنطقة الفرعية',
                 },
                 value: 'subRegion',
             },
             {
                 name: {
                     en: 'Branch',
-                    ar: '',
+                    ar: 'الفرع',
                 },
                 value: 'branch',
             },
             {
                 name: {
                     en: 'Publisher',
-                    ar: '',
+                    ar: 'الناشر',
                 },
                 value: 'originator',
             },
             {
                 name: {
                     en: 'Assignee Position',
-                    ar: '',
+                    ar: 'منصب المحال إليه ',
                 },
                 value: 'position',
             },
             {
                 name: {
                     en: 'Assignee',
-                    ar: '',
+                    ar: 'المحال إليه',
                 },
                 value: 'assignee',
             },
             {
                 name: {
                     en: 'Priority',
-                    ar: '',
+                    ar: 'الأولوية',
                 },
                 value: 'priority',
             },
