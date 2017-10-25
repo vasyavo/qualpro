@@ -371,17 +371,32 @@ module.exports = (req, res, next) => {
             {
                 $addFields: {
                     location: {
-                        $concat: [
-                            '$country.name.en',
-                            ' -> ',
-                            '$region.name.en',
-                            ' -> ',
-                            '$subRegion.name.en',
-                            ' -> ',
-                            '$retailSegment.name.en',
-                            ' -> ',
-                            '$outlet.name.en',
-                        ],
+                        en: {
+                            $concat: [
+                                '$country.name.en',
+                                ' -> ',
+                                '$region.name.en',
+                                ' -> ',
+                                '$subRegion.name.en',
+                                ' -> ',
+                                '$retailSegment.name.en',
+                                ' -> ',
+                                '$outlet.name.en',
+                            ],
+                        },
+                        ar: {
+                            $concat: [
+                                '$country.name.ar',
+                                ' -> ',
+                                '$region.name.ar',
+                                ' -> ',
+                                '$subRegion.name.ar',
+                                ' -> ',
+                                '$retailSegment.name.ar',
+                                ' -> ',
+                                '$outlet.name.ar',
+                            ],
+                        },
                     },
                 },
             },
