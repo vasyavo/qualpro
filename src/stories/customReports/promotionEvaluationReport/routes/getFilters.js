@@ -2120,6 +2120,18 @@ module.exports = (req, res, next) => {
                 en: 'Completed',
                 ar: 'منجز',
             },
+        }, {
+            _id: 'active',
+            name: {
+                en: 'Active',
+                ar: 'فعال',
+            },
+        }, {
+            _id: 'expired',
+            name: {
+                en: 'Expired',
+                ar: 'منتهية الصلاحية',
+            },
         }];
 
         response.statuses = statuses.filter((item) => {
