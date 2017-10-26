@@ -1735,25 +1735,25 @@ module.exports = (req, res, next) => {
             _id: 'weekly',
             name: {
                 en: 'Weekly Company Objective',
-                ar: '',
+                ar: 'أهداف الشركة الأسبوعية',
             },
         }, {
             _id: 'individual',
             name: {
                 en: 'Individual Objective',
-                ar: '',
+                ar: 'الأهداف الفردية',
             },
         }, {
             _id: 'monthly',
             name: {
                 en: 'Monthly Company Objective',
-                ar: '',
+                ar: 'أهداف الشركة الشهرية',
             },
         }, {
             _id: 'country',
             name: {
                 en: 'Country Objective',
-                ar: '',
+                ar: 'أهداف البلد',
             },
         }];
 
