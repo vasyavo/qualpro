@@ -1720,6 +1720,66 @@ module.exports = (req, res, next) => {
             questionnaires: [],
         };
 
+        const statuses = [{
+            _id: 'toBeDiscussed',
+            name: {
+                en: 'To be discussed',
+                ar: '',
+            },
+        }, {
+            _id: 'inProgress',
+            name: {
+                en: 'In progress',
+                ar: 'في تَقَدم',
+            },
+        }, {
+            _id: 'reOpened',
+            name: {
+                en: 'Reopened',
+                ar: 'ضعيف',
+            },
+        }, {
+            _id: 'closed',
+            name: {
+                en: 'Closed',
+                ar: 'مغلق',
+            },
+        }, {
+            _id: 'overDue',
+            name: {
+                en: 'Overdue',
+                ar: 'متأخر',
+            },
+        }, {
+            _id: 'fail',
+            name: {
+                en: 'Fail',
+                ar: 'اخفاق',
+            },
+        }, {
+            _id: 'completed',
+            name: {
+                en: 'Completed',
+                ar: 'منجز',
+            },
+        }, {
+            _id: 'active',
+            name: {
+                en: 'Active',
+                ar: 'فعال',
+            },
+        }, {
+            _id: 'expired',
+            name: {
+                en: 'Expired',
+                ar: 'منتهية الصلاحية',
+            },
+        }];
+
+        response.statuses = statuses.filter((item) => {
+            return response.statuses.indexOf(item._id) > -1;
+        });
+
         response.analyzeBy = [
             {
                 name: {

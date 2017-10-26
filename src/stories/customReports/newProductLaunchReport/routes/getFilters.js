@@ -848,6 +848,16 @@ module.exports = (req, res, next) => {
             displayTypes: [],
         };
 
+        response.packings = response.packings.map((item) => {
+            return {
+                _id: item,
+                name: {
+                    en: item,
+                    ar: item,
+                },
+            };
+        });
+
         // sanitize and filter custom values
         [
             'categories',

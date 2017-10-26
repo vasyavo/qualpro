@@ -362,6 +362,16 @@ module.exports = (req, res, next) => {
             positions: [],
         };
 
+        response.sizes = response.sizes.map((item) => {
+            return {
+                _id: item,
+                name: {
+                    en: item,
+                    ar: item,
+                },
+            };
+        });
+
         response.analyzeBy = [
             {
                 name: {
