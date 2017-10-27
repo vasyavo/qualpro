@@ -65,6 +65,7 @@ module.exports = BaseView.extend({
     saveItem: function () {
         var self = this;
         var model = this.model;
+        var _id = model.get('_id');
         var currEl = this.$el;
         var name = model.get('name');
         var address = model.get('address');
@@ -169,7 +170,14 @@ module.exports = BaseView.extend({
                 patch  : true,
                 wait   : true,
                 success: function (data) {
+                    var jsonData = data.toJSON();
+
                     self.hideDialog();
+
+                    if (self.contentType === 'branch' && (jsonData.outlet._id !== modelOutlet._id || jsonData.retailSegment._id !== modelRetailSegment._id)) {
+                        return $('.thumbnailsItems div[data-id="' + _id + '"]').remove();
+                    }
+
                     self.trigger('modelSaved', data);
                 },
                 error  : function (err, xhr) {
@@ -184,7 +192,7 @@ module.exports = BaseView.extend({
             model      : jsonModel,
             contentType: this.contentType,
             translation: this.translation,
-            App: App,
+            App        : App,
         });
         var self = this;
         var $thisEl;
