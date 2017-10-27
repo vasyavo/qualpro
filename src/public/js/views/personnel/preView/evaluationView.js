@@ -189,7 +189,6 @@ module.exports = BaseView.extend({
                     translation: this.translation
                 });
                 this.biYearlyEvaluationForm.on('formSubmit', this.onFormSubmitted, this);
-
                 break;
 
             default:
@@ -226,7 +225,7 @@ module.exports = BaseView.extend({
 
         ratingModel.set('personnel', ratingModel.personnel || this.personnel._id);
         ratingModel.save(ratingModel.attributes, {
-            success: function (model, xhr) {
+            success: function (model) {
                 if (self.biYearlyEvaluationForm) {
                     self.biYearlyEvaluationForm.trigger('biYearlyEvaluationSaved');
                 }
