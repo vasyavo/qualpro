@@ -1826,7 +1826,7 @@ module.exports = (req, res, next) => {
             {
                 name: {
                     en: 'Respondent',
-                    ar: 'arr',
+                    ar: 'المستجيب',
                 },
                 value: 'assignee',
             },
