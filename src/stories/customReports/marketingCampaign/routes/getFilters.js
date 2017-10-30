@@ -7,6 +7,7 @@ const MarketingCampaignModel = require('./../../../../types/marketingCampaign/mo
 const locationFilter = require('./../../utils/locationFilter');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 
 const ajv = new Ajv();
@@ -158,7 +159,7 @@ module.exports = (req, res, next) => {
                             },
                             in: {
                                 _id: '$$marketingCampaign._id',
-                                title: '$$marketingCampaign.promotionType',
+                                title: '$$marketingCampaign.description',
                                 country: '$$marketingCampaign.country',
                                 region: '$$marketingCampaign.region',
                                 subRegion: '$$marketingCampaign.subRegion',
@@ -433,37 +434,37 @@ module.exports = (req, res, next) => {
 
         if (_.get(queryFilter, `${CONTENT_TYPES.REGION}.length`)) {
             pipeline.push(...[{
-                    $addFields: {
-                        acceptable: {
-                            $let: {
-                                vars: {
-                                    filters: {
-                                        region: queryFilter[CONTENT_TYPES.REGION],
-                                    },
+                $addFields: {
+                    acceptable: {
+                        $let: {
+                            vars: {
+                                filters: {
+                                    region: queryFilter[CONTENT_TYPES.REGION],
                                 },
-                                in: {
-                                    $cond: {
-                                        if: {
-                                            $gt: [{
-                                                $size: {
-                                                    $filter: {
-                                                        input: '$region',
-                                                        as: 'region',
-                                                        cond: {
-                                                            $setIsSubset: [['$$region'], '$$filters.region'],
-                                                        },
+                            },
+                            in: {
+                                $cond: {
+                                    if: {
+                                        $gt: [{
+                                            $size: {
+                                                $filter: {
+                                                    input: '$region',
+                                                    as: 'region',
+                                                    cond: {
+                                                        $setIsSubset: [['$$region'], '$$filters.region'],
                                                     },
                                                 },
-                                            }, 0],
-                                        },
-                                        then: true,
-                                        else: false,
+                                            },
+                                        }, 0],
                                     },
+                                    then: true,
+                                    else: false,
                                 },
                             },
                         },
                     },
                 },
+            },
                 {
                     $match: {
                         acceptable: true,
@@ -1242,11 +1243,11 @@ module.exports = (req, res, next) => {
             },
         });
 
-        if (_.get(queryFilter, `${CONTENT_TYPES.PROMOTIONS}.length`)) {
+        if (_.get(queryFilter, `${CONTENT_TYPES.MARKETING_CAMPAIGN}.length`)) {
             pipeline.push({
                 $match: {
                     _id: {
-                        $in: queryFilter[CONTENT_TYPES.PROMOTIONS],
+                        $in: queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN],
                     },
                 },
             });
@@ -1725,7 +1726,7 @@ module.exports = (req, res, next) => {
                     positions: '$assigneePosition',
                     personnels: '$assignee',
                     statuses: '$status',
-                    promotionTypes: '$marketingCampaign',
+                    marketingCampaigns: '$marketingCampaign',
                     categories: '$product',
                 },
             },
@@ -1759,12 +1760,23 @@ module.exports = (req, res, next) => {
             publishers: [],
             positions: [],
             personnels: [],
-            promotionTypes: [],
+            marketingCampaigns: [],
         };
 
         if (result.length) {
             response = result[0];
         }
+
+        response.marketingCampaigns = response.marketingCampaigns.map(item => {
+            return {
+                _id: item._id,
+                name: {
+                    en: sanitizeHtml(item.name.en),
+                    ar: sanitizeHtml(item.name.ar),
+                },
+            };
+        });
+
         response.analyzeBy = [
             {
                 name: {

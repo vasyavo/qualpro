@@ -7,8 +7,8 @@ const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
-const applyAnalyzeBy = require('./../components/analyzeBy/index');
 const moment = require('moment');
+const _ = require('lodash');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -31,12 +31,12 @@ module.exports = (req, res, next) => {
             },
         },
     };
+    const query = req.body;
+    const timeFilter = query.timeFilter;
 
     const queryRun = (personnel, callback) => {
-        const query = req.body;
         const queryFilter = query.filter || {};
-        const timeFilter = query.timeFilter;
-        const analyzeByParam = query.analyzeBy;
+
         const filters = [
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
@@ -124,27 +124,144 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 status: 1,
                 country: 1,
-                region: 1,
-                subRegion: 1,
                 description: 1,
-                attachments: 1,
-                category: 1,
                 dateStart: 1,
                 dateEnd: 1,
                 publisher: { $arrayElemAt: ['$createdBy.user._id', 0] },
             },
         });
 
-        applyAnalyzeBy(pipeline, analyzeByParam, queryFilter);
+        pipeline.push({
+            $lookup: {
+                from: 'marketingCampaignItem',
+                localField: '_id',
+                foreignField: 'brandingAndDisplay',
+                as: 'items',
+            },
+        });
 
         pipeline.push({
-            $project: {
-                barChart: {
-                    data: '$data',
-                    labels: '$labels',
+            $unwind: '$items',
+        });
+
+        const timeFrames = timeFilter.map((item) => {
+            item.from = moment(item.from, 'MM/DD/YYYY')._d;
+            item.to = moment(item.to, 'MM/DD/YYYY')._d;
+
+            return item;
+        });
+
+        pipeline.push({
+            $addFields: {
+                timeFrames: {
+                    $filter: {
+                        input: timeFrames,
+                        as: 'timeFrameItem',
+                        cond: {
+                            $and: [
+                                { $gt: ['$items.createdBy.date', '$$timeFrameItem.from'] },
+                                { $lt: ['$items.createdBy.date', '$$timeFrameItem.to'] },
+                            ],
+                        },
+                    },
                 },
             },
         });
+
+        pipeline.push({
+            $unwind: '$country',
+        });
+
+        pipeline.push({
+            $unwind: '$timeFrames',
+        });
+
+        pipeline.push({
+            $group: {
+                _id: {
+
+                    country: '$country',
+                    _id: '$_id',
+                    description: '$description',
+                    timeFrames: '$timeFrames',
+                },
+                respondents: { $sum: 1 },
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'domains',
+                localField: '_id.country',
+                foreignField: '_id',
+                as: 'country',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                country: {
+                    $let: {
+                        vars: {
+                            country: { $arrayElemAt: ['$country', 0] },
+                        },
+                        in: {
+                            _id: '$$country._id',
+                            name: '$$country.name',
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $project: {
+                description: '$_id.description',
+                marketingCampaignId: '$_id._id',
+                country: 1,
+                respondents: 1,
+                _id: 1,
+            },
+        });
+
+        pipeline.push({
+            $sort: {
+                'country.name': 1,
+                description: 1,
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: '$country._id',
+                country: { $first: '$country' },
+                labels: { $push: {
+                    _id: '$marketingCampaignId',
+                    name: '$description',
+                } },
+                timeFrames: {
+                    $push: {
+                        timeFrame: '$_id.timeFrames',
+                        data: '$respondents',
+                        _id: '$marketingCampaignId',
+                    },
+                },
+            },
+        });
+
+        pipeline.push({
+            $group: {
+                _id: null,
+                charts: {
+                    $push: {
+                        country: '$country',
+                        timeFrames: '$timeFrames',
+                        labels: '$labels',
+                    },
+                },
+            },
+        });
+
 
         MarketingCampaignModel.aggregate(pipeline)
             .allowDiskUse(true)
@@ -165,23 +282,42 @@ module.exports = (req, res, next) => {
 
         let response = result[0];
 
-        if (response) {
+        if (!response || !response.charts) {
             response = {
-                barChart: {
-                    labels: response.barChart.labels,
-                    datasets: [{
-                        data: response.barChart.data,
-                    }],
-                },
-            };
-        } else {
-            response = {
-                barChart: {
-                    labels: [],
-                    datasets: [],
-                },
+                charts: [],
             };
         }
+
+        response.charts.forEach(element => {
+            const dataset = [];
+
+            element.labels = _.map(_.groupBy(element.labels, (doc) => {
+                return doc._id;
+            }), (grouped) => {
+                return grouped[0];
+            });
+
+            timeFilter.forEach((timePeriod, index) => {
+                const timeFrames = element.timeFrames.filter((timeFrame) => {
+                    return moment(timePeriod.from).isSame(timeFrame.timeFrame.from) && moment(timePeriod.to).isSame(timeFrame.timeFrame.to);
+                });
+                dataset.push({
+                    data: [],
+                });
+
+                element.labels.forEach(label => {
+                    const _idTimeFrame = timeFrames.find((timeFrameEldment) => {
+                        return timeFrameEldment._id.toString() === label._id.toString();
+                    });
+
+                    dataset[index].data.push(_idTimeFrame && _idTimeFrame.data || 0);
+                    dataset[index].label = `${moment(timePeriod.from).format('MM/DD/YYYY')} - ${moment(timePeriod.to).format('MM/DD/YYYY')}`;
+                });
+            });
+
+
+            element.datasets = dataset;
+        });
 
         res.status(200).send(response);
     });
