@@ -9,6 +9,7 @@ const locationFiler = require('./../../utils/locationFilter');
 const generalFiler = require('./../../utils/generalFilter');
 const moment = require('moment');
 const _ = require('lodash');
+const sanitizeHtml = require('../../utils/sanitizeHtml');
 
 const ajv = new Ajv();
 const ObjectId = mongoose.Types.ObjectId;
@@ -294,7 +295,13 @@ module.exports = (req, res, next) => {
             element.labels = _.map(_.groupBy(element.labels, (doc) => {
                 return doc._id;
             }), (grouped) => {
-                return grouped[0];
+                return {
+                    _id: grouped[0]._id,
+                    name: {
+                        en: sanitizeHtml(grouped[0].name.en),
+                        ar: sanitizeHtml(grouped[0].name.ar),
+                    },
+                };
             });
 
             timeFilter.forEach((timePeriod, index) => {

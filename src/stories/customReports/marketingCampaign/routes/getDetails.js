@@ -859,6 +859,13 @@ module.exports = (req, res, next) => {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
             };
+            item.marketingCampaignComment.map(comment => {
+                return {
+                    _id: comment._id,
+                    body: sanitizeHtml(comment.body),
+                    createdBy: comment.createdBy,
+                };
+            });
         });
 
         res.status(200).send(response);
