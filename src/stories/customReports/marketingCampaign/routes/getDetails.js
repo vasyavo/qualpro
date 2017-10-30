@@ -708,14 +708,8 @@ module.exports = (req, res, next) => {
                 outlet: 1,
                 category: 1,
                 displayType: {
-                    $reduce: {
-                        input: '$displayType',
-                        initialValue: { en: [], ar: [] },
-                        in: {
-                            en: { $concatArrays: ['$$value.en', ['$$this.name.en']] },
-                            ar: { $concatArrays: ['$$value.ar', ['$$this.name.ar']] },
-                        },
-                    },
+                    _id: 1,
+                    name: 1,
                 },
                 dateStart: 1,
                 dateEnd: 1,
