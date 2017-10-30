@@ -2198,7 +2198,7 @@ module.exports = (req, res, next) => {
             {
                 name: {
                     en: 'Promotion Type',
-                    ar: 'arr',
+                    ar: 'نوع العرض',
                 },
                 value: 'promotionType',
             },
