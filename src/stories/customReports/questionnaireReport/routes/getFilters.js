@@ -1819,7 +1819,7 @@ module.exports = (req, res, next) => {
             {
                 name: {
                     en: 'Respondent Position',
-                    ar: 'arr',
+                    ar: 'وظيفة المجيب',
                 },
                 value: 'assigneePosition',
             },
