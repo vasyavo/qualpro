@@ -384,6 +384,12 @@ module.exports = (req, res, next) => {
                 ar: 'في تَقَدم',
             },
         }, {
+            _id: 'expired',
+            name: {
+                en: 'Expired',
+                ar: 'منتهية الصلاحية',
+            },
+        }, {
             _id: 'reOpened',
             name: {
                 en: 'Reopened',
