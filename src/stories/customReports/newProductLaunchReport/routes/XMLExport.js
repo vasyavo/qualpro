@@ -723,7 +723,7 @@ module.exports = (req, res, next) => {
             });
             item.price = Number(item.price);
             let price = item.price.toFixed(2);
-            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                 price = parseFloat(price * currentCountry.currencyInUsd).toFixed(2);
                 price = `${price} $`;
             } else {
