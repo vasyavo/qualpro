@@ -43,6 +43,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, 'displayType',
             'status', 'publisher', CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.MARKETING_CAMPAIGN,
         ];
         const pipeline = [];
 
@@ -84,6 +85,14 @@ module.exports = (req, res, next) => {
                     ],
                 });
                 return frame;
+            });
+        }
+
+        if (queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN] && queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN].length) {
+            pipeline.push({
+                $match: {
+                    _id: { $in: queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN] },
+                },
             });
         }
 

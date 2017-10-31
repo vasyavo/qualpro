@@ -342,7 +342,8 @@ module.exports = (req, res, next) => {
                 category: '$group.category',
                 brand: '$group.brand',
                 location: {
-                    $concat: ['$group.country.name.en', ' -> ', '$group.region.name.en', ' -> ', '$group.subRegion.name.en', ' -> ', '$group.branch.name.en'],
+                    en: { $concat: ['$group.country.name.en', ' -> ', '$group.region.name.en', ' -> ', '$group.subRegion.name.en', ' -> ', '$group.branch.name.en'] },
+                    ar: { $concat: ['$group.country.name.ar', ' -> ', '$group.region.name.ar', ' -> ', '$group.subRegion.name.ar', ' -> ', '$group.branch.name.ar'] },
                 },
                 shelfShares: 1,
                 total: 1,

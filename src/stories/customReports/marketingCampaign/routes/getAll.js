@@ -45,6 +45,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, 'displayType',
             'status', 'publisher', CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.MARKETING_CAMPAIGN,
         ];
         const pipeline = [];
 
@@ -81,11 +82,25 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN] && queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN].length) {
+            pipeline.push({
+                $match: {
+                    _id: { $in: queryFilter[CONTENT_TYPES.MARKETING_CAMPAIGN] },
+                },
+            });
+        }
+
         if ($generalMatch.$and.length) {
             pipeline.push({
                 $match: $generalMatch,
             });
         }
+
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
 
         const $timeMatch = {};
 
@@ -388,6 +403,8 @@ module.exports = (req, res, next) => {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
             };
+            item.dateStart = moment(item.dateStart).format('DD-MM-YYYY');
+            item.dateEnd = moment(item.dateEnd).format('DD-MM-YYYY');
         });
 
         res.status(200).send(response);

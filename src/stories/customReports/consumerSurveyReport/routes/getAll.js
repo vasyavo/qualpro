@@ -764,11 +764,58 @@ module.exports = (req, res, next) => {
         const response = result.length ?
             result[0] : { data: [], total: 0 };
 
+        const statuses = [{
+            _id: 'toBeDiscussed',
+            name: {
+                en: 'To be discussed',
+                ar: '',
+            },
+        }, {
+            _id: 'inProgress',
+            name: {
+                en: 'In progress',
+                ar: 'في تَقَدم',
+            },
+        }, {
+            _id: 'reOpened',
+            name: {
+                en: 'Reopened',
+                ar: 'ضعيف',
+            },
+        }, {
+            _id: 'closed',
+            name: {
+                en: 'Closed',
+                ar: 'مغلق',
+            },
+        }, {
+            _id: 'overDue',
+            name: {
+                en: 'Overdue',
+                ar: 'متأخر',
+            },
+        }, {
+            _id: 'fail',
+            name: {
+                en: 'Fail',
+                ar: 'اخفاق',
+            },
+        }, {
+            _id: 'completed',
+            name: {
+                en: 'Completed',
+                ar: 'منجز',
+            },
+        }];
+
         response.data.forEach(item => {
             item.title = {
                 en: sanitizeHtml(item.title.en),
                 ar: sanitizeHtml(item.title.ar),
             };
+            item.status = statuses.filter((subItem) => {
+                return item.status.indexOf(subItem._id) > -1;
+            });
         });
 
         res.status(200).send(response);
