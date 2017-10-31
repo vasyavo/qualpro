@@ -4,20 +4,19 @@ var Backbone = require('backbone');
 var template = require('../../../../templates/personnel/form/biYearlyEvaluationFormTemplate.html');
 var createBiYearlyWorkflow = require('../../../helpers/createBiYearlyWorkflow');
 var BaseDialog = require('../../../views/baseDialog');
-var BiYearlyRatingModel = require('../../../models/biYearlyRating');
 
 module.exports = BaseDialog.extend({
 
-    template  : _.template(template),
-    completed : false,
+    template : _.template(template),
+    completed: false,
 
-    events    : {
+    events: {
         'click .workflowItem': 'workflowItemClicked'
     },
 
     initialize: function (options) {
         this.translation = options.translation;
-        this.model = new BiYearlyRatingModel({translation: this.translation});
+        this.model = options.model;
         this.ratings = this.model.get('details');
         this.workflow = createBiYearlyWorkflow(this.ratings, this.translation);
         this.makeRender();
@@ -119,7 +118,7 @@ module.exports = BaseDialog.extend({
             translation: this.translation,
             showEditBtn: false
         })).dialog({
-            dialogClass: 'formDialog yearly-evaluation-form',
+            dialogClass: ' yearly-evaluation-form',
             title      : this.translation.biYearlyEvaluationEdit,
             buttons    : {
                 submit: {
@@ -145,7 +144,7 @@ module.exports = BaseDialog.extend({
                     text : this.translation.cancelBtn,
                     click: function () {
                         self.trigger('editDialogCanceled');
-                        self.$el.dialog('close').dialog('destroy').remove();
+                        self.$el.find('.formDialog').dialog('close').dialog('destroy').remove();
                     }
                 }
             }
