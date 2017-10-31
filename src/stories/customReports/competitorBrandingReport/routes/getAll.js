@@ -394,16 +394,38 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    category: { $arrayElemAt: ['$category', 0] },
+                                    category: {
+                                        $arrayElemAt: ['$category', 0],
+                                    },
                                 },
-                                in: '$$category.name.en',
+                                in: {
+                                    en: '$$category.name.en',
+                                    ar: '$$category.name.ar',
+                                },
                             },
                         },
                         in: {
-                            $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
-                                then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                            en: {
+                                $cond: {
+                                    if: {
+                                        $eq: ['$$this.name.en', '$$value.en'],
+                                    },
+                                    then: '$$value.en',
+                                    else: {
+                                        $concat: ['$$value.en', ', ', '$$this.name.en'],
+                                    },
+                                },
+                            },
+                            ar: {
+                                $cond: {
+                                    if: {
+                                        $eq: ['$$this.name.ar', '$$value.ar'],
+                                    },
+                                    then: '$$value.ar',
+                                    else: {
+                                        $concat: ['$$value.ar', ', ', '$$this.name.ar'],
+                                    },
+                                },
                             },
                         },
                     },
@@ -436,16 +458,38 @@ module.exports = (req, res, next) => {
                         initialValue: {
                             $let: {
                                 vars: {
-                                    displayType: { $arrayElemAt: ['$displayType', 0] },
+                                    displayType: {
+                                        $arrayElemAt: ['$displayType', 0],
+                                    },
                                 },
-                                in: '$$displayType.name.en',
+                                in: {
+                                    en: '$$displayType.name.en',
+                                    ar: '$$displayType.name.ar',
+                                },
                             },
                         },
                         in: {
-                            $cond: {
-                                if: { $eq: ['$$this.name.en', '$$value'] },
-                                then: '$$value',
-                                else: { $concat: ['$$value', ', ', '$$this.name.en'] },
+                            en: {
+                                $cond: {
+                                    if: {
+                                        $eq: ['$$this.name.en', '$$value.en'],
+                                    },
+                                    then: '$$value.en',
+                                    else: {
+                                        $concat: ['$$value.en', ', ', '$$this.name.en'],
+                                    },
+                                },
+                            },
+                            ar: {
+                                $cond: {
+                                    if: {
+                                        $eq: ['$$this.name.ar', '$$value.ar'],
+                                    },
+                                    then: '$$value.ar',
+                                    else: {
+                                        $concat: ['$$value.ar', ', ', '$$this.name.ar'],
+                                    },
+                                },
                             },
                         },
                     },
