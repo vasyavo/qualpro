@@ -96,6 +96,12 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         const $timeMatch = {};
 
         $timeMatch.$or = [];
@@ -397,6 +403,8 @@ module.exports = (req, res, next) => {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
             };
+            item.dateStart = moment(item.dateStart).format('DD-MM-YYYY');
+            item.dateEnd = moment(item.dateEnd).format('DD-MM-YYYY');
         });
 
         res.status(200).send(response);
