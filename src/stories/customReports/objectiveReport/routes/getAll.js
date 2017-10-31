@@ -960,9 +960,18 @@ module.exports = (req, res, next) => {
                 return item.objectiveType.indexOf(subItem._id) > -1;
             });
 
-            item.form.contentType = formTypes.filter((subItem) => {
-                return item.form.contentType.indexOf(subItem._id) > -1;
-            });
+            if (item.form.contentType && item.form.contentType !== '') {
+                item.form.contentType = formTypes.filter((subItem) => {
+                    return item.form.contentType.indexOf(subItem._id) > -1;
+                });
+            } else {
+                item.form.contentType = {
+                    name: {
+                        en: '',
+                        ar: '',
+                    },
+                };
+            }
         });
         res.status(200).send(response);
     });
