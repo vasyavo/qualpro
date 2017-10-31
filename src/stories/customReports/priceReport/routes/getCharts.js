@@ -230,7 +230,10 @@ module.exports = (req, res, next) => {
         }
 
         response.lineChart.labels = response.lineChart.labels.map(item => {
-            return moment(new Date(item)).format('MMMM, YYYY');
+            return {
+                en: moment(new Date(item)).format('MMMM, YYYY'),
+                ar: moment(new Date(item)).lang('ar').format('MMMM, YYYY'),
+            };
         });
 
         if (response.lineChart.dataSets.length) {
