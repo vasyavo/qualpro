@@ -750,15 +750,15 @@ module.exports = (req, res, next) => {
             };
             item.priority = priorities.filter((subItem) => {
                 return item.priority.indexOf(subItem._id) > -1;
-            });
+            })[0];
 
             item.status = statuses.filter((subItem) => {
                 return item.status.indexOf(subItem._id) > -1;
-            });
+            })[0];
 
             item.form.contentType = formTypes.filter((subItem) => {
                 return item.form.contentType.indexOf(subItem._id) > -1;
-            });
+            })[0];
         });
         res.status(200).send(response);
     });

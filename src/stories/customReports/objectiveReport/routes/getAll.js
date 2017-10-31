@@ -950,20 +950,20 @@ module.exports = (req, res, next) => {
             };
             item.priority = priorities.filter((subItem) => {
                 return item.priority.indexOf(subItem._id) > -1;
-            });
+            })[0];
 
             item.status = statuses.filter((subItem) => {
                 return item.status.indexOf(subItem._id) > -1;
-            });
+            })[0];
 
             item.objectiveType = objectiveTypes.filter((subItem) => {
                 return item.objectiveType.indexOf(subItem._id) > -1;
-            });
+            })[0];
 
             if (item.form && item.form.contentType && item.form.contentType !== '') {
                 item.form.contentType = formTypes.filter((subItem) => {
                     return item.form.contentType.indexOf(subItem._id) > -1;
-                });
+                })[0];
             } else {
                 item.form = {
                     contentType: {

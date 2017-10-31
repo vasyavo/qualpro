@@ -815,7 +815,7 @@ module.exports = (req, res, next) => {
             };
             item.status = statuses.filter((subItem) => {
                 return item.status.indexOf(subItem._id) > -1;
-            });
+            })[0];
         });
 
         res.status(200).send(response);
