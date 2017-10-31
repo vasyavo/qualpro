@@ -597,6 +597,23 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 status: 1,
                 marketingCampaignComment: 1,
+                attachments: {
+                    $reduce: {
+                        input: '$marketingCampaignComment',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $ne: ['$$this.attachments', []],
+                                },
+                                then: {
+                                    $setUnion: ['$$this.attachments', '$$value'],
+                                },
+                                else: '$$value',
+                            },
+                        },
+                    },
+                },
                 description: 1,
                 country: 1,
                 region: 1,
@@ -633,6 +650,15 @@ module.exports = (req, res, next) => {
                 localField: 'commentsUser',
                 foreignField: '_id',
                 as: 'commentsUser',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'attachments',
+                foreignField: '_id',
+                as: 'attachments',
             },
         });
 
@@ -751,6 +777,26 @@ module.exports = (req, res, next) => {
                                     },
                                     0,
                                 ],
+                            },
+                            attachments: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$attachments',
+                                            as: 'attachment',
+                                            cond: {
+                                                $setIsSubset: [['$$attachment._id'], '$$comment.attachments'],
+                                            },
+                                        },
+                                    },
+                                    as: 'attachment',
+                                    in: {
+                                        _id: '$$attachment._id',
+                                        originalName: '$$attachment.originalName',
+                                        contentType: '$$attachment.contentType',
+                                        preview: '$$attachment.preview',
+                                    },
+                                },
                             },
                         },
                     },
