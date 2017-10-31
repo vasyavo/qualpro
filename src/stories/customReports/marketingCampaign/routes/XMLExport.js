@@ -93,6 +93,12 @@ module.exports = (req, res, next) => {
             });
         }
 
+        pipeline.push({
+            $match: {
+                status: { $ne: 'draft' },
+            },
+        });
+
         const $timeMatch = {};
 
         $timeMatch.$or = [];
@@ -354,7 +360,7 @@ module.exports = (req, res, next) => {
                                 <td>${item.createdBy.user.position.name[currentLanguage || 'en']}</td>
                                 <td>${item.category ? item.category.name[currentLanguage || 'en'] : ''}</td>
                                 <td>${displayType[currentLanguage || 'en'].join(', ')}</td>
-                                <td>${item.dateStart} - ${item.dateEnd}</td>
+                                <td>${moment(item.dateStart).format('DD MMMM, YYYY')} - ${moment(item.dateEnd).format('DD MMMM, YYYY')}</td>
                                 <td>${sanitizeHtml(item.description[currentLanguage || 'en'])}</td>
                                 <td>${item.respondents}</td>
                                 <td>${item.status}</td>
