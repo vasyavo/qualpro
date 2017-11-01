@@ -518,10 +518,57 @@ var Rating = function () {
                 dbQuery = dbQuery.limit(+query.recentsNum);
             }
 
-            dbQuery.exec(function (err, ratings) {
+            dbQuery.lean().exec(function (err, ratings) {
                 if (err) {
                     return next(err);
                 }
+
+                const statuses = [{
+                    _id: 'toBeDiscussed',
+                    ar: '',
+                }, {
+                    _id: 'inProgress',
+                    ar: 'في تَقَدم',
+                }, {
+                    _id: 'expired',
+                    ar: 'منتهية الصلاحية',
+                }, {
+                    _id: 'reOpened',
+                    ar: 'ضعيف',
+                }, {
+                    _id: 'closed',
+                    ar: 'مغلق',
+                }, {
+                    _id: 'overDue',
+                    ar: 'متأخر',
+                }, {
+                    _id: 'fail',
+                    ar: 'اخفاق',
+                }, {
+                    _id: 'completed',
+                    ar: 'منجز',
+                }];
+
+                ratings.forEach(item => {
+                    item.inStoreTasks.forEach(subItem => {
+                        subItem.statusAr = statuses.filter((filterStatus) => {
+                            return subItem.status.indexOf(filterStatus._id) > -1;
+                        })[0];
+                        subItem.statusAr = subItem.statusAr && subItem.statusAr.ar ? subItem.statusAr.ar : '';
+                    });
+                    item.individualObjectives.forEach(subItem => {
+                        subItem.statusAr = statuses.filter((filterStatus) => {
+                            return subItem.status.indexOf(filterStatus._id) > -1;
+                        })[0];
+                        subItem.statusAr = subItem.statusAr && subItem.statusAr.ar ? subItem.statusAr.ar : '';
+                    });
+                    item.companyObjectives.forEach(subItem => {
+                        subItem.statusAr = statuses.filter((filterStatus) => {
+                            return subItem.status.indexOf(filterStatus._id) > -1;
+                        })[0];
+                        subItem.statusAr = subItem.statusAr && subItem.statusAr.ar ? subItem.statusAr.ar : '';
+                    });
+                });
 
                 res.status(200).send(ratings);
             });
