@@ -7,6 +7,7 @@ const MarketingCampaignModel = require('./../../../../types/marketingCampaign/mo
 const locationFilter = require('./../../utils/locationFilter');
 const ACL_MODULES = require('./../../../../constants/aclModulesNames');
 const moment = require('moment');
+const generalFiler = require('./../../utils/generalFilter');
 const sanitizeHtml = require('../../utils/sanitizeHtml');
 const CONTENT_TYPES = require('./../../../../public/js/constants/contentType');
 
@@ -75,6 +76,16 @@ module.exports = (req, res, next) => {
         const scopeFilter = {};
 
         locationFilter(pipeline, personnel, queryFilter, scopeFilter);
+
+        const $generalMatch = generalFiler([CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.CATEGORY, 'displayType', 'status'], queryFilter, personnel);
+
+        if (queryFilter.publisher && queryFilter.publisher.length) {
+            $generalMatch.$and.push({
+                'createdBy.user': {
+                    $in: queryFilter.publisher,
+                },
+            });
+        }
 
         pipeline.push(...[
             {

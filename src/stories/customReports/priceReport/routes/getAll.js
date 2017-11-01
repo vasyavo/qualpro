@@ -47,7 +47,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.ITEM,
         ],
     };
-
+    let currentLanguage = 'en';
     const queryRun = (personnel, callback) => {
         const query = req.body;
         const queryFilter = query.filter || {};
@@ -56,6 +56,7 @@ module.exports = (req, res, next) => {
         const limit = query.count * 1 || CONSTANTS.LIST_COUNT;
         const skip = (page - 1) * limit;
         const pipeline = [];
+        currentLanguage = personnel.currentLanguage || 'en';
 
         const queryFilterValidate = ajv.compile(filterSchema);
         const queryFilterValid = queryFilterValidate(queryFilter);
@@ -204,7 +205,10 @@ module.exports = (req, res, next) => {
                 return country._id.toString() === item.country.toString();
             });
             item.price = parseFloat(item.price * (currentCountry && currentCountry.currencyInUsd || 1)).toFixed(2);
-            item.date = moment(item.date).format('MMMM, YYYY');
+            item.date = {
+                en: moment(item.date).format('MMMM, YYYY'),
+                ar: moment(item.date).lang('ar').format('MMMM, YYYY'),
+            };
         });
 
         res.status(200).send(response);

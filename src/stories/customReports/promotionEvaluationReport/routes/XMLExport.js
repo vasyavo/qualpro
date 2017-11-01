@@ -724,14 +724,14 @@ module.exports = (req, res, next) => {
                             const currentCountry = currency.defaultData.find((country) => {
                                 return country._id.toString() === item.country._id.toString();
                             });
-                            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                                 itemPrice = parseFloat(itemPrice * currentCountry.currencyInUsd).toFixed(2);
                                 itemPrice = `${itemPrice} $`;
                             } else {
                                 itemPrice = `${itemPrice} ${currentCountry.currency}`;
                             }
     
-                            if (queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
+                            if (queryFilter[CONTENT_TYPES.COUNTRY] && queryFilter[CONTENT_TYPES.COUNTRY].length > 1) {
                                 itemRsp = parseFloat(itemRsp * currentCountry.currencyInUsd).toFixed(2);
                                 itemRsp = `${itemRsp} $`;
                             } else {

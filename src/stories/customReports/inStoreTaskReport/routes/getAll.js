@@ -657,6 +657,90 @@ module.exports = (req, res, next) => {
             return next(err);
         }
 
+        const priorities = [{
+            _id: 'medium',
+            name: {
+                en: 'medium',
+                ar: 'متوسط',
+            },
+        }, {
+            _id: 'urgent',
+            name: {
+                en: 'urgent',
+                ar: 'عاجل',
+            },
+        }, {
+            _id: 'low',
+            name: {
+                en: 'low',
+                ar: 'ضعيف',
+            },
+        }, {
+            _id: 'high',
+            name: {
+                en: 'high',
+                ar: 'هام للغايه',
+            },
+        }];
+
+        const statuses = [{
+            _id: 'toBeDiscussed',
+            name: {
+                en: 'To be discussed',
+                ar: '',
+            },
+        }, {
+            _id: 'inProgress',
+            name: {
+                en: 'In progress',
+                ar: 'في تَقَدم',
+            },
+        }, {
+            _id: 'reOpened',
+            name: {
+                en: 'Reopened',
+                ar: 'ضعيف',
+            },
+        }, {
+            _id: 'closed',
+            name: {
+                en: 'Closed',
+                ar: 'مغلق',
+            },
+        }, {
+            _id: 'overDue',
+            name: {
+                en: 'Overdue',
+                ar: 'متأخر',
+            },
+        }, {
+            _id: 'fail',
+            name: {
+                en: 'Fail',
+                ar: 'اخفاق',
+            },
+        }, {
+            _id: 'completed',
+            name: {
+                en: 'Completed',
+                ar: 'منجز',
+            },
+        }];
+
+        const formTypes = [{
+            _id: 'distribution',
+            name: {
+                en: 'distribution',
+                ar: 'نماذج التوزيع',
+            },
+        }, {
+            _id: 'visibility',
+            name: {
+                en: 'visibility',
+                ar: 'نماذج الرؤية',
+            },
+        }];
+
         const response = result.length ?
             result[0] : { data: [], total: 0 };
         response.data.forEach(item => {
@@ -664,6 +748,17 @@ module.exports = (req, res, next) => {
                 en: sanitizeHtml(item.description.en),
                 ar: sanitizeHtml(item.description.ar),
             };
+            item.priority = priorities.filter((subItem) => {
+                return item.priority.indexOf(subItem._id) > -1;
+            })[0];
+
+            item.status = statuses.filter((subItem) => {
+                return item.status.indexOf(subItem._id) > -1;
+            })[0];
+
+            item.form.contentType = formTypes.filter((subItem) => {
+                return item.form.contentType.indexOf(subItem._id) > -1;
+            })[0];
         });
         res.status(200).send(response);
     });

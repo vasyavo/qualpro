@@ -474,12 +474,12 @@ module.exports = (req, res, next) => {
                                                 country: { $arrayElemAt: ['$country', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$country.name.en', 'null'],
+                                                $ifNull: ['$$country.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
@@ -493,12 +493,12 @@ module.exports = (req, res, next) => {
                                                 region: { $arrayElemAt: ['$region', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$region.name.en', 'null'],
+                                                $ifNull: ['$$region.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
@@ -512,12 +512,12 @@ module.exports = (req, res, next) => {
                                                 subRegion: { $arrayElemAt: ['$subRegion', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$subRegion.name.en', 'null'],
+                                                $ifNull: ['$$subRegion.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
@@ -531,12 +531,12 @@ module.exports = (req, res, next) => {
                                                 retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$retailSegment.name.en', 'null'],
+                                                $ifNull: ['$$retailSegment.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
@@ -550,12 +550,12 @@ module.exports = (req, res, next) => {
                                                 outlet: { $arrayElemAt: ['$outlet', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$outlet.name.en', 'null'],
+                                                $ifNull: ['$$outlet.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
@@ -569,12 +569,12 @@ module.exports = (req, res, next) => {
                                                 branch: { $arrayElemAt: ['$branch', 0] },
                                             },
                                             in: {
-                                                $ifNull: ['$$branch.name.en', 'null'],
+                                                $ifNull: ['$$branch.name.ar', 'null'],
                                             },
                                         },
                                     },
                                     in: {
-                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.en', 'null'] }],
+                                        $concat: ['$$value', ', ', { $ifNull: ['$$this.name.ar', 'null'] }],
                                     },
                                 },
                             },
