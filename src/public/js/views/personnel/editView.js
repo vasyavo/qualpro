@@ -82,13 +82,13 @@ module.exports = BaseView.extend({
         }
     },
 
-    showDomainDialog: function (e) {
+    showDomainDialog: _.debounce(function (e) {
         var domainType = $(e.target).attr('data-value');
 
         this.logic.showDomainDialog(domainType);
-    },
+    }, 1000, true),
 
-    showCoverDialog: function (e) {
+    showCoverDialog: _.debounce(function (e) {
         var $coveredName = this.$el.find('#coveredName');
         var listForSelection = new ListForSelection({
             translation       : this.translation,
@@ -103,7 +103,7 @@ module.exports = BaseView.extend({
             $coveredName.attr('data-id', cover.get('_id'));
             $coveredName.html(cover.get('fullName'));
         });
-    },
+    }, 1000, true),
 
     toggleCover: function (e) {
         e.stopPropagation();
@@ -126,7 +126,7 @@ module.exports = BaseView.extend({
             currentUser: currentUser,
             model      : model.toJSON(),
             translation: this.translation,
-            App: App,
+            App        : App,
         });
 
         var $formString = $(formString);

@@ -393,7 +393,7 @@ module.exports = BaseView.extend({
         $descriptionBlock.toggleClass('showAllDescription');
     },
 
-    openForm: function () {
+    openForm: _.debounce(function () {
         var self = this;
         var modelJSON = this.model.toJSON();
         var form = modelJSON.form;
@@ -481,7 +481,7 @@ module.exports = BaseView.extend({
                 });
             });
         }
-    },
+    }, 1000, true),
 
     duplicateObjective: function () {
         var jsonModel = this.model.toJSON();

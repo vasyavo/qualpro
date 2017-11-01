@@ -15,8 +15,8 @@ module.exports = baseTopBar.extend({
     paginationTemplate: _.template(pagination),
 
     events: {
-        'click #manageBtn': 'showManageDialog',
-        'click #manage-block': 'toggleManageBlock',
+        'click #manageBtn'      : 'showManageDialog',
+        'click #manage-block'   : 'toggleManageBlock',
         'click #namage-products': 'showManageProductsView'
     },
 
@@ -24,7 +24,7 @@ module.exports = baseTopBar.extend({
         this.$el.find('#manage-dropdown').toggleClass('showActionsDropDown');
     },
 
-    showManageProductsView: function () {
+    showManageProductsView: _.debounce(function () {
         var that = this;
 
         dataService.getData('/category', {}, function (err, response) {
@@ -36,7 +36,7 @@ module.exports = baseTopBar.extend({
 
             that.manageProductInfoView = new ManageProductsInformationView({
                 translation: that.translation,
-                categories: response
+                categories : response
             });
             that.manageProductInfoView.on('update-list-view', function () {
                 that.trigger('update-list-view');
@@ -44,7 +44,7 @@ module.exports = baseTopBar.extend({
         });
 
         this.$el.find('#manage-dropdown').removeClass('showActionsDropDown');
-    },
+    }, 1000, true),
 
     showManageDialog: _.debounce(function () {
         new manageView({
