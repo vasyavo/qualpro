@@ -5,8 +5,8 @@
     <meta name='csrf-token' content={{ csrfToken }}>
     <meta name='phoneNumber' content={{ phoneNumber }}>
     <title>enter code</title>
-    <script src="../js/libs/jquery/dist/jquery.min.js"></script>
-    <link rel="stylesheet" href="../css/icons.css"/>
+    <script src="../src/public/js/libs/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="../public/css/icons.css"/>
     <style>
         h2,
         span,
@@ -244,18 +244,6 @@
             border: none
         }
 
-        .lockedBlock .icon:after {
-            content: '\e938';
-            position: absolute;
-            top: 18px;
-            right: 13px;
-            line-height: normal;
-            font-family: icomoon;
-            color: #b7bac0;
-            font-size: 20px;
-            font-size: 1.25rem
-        }
-
         input[type=text]:focus + .icon:after {
             color: #70a5fb
         }
@@ -275,7 +263,7 @@
 <div>
     <div class="loginDiv">
         <a title="Return to the al alali homepage" class="mainLogo"><img
-                src="..\images\main-logo.png" alt="logo"/></a>
+                src="../src/public/images/main-logo.png" alt="logo"/></a>
         <form id="sendChangePass" action="{{host}}/personnel/checkVerificationCode/" method="post">
             <fieldset>
                 <h2>Password reset</h2>
