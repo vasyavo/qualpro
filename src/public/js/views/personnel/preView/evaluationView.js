@@ -218,9 +218,18 @@ module.exports = BaseView.extend({
         var form = e.target;
         var ratingModel = form.model;
         var self = this;
+        var currentDate = new Date();
+        var currentMonth = currentDate.getMonth() + 1;
 
         if (this.notRatedDataKey) {
             ratingModel.set('dataKey', this.notRatedDataKey);
+        }
+
+        if (this.biYearlyEvaluationForm && currentMonth !== 7 && currentMonth !== 1) {
+            return App.render({
+                type   : 'error',
+                message: this.translation.ratingWarningMessage,
+            });
         }
 
         ratingModel.set('personnel', ratingModel.personnel || this.personnel._id);
@@ -329,12 +338,11 @@ module.exports = BaseView.extend({
 
                 ratingCollection = this.addNotRatedRatingsToCollection(this.contentType, ratingCollection, nextRatingPeriod);
 
-
                 break;
 
             case 'biYearly':
                 lastRatingBiYerlyMaxDataKey = (lastRating.month === 6) ?
-                lastRating.year * 100 + 12 : (lastRating.year + 1) * 100 + 6;
+                    lastRating.year * 100 + 12 : (lastRating.year + 1) * 100 + 6;
 
                 if (currentDataKey >= +lastRating.dataKey && currentDataKey < lastRatingBiYerlyMaxDataKey) {
                     showCurrentRating();
@@ -510,7 +518,7 @@ module.exports = BaseView.extend({
             contentType: this.contentType,
             daysLeft   : daysLeft,
             translation: this.translation,
-            App: App,
+            App        : App,
         }));
 
         $thisEl = this.$el;
@@ -544,7 +552,6 @@ module.exports = BaseView.extend({
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
-
 
         this.constants.listDd = new FilterCollection(this.constants.listDd, {parse: true});
 

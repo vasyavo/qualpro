@@ -100,6 +100,7 @@ var personnelTranslation = {
     nextBtn                      : 'التالي',
     backBtn                      : 'السابق',
     //biYearly evaluation form
+    ratingWarningMessage         : 'Arabic',
     planningAndOrganizationSkills: ' مهارات التخطيط والتنظيم',
     prepareObj                   : ' إعداد الأهداف',
     preparePlan                  : 'إعداد الخطة اليومية والشهرية',
