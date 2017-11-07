@@ -82,7 +82,7 @@ module.exports = BaseView.extend({
 
             case 'biYearly':
 
-                if (currentMonth !== 7 && currentMonth !== 1 && accessLevel !== 1 && accessLevel !== 2) {
+                if (currentMonth !== 7 && currentMonth !== 1) {
                     return App.render({
                         type   : 'alert',
                         message: ERROR_MESSAGES.permissionToRateJulyJanuary[currentLanguage]
@@ -218,18 +218,9 @@ module.exports = BaseView.extend({
         var form = e.target;
         var ratingModel = form.model;
         var self = this;
-        var currentDate = new Date();
-        var currentMonth = currentDate.getMonth() + 1;
 
         if (this.notRatedDataKey) {
             ratingModel.set('dataKey', this.notRatedDataKey);
-        }
-
-        if (this.biYearlyEvaluationForm && currentMonth !== 7 && currentMonth !== 1) {
-            return App.render({
-                type   : 'error',
-                message: this.translation.ratingWarningMessage,
-            });
         }
 
         ratingModel.set('personnel', ratingModel.personnel || this.personnel._id);

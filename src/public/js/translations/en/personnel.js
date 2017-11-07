@@ -107,7 +107,6 @@ var personnelTranslation = {
     nextBtn                      : 'Next',
     backBtn                      : 'Back',
     //biYearly evaluation form
-    ratingWarningMessage         : 'You can not evaluate employee now. Evaluation should be done in July and January',
     planningAndOrganizationSkills: 'Planning and organization skills',
     prepareObj                   : 'Prepare Objectives',
     preparePlan                  : 'Prepare Daily, Monthly Plan',
