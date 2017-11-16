@@ -15,7 +15,7 @@ var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var App = require('../../../appState');
 
 module.exports = BaseView.extend({
-    template          : _.template(template),
+    template: _.template(template),
     ratingListTemplate: _.template(ratingListTemplate),
 
     initialize: function (options) {
@@ -31,8 +31,8 @@ module.exports = BaseView.extend({
 
         this.ratingCollection = new RatingCollection({
             contentType: this.contentType,
-            personnel  : this.personnel._id,
-            recentsNum : this.recentsNum
+            personnel: this.personnel._id,
+            recentsNum: this.recentsNum
         });
         this.ratingCollection.bind('reset', _.bind(this.renderRatings, self));
 
@@ -44,9 +44,9 @@ module.exports = BaseView.extend({
 
     events: {
         'click .currentSelected': 'showNewSelect',
-        'click .rateEmployee'   : 'rateEmployeeClicked',
-        'click .viewDetails'    : 'onViewDetails',
-        'click .rateNow'        : 'onRateNow'
+        'click .rateEmployee': 'rateEmployeeClicked',
+        'click .viewDetails': 'onViewDetails',
+        'click .rateNow': 'onRateNow'
     },
 
     rateEmployeeClicked: function (e) {
@@ -71,9 +71,9 @@ module.exports = BaseView.extend({
 
                 this.monthlyEvaluationForm = new MonthlyEvaluationFormView({
                     translation: this.translation,
-                    personnel  : this.personnel,
-                    month      : currentDate.getMonth() + 1,
-                    year       : currentDate.getFullYear()
+                    personnel: this.personnel,
+                    month: currentDate.getMonth() + 1,
+                    year: currentDate.getFullYear()
                 });
 
                 this.monthlyEvaluationForm.on('monthlyEvaluationSave', this.onMonthlyEvaluationSave, this);
@@ -82,9 +82,9 @@ module.exports = BaseView.extend({
 
             case 'biYearly':
 
-                if (currentMonth !== 7 && currentMonth !== 1) {
+                if (currentMonth !== 7 && currentMonth !== 1 && accessLevel !== 1 && accessLevel !== 2) {
                     return App.render({
-                        type   : 'alert',
+                        type: 'alert',
                         message: ERROR_MESSAGES.permissionToRateJulyJanuary[currentLanguage]
                     });
                 }
@@ -98,7 +98,7 @@ module.exports = BaseView.extend({
 
             default:
                 App.render({
-                    type   : 'alert',
+                    type: 'alert',
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
@@ -121,9 +121,9 @@ module.exports = BaseView.extend({
         switch (this.contentType) {
             case 'monthly':
                 this.monthlyPreview = new MonthlyPreview({
-                    model      : model,
+                    model: model,
                     translation: this.translation,
-                    personnel  : this.personnel
+                    personnel: this.personnel
                 });
 
                 this.monthlyPreview.on('monthlyEvaluationSave', this.onMonthlyEvaluationSave, this);
@@ -132,10 +132,10 @@ module.exports = BaseView.extend({
 
             case 'biYearly':
                 this.biYearlyPreview = new BiYearlyPreview({
-                    collection   : this.ratingCollection,
+                    collection: this.ratingCollection,
                     originalModel: model,
-                    translation  : this.translation,
-                    personnel    : this.personnel
+                    translation: this.translation,
+                    personnel: this.personnel
                 });
 
                 this.biYearlyPreview.on('formSubmit', this.onFormSubmitted, this);
@@ -144,7 +144,7 @@ module.exports = BaseView.extend({
 
             default:
                 App.render({
-                    type   : 'alert',
+                    type: 'alert',
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
@@ -160,7 +160,7 @@ module.exports = BaseView.extend({
 
         if (accessLevel !== 1 && accessLevel !== 2 || accessLevel >= personnelAccessLevel) {
             return App.render({
-                type   : 'alert',
+                type: 'alert',
                 message: ERROR_MESSAGES.noRightsToRatePastPeriod[currentLanguage]
             });
         }
@@ -175,9 +175,9 @@ module.exports = BaseView.extend({
 
                 this.monthlyEvaluationForm = new MonthlyEvaluationFormView({
                     translation: this.translation,
-                    personnel  : this.personnel,
-                    month      : month,
-                    year       : year
+                    personnel: this.personnel,
+                    month: month,
+                    year: year
                 });
 
                 this.monthlyEvaluationForm.on('monthlyEvaluationSave', this.onMonthlyEvaluationSave, this);
@@ -193,7 +193,7 @@ module.exports = BaseView.extend({
 
             default:
                 App.render({
-                    type   : 'alert',
+                    type: 'alert',
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
@@ -241,15 +241,15 @@ module.exports = BaseView.extend({
                 self.$el.find('.averageRating .rating').attr('data-rate-value', model.get('avgRating'));
 
                 self.ratingCollection.fetch({
-                    data : {
+                    data: {
                         contentType: self.contentType,
-                        personnel  : self.personnel._id,
-                        recentsNum : self.recentsNum
+                        personnel: self.personnel._id,
+                        recentsNum: self.recentsNum
                     },
                     reset: true
                 });
             },
-            error  : function (model, xhr) {
+            error: function (model, xhr) {
                 var error = xhr.responseText || '';
 
                 App.render({type: 'error', message: error});
@@ -261,10 +261,10 @@ module.exports = BaseView.extend({
         this.recentsNum = +id + 1;
 
         this.ratingCollection.fetch({
-            data : {
+            data: {
                 contentType: this.contentType,
-                personnel  : this.personnel._id,
-                recentsNum : this.recentsNum
+                personnel: this.personnel._id,
+                recentsNum: this.recentsNum
             },
             reset: true
         });
@@ -345,7 +345,7 @@ module.exports = BaseView.extend({
 
             default:
                 App.render({
-                    type   : 'alert',
+                    type: 'alert',
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
@@ -355,8 +355,8 @@ module.exports = BaseView.extend({
         }
 
         $thisEl.find('.listTable').html(this.ratingListTemplate({
-            ratings    : ratingCollection,
-            noRateNow  : noRateNow,
+            ratings: ratingCollection,
+            noRateNow: noRateNow,
             translation: this.translation
 
         }));
@@ -380,21 +380,21 @@ module.exports = BaseView.extend({
                 newDataKey = ((year - 1) * 100 + 12).toString();
 
                 return {
-                    _id          : newDataKey,
-                    dataKey      : newDataKey,
+                    _id: newDataKey,
+                    dataKey: newDataKey,
                     timeFirstCaps: 'Fall',
-                    year         : year - 1,
-                    type         : 'biYearly'
+                    year: year - 1,
+                    type: 'biYearly'
                 };
             } else {
                 newDataKey = (year * 100 + 6).toString();
 
                 return {
-                    _id          : newDataKey,
-                    dataKey      : newDataKey,
+                    _id: newDataKey,
+                    dataKey: newDataKey,
                     timeFirstCaps: 'Spring',
-                    year         : year,
-                    type         : 'biYearly'
+                    year: year,
+                    type: 'biYearly'
                 };
             }
         } else {
@@ -408,11 +408,11 @@ module.exports = BaseView.extend({
             newDataKey = (year * 100 + month).toString();
 
             return {
-                _id      : newDataKey,
-                dataKey  : newDataKey,
+                _id: newDataKey,
+                dataKey: newDataKey,
                 monthLong: moment().set('month', month - 1).format('MMMM'),
-                year     : year,
-                type     : 'monthly'
+                year: year,
+                type: 'monthly'
             };
         }
     },
@@ -505,11 +505,11 @@ module.exports = BaseView.extend({
         currentMonth = date.getMonth() + 1;
 
         this.$el.html(this.template({
-            personnel  : this.personnel,
+            personnel: this.personnel,
             contentType: this.contentType,
-            daysLeft   : daysLeft,
+            daysLeft: daysLeft,
             translation: this.translation,
-            App        : App,
+            App: App,
         }));
 
         $thisEl = this.$el;
@@ -539,7 +539,7 @@ module.exports = BaseView.extend({
 
             default:
                 App.render({
-                    type   : 'alert',
+                    type: 'alert',
                     message: ERROR_MESSAGES.wrongEvaluationContentType[currentLanguage]
                 });
         }
@@ -547,10 +547,10 @@ module.exports = BaseView.extend({
         this.constants.listDd = new FilterCollection(this.constants.listDd, {parse: true});
 
         this.dropDown = new DropDownView({
-            dropDownList  : this.constants.listDd,
+            dropDownList: this.constants.listDd,
             selectedValues: [this.constants.listDd.at(0).toJSON()],
-            contentType   : 'period',
-            filter        : this.filter
+            contentType: 'period',
+            filter: this.filter
         })
         ;
 
