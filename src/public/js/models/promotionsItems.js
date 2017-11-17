@@ -8,7 +8,7 @@ var ERROR_MESSAGES = require('../constants/errorMessages');
 var App = require('../appState');
 
 module.exports = parent.extend({
-    defaults      : {},
+    defaults: {},
     attachmentsKey: 'comment.attachments',
 
     multilanguageFields: [
@@ -38,19 +38,21 @@ module.exports = parent.extend({
 
         var statuses = CONSTANTS.PROMOTION_UI_STATUSES;
 
-        model.branches.forEach(function (branch) {
-            var status = _.findWhere(statuses, {_id: branch.status});
+        if (model.branches) {
+            model.branches.forEach(function (branch) {
+                var status = _.findWhere(statuses, {_id: branch.status});
 
-            if (branch.dateStart) {
-                branch.dateStart = custom.dateFormater('DD.MM.YYYY', branch.dateStart);
-            }
+                if (branch.dateStart) {
+                    branch.dateStart = custom.dateFormater('DD.MM.YYYY', branch.dateStart);
+                }
 
-            if (branch.dateEnd) {
-                branch.dateEnd = custom.dateFormater('DD.MM.YYYY', branch.dateEnd);
-            }
+                if (branch.dateEnd) {
+                    branch.dateEnd = custom.dateFormater('DD.MM.YYYY', branch.dateEnd);
+                }
 
-            branch.status = status.name[currentLanguage];
-        });
+                branch.status = status.name[currentLanguage];
+            });
+        }
 
         return model;
     },

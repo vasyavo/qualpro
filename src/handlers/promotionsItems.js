@@ -42,7 +42,19 @@ var Promotions = function () {
         comment     : 1,
         createdBy   : 1,
         editedBy    : 1,
-        total       : 1
+        total       : 1,
+    };
+
+    this.getById = function (req, res, next) {
+        const id = req.params.id;
+
+        PromotionItemModel.findById(id, function (err, result) {
+            if (err) {
+                return next(err);
+            }
+
+            res.status(200).send(result);
+        });
     };
 
     this.getAll = function (req, res, next) {
@@ -476,16 +488,16 @@ var Promotions = function () {
             queryRun(personnel);
         });
     };
-    
+
     this.removeItem = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const id = req.params.id;
-        
+
         const queryRun = (callback) => {
             async.waterfall([
-                
+
                 (cb) => {
                     PromotionItemModel.findOne({ _id : id }).lean().exec(cb);
                 },
@@ -509,27 +521,27 @@ var Promotions = function () {
                         if (!res.headersSent) {
                             next(err);
                         }
-                        
+
                         return logger.error(err);
                     }
-    
+
                     PromotionItemModel.findOneAndRemove({_id: id}, callback)
                 },
             ], (err, body) => {
                 if (err) {
                     return next(err);
                 }
-                
+
                 res.status(200).send(body);
             });
         };
-        
+
         async.waterfall([
-            
+
             (cb) => {
                 access.getArchiveAccess(req, ACL_MODULES.AL_ALALI_PROMOTIONS_ITEMS, cb);
             },
-            
+
             (allowed, personnel, cb) => {
                 queryRun(cb);
             }
@@ -537,7 +549,7 @@ var Promotions = function () {
             if (err) {
                 return next(err);
             }
-            
+
             res.status(200).send(body);
         });
     };

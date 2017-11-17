@@ -15,8 +15,8 @@ var requireContent = require('../../../helpers/requireContent');
 
 module.exports = paginator.extend({
     contentType: 'activityList',
-    viewType   : 'list',
-    template   : _.template(headerTemplate),
+    viewType: 'list',
+    template: _.template(headerTemplate),
 
     events: {
         'click tr .person': 'personnelClick'
@@ -82,6 +82,29 @@ module.exports = paginator.extend({
         var TargetModel;
         var PreView;
         var translation;
+        var PromotionItemModel;
+        var promotionItemModel;
+        var promotionId;
+
+        function fetchPromotionModel() {
+            PreView = requireContent(href + '.views.preview');
+            translation = requireContent(href + '.translation.' + self.currentLanguage);
+
+            itemModel = new TargetModel({
+                _id: id
+            });
+            itemModel.on('sync', function (prettyModel) {
+                self.preView = new PreView({
+                    model: prettyModel,
+                    translation: translation,
+                    activityList: activityList
+                });
+                self.preView.on('disableEvent', this.archiveItems, this);
+                self.preView.on('openEditView', this.editItem, this);
+                itemModel.off('sync');
+            });
+            itemModel.fetch();
+        }
 
         e.stopPropagation();
 
@@ -94,27 +117,23 @@ module.exports = paginator.extend({
 
             if (href === 'inStoreTasks') {
                 TargetModel = requireContent('inStoreTasks.taskFlowModel');
+            } else if (promotionItems) {
+                PromotionItemModel = requireContent('promotionsItems.model');
+                promotionItemModel = new PromotionItemModel({
+                    _id: id
+                });
+                promotionItemModel.on('sync', function (prettyModel) {
+                    promotionId = promotionItemModel.get('promotion');
+                    TargetModel = requireContent(href + '.model');
+                    id = promotionId;
+                    fetchPromotionModel();
+                });
+                return promotionItemModel.fetch();
             } else {
                 TargetModel = requireContent(href + '.model');
             }
 
-            PreView = requireContent(href + '.views.preview');
-            translation = requireContent(href + '.translation.' + self.currentLanguage);
-
-            itemModel = new TargetModel({
-                _id : id
-            });
-            itemModel.on('sync', function (prettyModel) {
-                self.preView = new PreView({
-                    model       : prettyModel,
-                    translation : translation,
-                    activityList: activityList
-                });
-                self.preView.on('disableEvent', this.archiveItems, this);
-                self.preView.on('openEditView', this.editItem, this);
-                itemModel.off('sync');
-            });
-            itemModel.fetch();
+            fetchPromotionModel();
         } else if (['region', 'subRegion', 'country', 'retailSegment', 'outlet', 'branch'].indexOf(modelJSON.itemDetails) !== -1) {
             contentType = modelJSON.itemDetails;
             url = model.get('itemType');
@@ -126,7 +145,7 @@ module.exports = paginator.extend({
             itemModel = new TargetModel({_id: id});
             itemModel.on('sync', function (prettyModel) {
                 self.preView = new PreView({
-                    model      : prettyModel,
+                    model: prettyModel,
                     translation: translation,
                     contentType: contentType
 
@@ -153,31 +172,31 @@ module.exports = paginator.extend({
 
             filter = {
                 'createdBy.user': {
-                    type  : 'ObjectId',
+                    type: 'ObjectId',
                     values: [modelJSON.createdBy.user._id],
-                    names : personnelName
+                    names: personnelName
                 },
 
                 time: {
                     values: timeValues,
-                    type  : 'date',
-                    names : ['Fixed Period']
+                    type: 'date',
+                    names: ['Fixed Period']
                 }
             };
 
             if (countryIds.length && countryNames.length) {
                 filter.country = {
-                    type  : 'ObjectId',
+                    type: 'ObjectId',
                     values: countryIds,
-                    names : countryNames
+                    names: countryNames
                 };
             }
 
             if (branchIds.length && branchNames.length) {
                 filter.branch = {
-                    type  : 'ObjectId',
+                    type: 'ObjectId',
                     values: branchIds,
-                    names : branchNames
+                    names: branchNames
                 };
             }
 
@@ -188,10 +207,10 @@ module.exports = paginator.extend({
 
                 if (response && response.category) {
                     filter.category = {
-                            type  : 'ObjectId',
-                            values: [response.category._id],
-                            names : [response.category.name[self.currentLanguage]]
-                        };
+                        type: 'ObjectId',
+                        values: [response.category._id],
+                        names: [response.category.name[self.currentLanguage]]
+                    };
                 }
 
                 url = 'qualPro/' + modelType + '/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
@@ -205,9 +224,9 @@ module.exports = paginator.extend({
 
             filter = {
                 country: {
-                    type  : 'ObjectId',
+                    type: 'ObjectId',
                     values: countryIds,
-                    names : countryNames
+                    names: countryNames
                 }
             };
 
@@ -218,10 +237,10 @@ module.exports = paginator.extend({
 
                 if (response && response.category) {
                     filter.category = response && response.category && {
-                            type  : 'ObjectId',
-                            values: [response.category._id],
-                            names : [response.category.name[self.currentLanguage]]
-                        };
+                        type: 'ObjectId',
+                        values: [response.category._id],
+                        names: [response.category.name[self.currentLanguage]]
+                    };
                 }
 
                 url = 'qualPro/itemsPrices/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
@@ -235,9 +254,9 @@ module.exports = paginator.extend({
 
             filter = {
                 country: {
-                    type  : 'ObjectId',
+                    type: 'ObjectId',
                     values: countryIds,
-                    names : countryNames
+                    names: countryNames
                 }
             };
 
@@ -248,10 +267,10 @@ module.exports = paginator.extend({
 
                 if (response && response.brand) {
                     filter.brand = response && response.brand && {
-                            type  : 'ObjectId',
-                            values: [response.brand._id],
-                            names : [response.brand.name[self.currentLanguage]]
-                        };
+                        type: 'ObjectId',
+                        values: [response.brand._id],
+                        names: [response.brand.name[self.currentLanguage]]
+                    };
                 }
 
                 url = 'qualPro/competitorsList/all/list/p=1/c=25/filter=' + encodeURIComponent(JSON.stringify(filter));
@@ -273,7 +292,7 @@ module.exports = paginator.extend({
             var translation = requireContent('personnel.translation.' + self.currentLanguage);
 
             self.personPreView = new personPreView({
-                model      : model,
+                model: model,
                 translation: translation
             });
             self.personPreView.on('disableEvent', this.archiveItems, this);
@@ -294,8 +313,8 @@ module.exports = paginator.extend({
 
         $currentEl.append(new ListItemsView({
             translation: this.translation,
-            el         : this.$itemsEl,
-            collection : this.collection
+            el: this.$itemsEl,
+            collection: this.collection
         }).render());
 
         this.$el.find('tbody.listTable tr').on('click', _.debounce(this.rowClick.bind(this), 1000, true));
@@ -314,8 +333,8 @@ module.exports = paginator.extend({
         $holder.find('.listTable').empty();
 
         itemView = new ListItemsView({
-            el         : this.$itemsEl,
-            collection : newModels,
+            el: this.$itemsEl,
+            collection: newModels,
             translation: this.translation
         });
 

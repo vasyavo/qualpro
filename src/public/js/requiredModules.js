@@ -300,6 +300,9 @@ module.exports = function () {
                 ar: require('./translations/ar/promotions'),
             },
         },
+        promotionsItems: {
+            model: require('./models/promotionsItems'),
+        },
         questionnary: {
             views: {
                 list: require('./views/questionnary/list/listView'),
