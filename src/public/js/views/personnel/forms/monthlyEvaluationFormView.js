@@ -10,6 +10,7 @@ var custom = require('../../../custom');
 var ERROR_MESSAGES = require('../../../constants/errorMessages');
 var validation = require('../../../validation');
 var App = require('../../../appState');
+var requireContent = require('../../../helpers/requireContent');
 
 module.exports = BaseDialog.extend({
     contentType  : 'monthly',
