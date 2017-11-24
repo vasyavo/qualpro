@@ -67,7 +67,7 @@ var Rating = function () {
         async.waterfall([aggregate, saveToPersonnel], callback);
     }
 
-    this.getForCreate = function(req, res, next) {
+    this.getForCreate = function (req, res, next) {
         function queryRun() {
             var query = req.query;
             var personnel = query.personnel;
@@ -76,30 +76,30 @@ var Rating = function () {
             var dateStart = new Date(year, month, 1);
             var dateEnd = new Date(year, month + 1, 1);
 
-            var dateMatch = { $gte: dateStart, $lt: dateEnd };
+            var dateMatch = {$gte: dateStart, $lt: dateEnd};
 
             var objectivesDefMatch = [{
                 $or: [
-                    { assignedTo          : ObjectId(personnel) },
-                    { "history.assignedTo": ObjectId(personnel) }
+                    {assignedTo: ObjectId(personnel)},
+                    {"history.assignedTo": ObjectId(personnel)}
                 ]
             }, {
                 $or: [
-                    { dateStart : dateMatch },
-                    { dateEnd   : dateMatch },
-                    { dateClosed: dateMatch }
+                    {dateStart: dateMatch},
+                    {dateEnd: dateMatch},
+                    {dateClosed: dateMatch}
                 ]
             }];
 
             var objectivesDefProjection = {
-                title        : 1,
-                status       : 1,
-                dateStart    : 1,
-                dateEnd      : 1,
-                dateClosed   : 1,
-                history      : 1,
+                title: 1,
+                status: 1,
+                dateStart: 1,
+                dateEnd: 1,
+                dateClosed: 1,
+                history: 1,
                 objectiveType: 1,
-                context      : 1
+                context: 1
             };
 
             var reportsDefMatch = {
@@ -143,7 +143,7 @@ var Rating = function () {
                         $and: objectivesDefMatch.concat({
                             context: CONTENT_TYPES.OBJECTIVES
                         }, {
-                            objectiveType: { $ne: 'individual' }
+                            objectiveType: {$ne: 'individual'}
                         })
                     }
                 });
@@ -198,7 +198,7 @@ var Rating = function () {
 
                         pipeLine.push({
                             $project: {
-                                type: { $literal: 'promotionsItems' },
+                                type: {$literal: 'promotionsItems'},
                                 date: "$createdBy.date"
                             }
                         });
@@ -221,7 +221,7 @@ var Rating = function () {
 
                         pipeLine.push({
                             $project: {
-                                type: { $literal: 'competitorPromotion' },
+                                type: {$literal: 'competitorPromotion'},
                                 date: "$createdBy.date"
                             }
                         });
@@ -244,7 +244,7 @@ var Rating = function () {
 
                         pipeLine.push({
                             $project: {
-                                type: { $literal: 'competitorBranding' },
+                                type: {$literal: 'competitorBranding'},
                                 date: "$createdBy.date"
                             }
                         });
@@ -267,7 +267,7 @@ var Rating = function () {
 
                         pipeLine.push({
                             $project: {
-                                type: { $literal: 'achievementForm' },
+                                type: {$literal: 'achievementForm'},
                                 date: "$createdBy.date"
                             }
                         });
@@ -290,7 +290,7 @@ var Rating = function () {
 
                         pipeLine.push({
                             $project: {
-                                type: { $literal: 'newProductLaunch' },
+                                type: {$literal: 'newProductLaunch'},
                                 date: "$createdBy.date"
                             }
                         });
@@ -303,7 +303,7 @@ var Rating = function () {
 
                         aggregation.exec(callback);
                     }
-                ], function(err, results) {
+                ], function (err, results) {
                     if (err) {
                         return callback(err);
                     }
@@ -317,9 +317,9 @@ var Rating = function () {
 
             async.parallel({
                 individualObjectives: individualObjectives,
-                companyObjectives   : companyObjectives,
-                inStoreTasks        : inStoreTasks,
-                submittingReports   : submittingReports
+                companyObjectives: companyObjectives,
+                inStoreTasks: inStoreTasks,
+                submittingReports: submittingReports
             }, function (err, results) {
                 if (err) {
                     return next(err);
@@ -385,9 +385,9 @@ var Rating = function () {
             // Verify rating existence
             function findOne(callback) {
                 var conditions = {
-                    type     : type,
+                    type: type,
                     personnel: body.personnel,
-                    dataKey  : dataKey
+                    dataKey: dataKey
                 };
 
                 MonthlyModel.findOne(conditions, callback);
@@ -425,7 +425,7 @@ var Rating = function () {
             function addAverage(model, callback) {
                 updAvgRating({
                     personnelId: body.personnel,
-                    dataKey    : dataKey
+                    dataKey: dataKey
                 }, type, function (err, personnel) {
                     if (err) {
                         return callback(err);
@@ -433,7 +433,7 @@ var Rating = function () {
 
                     ActivityLog.emit('personnel:monthly', {
                         actionOriginator: req.session.uId,
-                        accessRoleLevel : req.session.level,
+                        accessRoleLevel: req.session.level,
                         body: personnel,
                     });
 
@@ -459,6 +459,7 @@ var Rating = function () {
                 res.status(201).send(model);
             });
         }
+
         access.getWriteAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             var body = req.body;
 
@@ -490,6 +491,7 @@ var Rating = function () {
                 type: type
             };
             var dbQuery;
+            var timeFilter = query.timeFilter && JSON.parse(query.timeFilter);
 
             if (query.personnel) {
                 conditions.personnel = query.personnel;
@@ -499,14 +501,11 @@ var Rating = function () {
                 conditions.year = query.year;
             }
 
-            const dataKeys = query.dateKeys && query.dateKeys.length &&  query.dateKeys.split(',').map(item => {
-                return item.trim();
-            });
-
-            if (dataKeys) {
+            if (timeFilter) {
                 conditions.dataKey = {
-                    $in: dataKeys,
-                };
+                    $gte: timeFilter.from,
+                    $lte: timeFilter.to,
+                }
             }
 
             dbQuery = MonthlyModel.find(conditions)
@@ -573,6 +572,7 @@ var Rating = function () {
                 res.status(200).send(ratings);
             });
         }
+
         access.getReadAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             if (err) {
                 return next(err);
@@ -594,7 +594,7 @@ var Rating = function () {
             var id = req.params.id;
 
             MonthlyModel.findOne({
-                _id : id,
+                _id: id,
                 type: type
             }, function (err, result) {
                 if (err) {
@@ -604,6 +604,7 @@ var Rating = function () {
                 res.status(200).send(result);
             });
         }
+
         access.getReadAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             if (err) {
                 return next(err);
@@ -624,7 +625,7 @@ var Rating = function () {
             var type = CONTENT_TYPES.MONTHLY;
             var id = req.params.id;
             var conditions = {
-                _id : id,
+                _id: id,
                 type: type
             };
 
@@ -643,7 +644,7 @@ var Rating = function () {
 
                     updAvgRating({
                         personnelId: result.personnel,
-                        dataKey    : result.dataKey
+                        dataKey: result.dataKey
                     }, result.type, function (err, personnel) {
                         if (err) {
                             return next(err);
@@ -651,7 +652,7 @@ var Rating = function () {
 
                         ActivityLog.emit('personnel:monthly', {
                             actionOriginator: req.session.uId,
-                            accessRoleLevel : req.session.level,
+                            accessRoleLevel: req.session.level,
                             body: personnel,
                         });
 
@@ -662,6 +663,7 @@ var Rating = function () {
                     });
                 });
         }
+
         access.getEditAccess(req, ACL_MODULES.EMPLOYEES_PERFORMANCE, function (err, allowed) {
             var body = req.body;
 
