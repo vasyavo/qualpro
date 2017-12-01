@@ -27,19 +27,19 @@ var CompetitorItem = function () {
     var self = this;
 
     var $defProjection = {
-        _id        : 1,
-        name       : 1,
-        packing    : 1,
-        origin     : 1,
-        brand      : 1,
-        variant    : 1,
-        archived   : 1,
+        _id: 1,
+        name: 1,
+        packing: 1,
+        origin: 1,
+        brand: 1,
+        variant: 1,
+        archived: 1,
         topArchived: 1,
-        createdBy  : 1,
-        editedBy   : 1,
-        product    : 1,
-        category   : 1,
-        country    : 1
+        createdBy: 1,
+        editedBy: 1,
+        product: 1,
+        category: 1,
+        country: 1
     };
 
     var modelFindById = function (id, callback) {
@@ -73,60 +73,60 @@ var CompetitorItem = function () {
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
             from: 'origins',
-            key : 'origin'
+            key: 'origin'
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from         : 'brands',
-            key          : 'brand',
-            isArray      : false,
+            from: 'brands',
+            key: 'brand',
+            isArray: false,
             addProjection: ['imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'country',
+            from: 'domains',
+            key: 'country',
             isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from           : 'personnels',
-            key            : 'createdBy.user',
-            isArray        : false,
-            addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
             includeSiblings: {createdBy: {date: 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from           : 'accessRoles',
-            key            : 'createdBy.user.accessRole',
-            isArray        : false,
-            addProjection  : ['_id', 'name', 'level'],
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id      : 1,
-                        position : 1,
+                        _id: 1,
+                        position: 1,
                         firstName: 1,
-                        lastName : 1
+                        lastName: 1
                     }
                 }
             }
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from           : 'positions',
-            key            : 'createdBy.user.position',
-            isArray        : false,
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
             includeSiblings: {
                 createdBy: {
                     date: 1,
                     user: {
-                        _id       : 1,
+                        _id: 1,
                         accessRole: 1,
-                        firstName : 1,
-                        lastName  : 1
+                        firstName: 1,
+                        lastName: 1
                     }
                 }
             }
@@ -134,43 +134,43 @@ var CompetitorItem = function () {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-                from           : 'personnels',
-                key            : 'editedBy.user',
-                isArray        : false,
-                addProjection  : ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
+                from: 'personnels',
+                key: 'editedBy.user',
+                isArray: false,
+                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole'],
                 includeSiblings: {editedBy: {date: 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-                from           : 'accessRoles',
-                key            : 'editedBy.user.accessRole',
-                isArray        : false,
-                addProjection  : ['_id', 'name', 'level'],
+                from: 'accessRoles',
+                key: 'editedBy.user.accessRole',
+                isArray: false,
+                addProjection: ['_id', 'name', 'level'],
                 includeSiblings: {
                     editedBy: {
                         date: 1,
                         user: {
-                            _id      : 1,
-                            position : 1,
+                            _id: 1,
+                            position: 1,
                             firstName: 1,
-                            lastName : 1
+                            lastName: 1
                         }
                     }
                 }
             }));
 
             pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-                from           : 'positions',
-                key            : 'editedBy.user.position',
-                isArray        : false,
+                from: 'positions',
+                key: 'editedBy.user.position',
+                isArray: false,
                 includeSiblings: {
                     editedBy: {
                         date: 1,
                         user: {
-                            _id       : 1,
+                            _id: 1,
                             accessRole: 1,
-                            firstName : 1,
-                            lastName  : 1
+                            firstName: 1,
+                            lastName: 1
                         }
                     }
                 }
@@ -179,10 +179,10 @@ var CompetitorItem = function () {
 
         pipeLine.push({
             $lookup: {
-                from        : 'competitorVariants',
-                localField  : 'variant',
+                from: 'competitorVariants',
+                localField: 'variant',
                 foreignField: '_id',
-                as          : 'variant'
+                as: 'variant'
             }
         });
 
@@ -193,7 +193,7 @@ var CompetitorItem = function () {
         pipeLine.push({
             $project: aggregationHelper.getProjection({
                 variant: {
-                    _id : 1,
+                    _id: 1,
                     name: 1
                 },
                 product: '$variant.category'
@@ -208,10 +208,10 @@ var CompetitorItem = function () {
 
         pipeLine.push({
             $lookup: {
-                from        : 'categories',
-                localField  : 'product',
+                from: 'categories',
+                localField: 'product',
                 foreignField: '_id',
-                as          : 'product'
+                as: 'product'
             }
         });
 
@@ -222,7 +222,7 @@ var CompetitorItem = function () {
         pipeLine.push({
             $project: aggregationHelper.getProjection({
                 product: {
-                    _id : 1,
+                    _id: 1,
                     name: 1
                 }
             })
@@ -235,12 +235,12 @@ var CompetitorItem = function () {
         }
 
         pipeLine = _.union(pipeLine, aggregationHelper.endOfPipeLine({
-            isMobile         : isMobile,
+            isMobile: isMobile,
             searchFieldsArray: searchFieldsArray,
-            filterSearch     : filterSearch,
-            skip             : skip,
-            limit            : limit,
-            sort             : sort
+            filterSearch: filterSearch,
+            skip: skip,
+            limit: limit,
+            sort: sort
         }));
 
         return pipeLine;
@@ -330,8 +330,8 @@ var CompetitorItem = function () {
             delete filter.globalSearch;
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.COMPETITORITEM,
-                filter     : filter,
-                personnel  : personnel
+                filter: filter,
+                personnel: personnel
             });
 
             aggregationHelper = new AggregationHelper($defProjection, queryObject);
@@ -490,7 +490,7 @@ var CompetitorItem = function () {
                 }
 
                 result = response && response[0] ? response[0] : {
-                    data : [],
+                    data: [],
                     total: 0
                 };
 
@@ -520,6 +520,7 @@ var CompetitorItem = function () {
         function queryRun(personnel) {
             var query = req.query;
             var isMobile = req.isMobile;
+            var forTable = query.forTable;
             var page = query.page || 1;
             var limit = parseInt(query.count, 10) || parseInt(CONSTANTS.LIST_COUNT, 10);
             var skip = (page - 1) * limit;
@@ -549,7 +550,7 @@ var CompetitorItem = function () {
                 sort['variant.name.' + language] = 1;
             } else {
                 sort = {
-                    'brand.name'  : 1,
+                    'brand.name': 1,
                     'product.name': 1,
                     'variant.name': 1
                 };
@@ -558,8 +559,8 @@ var CompetitorItem = function () {
             delete filter.globalSearch;
             queryObject = filterMapper.mapFilter({
                 contentType: CONTENT_TYPES.COMPETITORITEM,
-                filter     : filter,
-                personnel  : personnel
+                filter: filter,
+                personnel: personnel
             });
             delete queryObject.region;
             delete queryObject.subRegion;
@@ -588,7 +589,7 @@ var CompetitorItem = function () {
                 'variant.name.en',
                 'variant.name.ar',
             ];
-            if (isMobile) {
+            if (isMobile || forTable) {
                 pipeLine = [
                     {
                         $match: queryObject,
@@ -601,8 +602,8 @@ var CompetitorItem = function () {
                     {
                         $group: {
                             _id: null,
-                            root: { $push: '$_id' },
-                            total: { $sum: 1 },
+                            root: {$push: '$_id'},
+                            total: {$sum: 1},
                         },
                     },
 
@@ -691,14 +692,24 @@ var CompetitorItem = function () {
                             },
                         },
                     },
-    
                     {
                         $addFields: {
                             variant: '$variant._id'
                         },
-                    },
+                    },];
 
-                    {
+                if (forTable) {
+                    pipeLine.push({
+                        "$lookup": {
+                            "from": "origins",
+                            "localField": "origin",
+                            "foreignField": "_id",
+                            "as": "origin"
+                        }
+                    },);
+                }
+
+                pipeLine.push({
                         $group: {
                             _id: '$total',
                             data: {
@@ -731,19 +742,17 @@ var CompetitorItem = function () {
                                 country: 1,
                             },
                         },
-                    },
-
-                ];
+                    },);
             } else {
                 pipeLine = self.getAllForUI({
-                    queryObject      : queryObject,
+                    queryObject: queryObject,
                     aggregationHelper: aggregationHelper,
-                    query            : query,
-                    skip             : skip,
-                    limit            : limit,
-                    sort             : sort,
+                    query: query,
+                    skip: skip,
+                    limit: limit,
+                    sort: sort,
                     searchFieldsArray: searchFieldsArray,
-                    filterSearch     : filterSearch
+                    filterSearch: filterSearch
                 });
             }
             aggregation = CompetitorItem.aggregate(pipeLine);
@@ -757,9 +766,9 @@ var CompetitorItem = function () {
                     return next(err);
                 }
 
-                response = response.length ? response[0] : { data: [], total: 0 };
+                response = response.length ? response[0] : {data: [], total: 0};
 
-                next({ status: 200, body: response });
+                next({status: 200, body: response});
             });
         }
 
@@ -802,28 +811,28 @@ var CompetitorItem = function () {
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
             from: 'origins',
-            key : 'origin'
+            key: 'origin'
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from   : 'domains',
-            key    : 'country',
+            from: 'domains',
+            key: 'country',
             isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from         : 'brands',
-            key          : 'brand',
+            from: 'brands',
+            key: 'brand',
             addProjection: ['topArchived', 'archived'],
-            isArray      : false
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from             : 'competitorVariants',
-            key              : 'variant',
-            addProjection    : ['topArchived', 'archived'],
+            from: 'competitorVariants',
+            key: 'variant',
+            addProjection: ['topArchived', 'archived'],
             addMainProjection: ['category'],
-            isArray          : false
+            isArray: false
         }));
 
         if (queryObjectAfterLookup && queryObjectAfterLookup.product && queryObjectAfterLookup.product.$in && queryObjectAfterLookup.product.$in.length) {
@@ -835,10 +844,10 @@ var CompetitorItem = function () {
         }
 
         pipeLine = _.union(pipeLine, aggregationHelper.aggregationPartMaker({
-            from         : 'categories',
-            key          : 'category',
+            from: 'categories',
+            key: 'category',
             addProjection: ['topArchived', 'archived'],
-            isArray      : false
+            isArray: false
         }));
 
         if (filterSearch) {
@@ -865,9 +874,9 @@ var CompetitorItem = function () {
         if (!query.variant && !query.category && !query.brand) {
             pipeLine.push({
                 $sort: {
-                    'brand.name'   : 1,
+                    'brand.name': 1,
                     'category.name': 1,
-                    'variant.name' : 1
+                    'variant.name': 1
                 }
             });
         }
@@ -890,35 +899,34 @@ var CompetitorItem = function () {
 
         pipeLine = _.union(pipeLine, aggregationHelper.groupForUi());
 
-
         return pipeLine;
     };
 
     this.addGroupForListView = function (pipeLine) {
         pipeLine.push({
             $group: {
-                _id        : {
-                    brand   : '$brand._id',
+                _id: {
+                    brand: '$brand._id',
                     category: '$category._id',
-                    variant : '$variant._id'
+                    variant: '$variant._id'
                 },
                 topArchived: {$first: '$variant.topArchived'},
                 variantName: {$first: '$variant.name'},
-                archived   : {$first: '$variant.archived'},
-                category   : {$first: '$category'},
-                brand      : {$first: '$brand'},
-                total      : {$first: '$total'},
-                items      : {
+                archived: {$first: '$variant.archived'},
+                category: {$first: '$category'},
+                brand: {$first: '$brand'},
+                total: {$first: '$total'},
+                items: {
                     $addToSet: {
-                        _id        : '$_id',
-                        name       : '$name',
-                        packing    : '$packing',
-                        origin     : '$origin',
-                        category   : '$category',
-                        variant    : '$variant',
-                        archived   : '$archived',
-                        createdBy  : '$createdBy',
-                        editedBy   : '$editedBy',
+                        _id: '$_id',
+                        name: '$name',
+                        packing: '$packing',
+                        origin: '$origin',
+                        category: '$category',
+                        variant: '$variant',
+                        archived: '$archived',
+                        createdBy: '$createdBy',
+                        editedBy: '$editedBy',
                         topArchived: '$topArchived'
                     }
                 }
@@ -927,22 +935,22 @@ var CompetitorItem = function () {
 
         pipeLine.push({
             $group: {
-                _id         : {
-                    brand   : '$brand._id',
+                _id: {
+                    brand: '$brand._id',
                     category: '$category._id'
                 },
-                total       : {$first: '$total'},
+                total: {$first: '$total'},
                 categoryName: {$first: '$category.name'},
-                topArchived : {$first: '$category.topArchived'},
-                brand       : {$first: '$brand'},
-                archived    : {$first: '$category.archived'},
-                variants    : {
+                topArchived: {$first: '$category.topArchived'},
+                brand: {$first: '$brand'},
+                archived: {$first: '$category.archived'},
+                variants: {
                     $addToSet: {
-                        _id        : '$_id.variant',
+                        _id: '$_id.variant',
                         topArchived: '$topArchived',
                         variantName: '$variantName',
-                        archived   : '$archived',
-                        items      : '$items'
+                        archived: '$archived',
+                        items: '$items'
                     }
                 }
             }
@@ -950,18 +958,18 @@ var CompetitorItem = function () {
 
         pipeLine.push({
             $group: {
-                _id        : '$brand._id',
-                total      : {$first: '$total'},
-                brandName  : {$first: '$brand.name'},
+                _id: '$brand._id',
+                total: {$first: '$total'},
+                brandName: {$first: '$brand.name'},
                 topArchived: {$first: '$brand.topArchived'},
-                archived   : {$first: '$brand.archived'},
-                categories : {
+                archived: {$first: '$brand.archived'},
+                categories: {
                     $addToSet: {
-                        _id         : '$_id.category',
-                        topArchived : '$topArchived',
+                        _id: '$_id.category',
+                        topArchived: '$topArchived',
                         categoryName: '$categoryName',
-                        archived    : '$archived',
-                        variants    : '$variants'
+                        archived: '$archived',
+                        variants: '$variants'
                     }
                 }
             }

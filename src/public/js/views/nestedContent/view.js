@@ -512,12 +512,16 @@ module.exports = BaseView.extend({
         var nextContent = this.getNextContent(content);
         var searchObject = {
             archived: 'false',
-            count   : -1
+            count   : 10
         };
         var currentLanguage = App.currentUser.currentLanguage;
         var contentCollection;
         var collection;
         var model;
+
+        if(content === 'competitorVariant'){
+            searchObject.forTable = true;
+        }
 
         if (this.editInProgress) {
             return;
