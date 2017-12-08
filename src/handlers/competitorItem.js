@@ -706,7 +706,7 @@ var CompetitorItem = function () {
                             "foreignField": "_id",
                             "as": "origin"
                         }
-                    },);
+                    });
                 }
 
                 pipeLine.push({
