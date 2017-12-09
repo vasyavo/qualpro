@@ -742,7 +742,7 @@ var CompetitorItem = function () {
                                 country: 1,
                             },
                         },
-                    },);
+                    });
             } else {
                 pipeLine = self.getAllForUI({
                     queryObject: queryObject,
