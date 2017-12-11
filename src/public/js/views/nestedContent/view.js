@@ -2,6 +2,7 @@ var $ = require('jquery');
 var _ = require('underscore');
 var async = require('async');
 var Cookies = require('js-cookie');
+var crypto = require('crypto');
 var template = require('../../../templates/nestedContent/main.html');
 var BaseView = require('../../views/baseDialog');
 var DropDownView = require('../../views/filter/dropDownView');
@@ -52,6 +53,80 @@ module.exports = BaseView.extend({
         var collections;
         var self = this;
         var templates = [];
+
+        const securitySettings = {
+            merchantIdentifier: 'WVgBzKQi',
+            accessCode: '4bSEXJao5QhEfbwV7Deq',
+            SHARequestPhrase: 'TESTSHAIN',
+            SHAResponsePhrase: 'TESTSHAOUT',
+            SHAType: 'sha256',
+        };
+        const merchantReference = 'sded122131232';
+
+        const calculateSignature = (data, signType = 'request') => {
+            let shaString = '';
+            const sortable = [];
+            const dataKeys = Object.keys(data);
+
+            dataKeys.forEach((key) => {
+                sortable.push([key, data[key]]);
+            });
+
+            sortable.sort((a, b) => {
+                return a[1] - b[1];
+            });
+
+            sortable.forEach((el) => {
+                shaString += `${el[0]}=${el[1]}`;
+            });
+
+            if (signType === 'request') {
+                shaString = `${securitySettings.SHARequestPhrase}${shaString}${securitySettings.SHARequestPhrase}`;
+            } else {
+                shaString = `${securitySettings.SHAResponsePhrase}${shaString}${securitySettings.SHAResponsePhrase}`;
+            }
+
+            const signature = crypto.createHash(securitySettings.SHAType).update(shaString, 'utf8').digest('hex');
+
+            return signature;
+        };
+
+        const form = {
+            service_command: 'TOKENIZATION',
+            access_code: securitySettings.accessCode,
+            merchant_identifier: securitySettings.merchantIdentifier,
+            merchant_reference: merchantReference,
+            language: 'en',
+            expiry_date: 2105,
+            card_number: 5123456789012346,
+            card_security_code: 123,
+            signature: calculateSignature({
+                merchant_identifier: securitySettings.merchantIdentifier,
+                access_code: securitySettings.accessCode,
+                merchant_reference: merchantReference,
+                service_command: 'TOKENIZATION',
+                language: 'en',
+            }),
+        };
+
+        $.ajax({
+            method: 'POST',
+            data: form,
+            headers: {
+                'Access-Control-Allow-Origin':'*',
+                'Access-Control-Allow-Methods': 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Origin, Content-Type, X-Auth-Token',
+            },
+            url: 'https://sbcheckout.PayFort.com/FortAPI/paymentPage',
+        }, (err, httpResponse) => {
+
+            debugger;
+            if (err) {
+                console.log(err);
+            }
+debugger;
+
+        });
 
         this.translation = options.translation;
         this.tablesArray = [];
