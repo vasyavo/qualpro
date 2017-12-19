@@ -12,7 +12,7 @@ exports.up = function (db, next) {
 
             db.collection('origins').update({
                 name: {
-                    en: 'Scotland',
+                    en: 'SCOTLAND',
                     ar: 'أسكتلندا',
                 },
             }, {
