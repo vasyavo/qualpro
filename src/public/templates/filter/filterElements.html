@@ -1,5 +1,5 @@
-<%collection.forEach(function(element){%>
-<li class="filterElement <%= element.name && (element.name.currentLanguage === 'Fixed Period') ? 'fixedPeriod' : ''%> <%= element.status ? 'checkedValue' : ''%>" data-value="<%= element._id %>">
+<% collection.forEach(function(element){%>
+<li class="filterElement <%= element._id === 'fixedPeriod' ? 'fixedPeriod' : ''%> <%= element.status ? 'checkedValue' : ''%>" data-value="<%= element._id %>">
     <span></span>
     <%- element.name && element.name.currentLanguage %>
 </li>
