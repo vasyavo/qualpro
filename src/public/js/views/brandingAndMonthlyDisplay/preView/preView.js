@@ -28,11 +28,11 @@ var requireContent = require('../../../helpers/requireContent');
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
 
-    template             : _.template(PreviewTemplate),
-    commentTemplate      : _.template(CommentTemplate),
-    newCommentTemplate   : _.template(NewCommentTemplate),
-    fileTemplate         : _.template(FileTemplate),
-    CONSTANTS            : CONSTANTS,
+    template: _.template(PreviewTemplate),
+    commentTemplate: _.template(CommentTemplate),
+    newCommentTemplate: _.template(NewCommentTemplate),
+    fileTemplate: _.template(FileTemplate),
+    CONSTANTS: CONSTANTS,
     ALLOWED_CONTENT_TYPES: _.union(
         CONSTANTS.IMAGE_CONTENT_TYPES,
         CONSTANTS.VIDEO_CONTENT_TYPES,
@@ -43,12 +43,12 @@ module.exports = BaseView.extend({
     ),
 
     events: {
-        'click #attachFiles'              : 'showAttachDialog',
-        'click #sendComment'              : 'sendComment',
+        'click #attachFiles': 'showAttachDialog',
+        'click #sendComment': 'sendComment',
         'click .commentBottom .attachment': 'onShowFilesInComment',
-        'click #showAllDescription'       : 'onShowAllDescriptionInComment',
-        'click .masonryThumbnail'         : 'showFilePreviewDialog',
-        'click #downloadFile'             : 'stopPropagation',
+        'click #showAllDescription': 'onShowAllDescriptionInComment',
+        'click .masonryThumbnail': 'showFilePreviewDialog',
+        'click #downloadFile': 'stopPropagation',
         'click #edit': 'showEditView',
         'click #delete': 'deleteBrandingAndMonthlyDisplay',
     },
@@ -127,15 +127,15 @@ module.exports = BaseView.extend({
         var fileModelId = $thumbnail.attr('data-id');
         var fileModel = this.previewFiles.get(fileModelId);
         var options = {
-            fileModel  : fileModel,
-            bucket     : 'competitors',
+            fileModel: fileModel,
+            bucket: 'competitors',
             translation: this.translation,
         };
-        if(!fileModel){
+        if (!fileModel) {
             fileModel = this.fileCollection.get(fileModelId);
             options = {
-                fileModel  : fileModel,
-                bucket     : 'comments',
+                fileModel: fileModel,
+                bucket: 'comments',
                 translation: this.translation
             };
         }
@@ -156,10 +156,10 @@ module.exports = BaseView.extend({
         var self = this;
 
         this.fileDialogView = new FileDialogView({
-            files      : this.files,
+            files: this.files,
             dialogTitle: this.translation.dialogTitle,
             translation: this.translation,
-            buttonName : this.translation.attachBtn
+            buttonName: this.translation.attachBtn
         });
         this.fileDialogView.on('clickAttachFileButton', this.attachFile, this);
         this.fileDialogView.on('fileDialogClosed', function () {
@@ -215,7 +215,7 @@ module.exports = BaseView.extend({
             };
 
             fileModel.update({
-                file    : selectedFile,
+                file: selectedFile,
                 selected: true,
                 uploaded: true
             });
@@ -304,7 +304,7 @@ module.exports = BaseView.extend({
         this.commentBody = {
             commentText: this.$el.find('#commentInput').val(),
             objectiveId: this.model.get('_id'),
-            context    : CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY
+            context: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY
         };
 
         commentModel.setFieldsNames(this.translation);
@@ -327,12 +327,12 @@ module.exports = BaseView.extend({
         data.append('data', JSON.stringify(context.commentBody));
 
         $.ajax({
-            url        : context.commentCollection.url,
-            type       : 'POST',
-            data       : data,
+            url: context.commentCollection.url,
+            type: 'POST',
+            data: data,
             contentType: false,
             processData: false,
-            success    : function (comment) {
+            success: function (comment) {
                 var commentModel = new CommentModel(comment, {parse: true});
                 var jsonComment = commentModel.toJSON();
 
@@ -340,8 +340,8 @@ module.exports = BaseView.extend({
                 context.model.set({comments: _.pluck(context.commentCollection, '_id')});
                 context.$el.find('#commentWrapper').prepend(context.newCommentTemplate(
                     {
-                        comment      : jsonComment,
-                        translation  : this.translation,
+                        comment: jsonComment,
+                        translation: this.translation,
                         notShowAttach: false
                     }
                 ));
@@ -369,8 +369,8 @@ module.exports = BaseView.extend({
 
         $commentWrapper.html('');
         $commentWrapper.append(this.commentTemplate({
-            collection   : jsonCollection,
-            translation  : this.translation,
+            collection: jsonCollection,
+            translation: this.translation,
             notShowAttach: false
         }));
 
@@ -405,23 +405,25 @@ module.exports = BaseView.extend({
             currentConfig = levelConfig[this.contentType][App.currentUser.accessRole.level] ? levelConfig[this.contentType][App.currentUser.accessRole.level].preview : [];
         }
 
-        dataService.getData(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY + '/' + this.model.get('_id'), {}, function(err, model) {
+        dataService.getData(CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY + '/' + this.model.get('_id'), {}, function (err, model) {
             if (err) {
                 return App.renderErrors([ERROR_MESSAGES.readError]);
             }
 
             const currentLanguage = App.currentUser.currentLanguage;
+            const notCurrentLanguage = App.currentUser.currentLanguage === 'en' ? 'ar' : 'en';
+
 
             const categories = [];
-            model.categories.map(function(category) {
-                categories.push(category.name[currentLanguage]);
+            model.categories.map(function (category) {
+                categories.push(category.name[currentLanguage] || category.name[notCurrentLanguage]);
             });
             model.categoryString = categories.join(', ');
-            model.descriptionString = model.description[currentLanguage];
-            model.branchString = model.branch.name[currentLanguage];
-            model.outletString = model.outlet.name[currentLanguage];
-            model.retailSegmentString = model.retailSegment.name[currentLanguage];
-            model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function(item) {
+            model.descriptionString = model.description[currentLanguage] || model.description[notCurrentLanguage];
+            model.branchString = model.branch.name[currentLanguage] || model.branch.name[notCurrentLanguage];
+            model.outletString = model.outlet.name[currentLanguage] || model.outlet.name[notCurrentLanguage];
+            model.retailSegmentString = model.retailSegment.name[currentLanguage] || model.retailSegment.name[notCurrentLanguage];
+            model.displayTypeString = (model.displayType && model.displayType.length) ? model.displayType.map(function (item) {
                 return item.name[currentLanguage];
             }).join(',') : '';
             model.dateStart = moment.utc(model.dateStart).format('DD.MM.YYYY');
@@ -435,17 +437,17 @@ module.exports = BaseView.extend({
             var formString;
 
             formString = self.$el.html(self.template({
-                jsonModel  : model,
+                jsonModel: model,
                 translation: self.translation
             }));
 
             self.$el = formString.dialog({
-                dialogClass  : 'create-dialog competitorBranding-dialog',
-                width        : '1000',
+                dialogClass: 'create-dialog competitorBranding-dialog',
+                width: '1000',
                 showCancelBtn: false,
-                buttons      : {
+                buttons: {
                     save: {
-                        text : self.translation.okBtn,
+                        text: self.translation.okBtn,
                         class: 'btn saveBtn',
                         click: function () {
                             self.undelegateEvents();
@@ -480,7 +482,7 @@ module.exports = BaseView.extend({
 
                     if (!container.find('#' + config.elementId).length) {
                         container[config.insertType](template({
-                            elementId  : config.elementId,
+                            elementId: config.elementId,
                             translation: self.translation
                         }));
                     }
@@ -490,7 +492,7 @@ module.exports = BaseView.extend({
             }
 
             self.$el.find('#commentForm').on('submit', {
-                body   : self.commentBody,
+                body: self.commentBody,
                 context: self
             }, self.commentFormSubmit);
             self.$el.find('#fileThumbnail').hide();
@@ -500,8 +502,8 @@ module.exports = BaseView.extend({
             self.commentCollection = new CommentCollection({
                 data: {
                     objectiveId: self.model.get('_id'),
-                    context    : CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
-                    reset      : true
+                    context: CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY,
+                    reset: true
                 }
             });
 
