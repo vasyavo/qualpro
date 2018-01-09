@@ -488,7 +488,7 @@ module.exports = BaseView.extend({
                     }
                 });
             } else {
-                this.$el.find('.objectivesTopBtnBlockSmall').hide();
+                self.$el.find('.objectivesTopBtnBlockSmall').hide();
             }
 
             self.$el.find('#commentForm').on('submit', {
