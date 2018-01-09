@@ -10,17 +10,17 @@ var TimeView = require('../../views/filter/timeView');
 var App = require('../../appState');
 
 var filterValuesView = Backbone.View.extend({
-    elementsTemplate  : _.template(filterElements),
-    currentPage       : 1,
+    elementsTemplate: _.template(filterElements),
+    currentPage: 1,
     currentCheckedPage: 1,
-    updateNames       : true,
+    updateNames: true,
 
     events: {
         'click .filterValues li:not(.fixedPeriod)': 'parrentSelectValue',
-        'click .dropDown'                         : 'showHideEvent',
-        'click .pencil'                           : 'showHideEvent',
-        'click .fixedPeriod'                      : 'showFixedPeriod',
-        'click .select-all'                       : 'selectAllFilterValues'
+        'click .dropDown': 'showHideEvent',
+        'click .pencil': 'showHideEvent',
+        'click .fixedPeriod': 'showFixedPeriod',
+        'click .select-all': 'selectAllFilterValues'
     },
 
     initialize: function (options) {
@@ -81,7 +81,7 @@ var filterValuesView = Backbone.View.extend({
             }, 500);
     },
 
-    selectAllFilterValues : function (event) {
+    selectAllFilterValues: function (event) {
         var selectAllLi = $(event.target).parent();
         var isSelectAllChecked = selectAllLi.hasClass('checkedValue');
 
@@ -95,12 +95,12 @@ var filterValuesView = Backbone.View.extend({
             var jsonCollection = this.collection.toJSON();
 
             var filters = {
-                type : 'ObjectId',
-                names : [],
-                values : []
+                type: 'ObjectId',
+                names: [],
+                values: []
             };
 
-            jsonCollection.map(function(model) {
+            jsonCollection.map(function (model) {
                 filters.names.push(model.name[App.currentUser.currentLanguage]);
                 filters.values.push(model._id);
             });
@@ -118,10 +118,10 @@ var filterValuesView = Backbone.View.extend({
         var checkElement = !$currentElement.hasClass('checkedValue');
         var options = {
             $currentElement: $currentElement,
-            currentValue   : currentValue,
-            currentName    : currentName,
-            checkElement   : checkElement,
-            mandatory      : this.mandatory
+            currentValue: currentValue,
+            currentName: currentName,
+            checkElement: checkElement,
+            mandatory: this.mandatory
         };
 
         if (!checkElement && this.defFilter && this.defFilter[this.filterName] && !this.defFilter[this.filterName].options) {
@@ -159,18 +159,21 @@ var filterValuesView = Backbone.View.extend({
         var currentValue = $currentElement.attr('data-value');
         var currentName = $currentElement.text().trim();
         var checkElement = !$currentElement.hasClass('checkedValue');
+        var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) ||
+            Cookies.get('currentLanguage') || 'en';
         var options = {
             $currentElement: $currentElement,
-            currentValue   : currentValue,
-            currentName    : currentName,
-            checkElement   : checkElement,
-            mandatory      : this.mandatory
+            currentValue: currentValue,
+            currentName: currentName,
+            checkElement: checkElement,
+            mandatory: this.mandatory
         };
         options.$filterNameElement = this.$el.find('.filterName');
         options.filterName = options.$filterNameElement.attr('data-value');
 
         this.timeView = new TimeView();
         this.timeView.on('dateSelected', function (data) {
+            var names = [currentLanguage === 'en' ? 'Fixed Period' : 'فترة محددة'];
             self.checkFilterElement(options);
             self.$el.find('.current').removeClass('current');
             self.trigger('selectValue', options);
@@ -178,8 +181,8 @@ var filterValuesView = Backbone.View.extend({
 
             self.filter.time = {
                 values: filterValues,
-                type  : 'date',
-                names : ['Fixed Period']
+                type: 'date',
+                names,
             };
             self.$el.find('input').val(self.filter.time.names.join(', '));
             self.$el.find('.current').removeClass('current');
@@ -344,7 +347,7 @@ var filterValuesView = Backbone.View.extend({
 
         if (this.updateNames) {
             this.updateFilterNameElement({
-                $filterNameElement  : $filterNameElement,
+                $filterNameElement: $filterNameElement,
                 isCheckedUlContainer: false
             }, names);
         }
@@ -409,12 +412,12 @@ var filterValuesView = Backbone.View.extend({
         }
 
         this.makePagination($paginationLi, {
-            start           : start,
-            end             : end,
+            start: start,
+            end: end,
             collectionLength: collectionLength,
-            currentPage     : currentPage,
-            elementsToShow  : elementsToShow,
-            checked         : checked
+            currentPage: currentPage,
+            elementsToShow: elementsToShow,
+            checked: checked
         });
 
         if (!options.notHideValues) {
@@ -442,16 +445,16 @@ var filterValuesView = Backbone.View.extend({
 
         $currentEl.append(this.template({
             filterDisplayName: this.filterDisplayName[currentLanguage] || this.filterDisplayName,
-            filterName       : this.filterName,
-            mandatory        : this.mandatory,
-            currentFilter    : this.currentFilter && !this.currentFilter.options ? this.currentFilter : null,
-            filterInputText  : filterInputText,
-            translation      : this.translation,
-            showSelectAll    : this.filerConstants.showSelectAll
+            filterName: this.filterName,
+            mandatory: this.mandatory,
+            currentFilter: this.currentFilter && !this.currentFilter.options ? this.currentFilter : null,
+            filterInputText: filterInputText,
+            translation: this.translation,
+            showSelectAll: this.filerConstants.showSelectAll
         }));
 
         this.beforeRenderContent({
-            withEmptyResult : false
+            withEmptyResult: false
         });
 
         $currentEl.find('.' + this.filterName + 'Values .miniStylePagination a').click(function (e) {

@@ -3,10 +3,13 @@ var _ = require('underscore');
 var Backbone = require('backbone');
 var moment = require('moment');
 var template = require('../../../templates/filter/time.html');
+var requireContent = require('../../helpers/requireContent');
+var CONSTANTS = require('../../constants/contentType');
+var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
     contentType: 'time',
-    template   : _.template(template),
+    template: _.template(template),
     events: {},
 
     initialize: function () {
@@ -22,23 +25,27 @@ module.exports = Backbone.View.extend({
 
         this.trigger('dateSelected', {
             fromTime: fromTime,
-            toTime  : toTime
+            toTime: toTime
         });
     },
 
     render: function () {
         var self = this;
         var $curEl = this.$el;
+        var currentLanguage = (App.currentUser && App.currentUser.currentLanguage) || Cookies.get('currentLanguage') || 'en';
+        var translation = requireContent(CONSTANTS.ACTIVITYLIST + '.translation.' + currentLanguage);
 
-        $curEl.html(this.template());
+        $curEl.html(this.template({
+            translation: translation,
+        }));
 
         $curEl = $curEl.dialog({
-            dialogClass  : 'timeDialog',
-            title        : 'Select Title',
+            dialogClass: 'timeDialog',
+            title: 'Select Title',
             showCancelBtn: true,
-            buttons      : {
+            buttons: {
                 save: {
-                    text : 'Ok',
+                    text: translation.ok,
                     click: function () {
                         self.save();
                         $(this).dialog('destroy').remove();
@@ -49,20 +56,20 @@ module.exports = Backbone.View.extend({
 
         $curEl.find('#startDate').datepicker({
             changeMonth: true,
-            changeYear : true,
-            yearRange  : '-20y:c+10y',
+            changeYear: true,
+            yearRange: '-20y:c+10y',
             defaultDate: new Date(),
-            onClose    : function (selectedDate) {
+            onClose: function (selectedDate) {
                 $curEl.find('#endDate').datepicker('option', 'minDate', selectedDate);
             }
         });
 
         $curEl.find('#endDate').datepicker({
             changeMonth: true,
-            changeYear : true,
-            yearRange  : '-20y:c+10y',
+            changeYear: true,
+            yearRange: '-20y:c+10y',
             defaultDate: new Date(),
-            onClose    : function (selectedDate) {
+            onClose: function (selectedDate) {
                 $curEl.find('#startDate').datepicker('option', 'maxDate', selectedDate);
             }
         });
