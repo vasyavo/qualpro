@@ -152,6 +152,7 @@ var personnelTranslation = {
     objectives                   : 'الأهداف',
     standards                    : 'متوسط المستوى',
     ratingTitle                  : 'التقييم',
+    editTitle                    : 'تعديل بيانات',
     // monthly evaluation form
     monthlyFormTitle             : 'نموذج التقييم الشهري',
     target                       : ' الهدف المحدد',
