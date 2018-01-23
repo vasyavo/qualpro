@@ -468,7 +468,7 @@ module.exports = BaseView.extend({
         }
 
         ratingCollectionJSON.length = newLength;
-        ratingCollectionJSON.shift();
+        // ratingCollectionJSON.shift();
 
         return ratingCollectionJSON;
     },
