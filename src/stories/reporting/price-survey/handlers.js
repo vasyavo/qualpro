@@ -1004,10 +1004,11 @@ const getAll = (req, res, next) => {
         };
 
         aggregation.exec(function(err, response) {
-            console.log(response[0]);
             if (err) {
+                console.log(err);
                 return next(err);
             }
+            console.log(response);
             if (response.length) {
                 response[0].data = _.map(response[0].data, function(model) {
 
