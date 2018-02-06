@@ -559,6 +559,8 @@ const getAll = (req, res, next) => {
         var filterSearch = filter.globalSearch || '';
         var queryObject;
         var pipeLine = [];
+        var queryPipeline = [];
+        var mainPipeline = [];
         var aggregation;
         var employeeFilter;
         var positionFilter;
@@ -579,12 +581,12 @@ const getAll = (req, res, next) => {
             'brand.name.ar'
         ];
 
-        delete filter.globalSearch;
+        aggregateHelper = new AggregationHelper($defProjection);
         queryObject = query.filter ? filterMapper.mapFilter({
-                contentType: CONTENT_TYPES.PRICESURVEY,
-                filter: filter,
-                personnel: personnel
-            }) : {};
+            contentType: CONTENT_TYPES.PRICESURVEY,
+            filter: filter,
+            personnel: personnel
+        }) : {};
 
         if (queryObject.personnel) {
             employeeFilter = queryObject.personnel;
@@ -596,29 +598,54 @@ const getAll = (req, res, next) => {
             delete queryObject.position;
         }
 
-        aggregateHelper = new AggregationHelper($defProjection);
-
-        pipeLine.push({
+        queryPipeline.push({
             $match: queryObject
         });
 
         if (employeeFilter) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     'createdBy.user': employeeFilter
                 }
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'personnels',
-            key: 'createdBy.user',
-            addProjection: ['position', 'country', 'region', 'subRegion'],
-            isArray: false
-        }));
+        queryPipeline.push(...[
+                // Stage 1
+                {
+                    $lookup: {
+                        "from": "personnels",
+                        "localField": "createdBy.user",
+                        "foreignField": "_id",
+                        "as": "createdBy.user"
+                    }
+                },
+
+                // Stage 2
+                {
+                    $addFields: {
+                        "createdBy.user": {
+                            $let: {
+                                vars: {
+                                    user: {
+                                        $arrayElemAt: ['$createdBy.user', 0]
+                                    }
+                                },
+                                in: {
+                                    "_id": "$$user._id",
+                                    "name": "$$user.name",
+                                    "position": "$$user.position",
+                                    "country": "$$user.country",
+                                    "region": "$$user.region",
+                                    "subRegion": "$$user.subRegion"
+                                }
+                            }
+                        }
+                    }
+                }]);
 
         if (queryObject.country) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -633,7 +660,7 @@ const getAll = (req, res, next) => {
         }
 
         if (queryObject.region) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -648,7 +675,7 @@ const getAll = (req, res, next) => {
         }
 
         if (queryObject.subRegion) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -663,34 +690,185 @@ const getAll = (req, res, next) => {
         }
 
         if (positionFilter) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     'createdBy.user.position': positionFilter
                 }
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'categories',
-            key: 'category',
-            isArray: false
-        }));
+        queryPipeline.push(...[
+            {
+                $project: {
+                    "createdBy": 1,
+                    "category": 1,
+                    "_id": 1,
+                    "maxBranchCount": 1,
+                    "brands": 1,
+                    "branchesAll": 1,
+                    "items": 1,
+                    "variant": 1,
+                    "country": 1,
+                    "branch": 1,
+                    "region": 1,
+                    "subRegion": 1,
+                    "retailSegment": 1,
+                    "outlet": 1,
+                    "size": 1,
+                    "price": 1,
+                    "currency": 1
+                }
+            },
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'variants',
-            key: 'variant',
-            isArray: false
-        }));
+            // Stage 4
+            {
+                $lookup: {
+                    "from": "categories",
+                    "localField": "category",
+                    "foreignField": "_id",
+                    "as": "category"
+                }
+            },
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'branches',
-            key: 'branch',
-            isArray: false,
-            addProjection: ['outlet', 'retailSegment', 'subRegion']
-        }));
+            // Stage 5
+            {
+                $addFields: {
+                    "category": {
+                        $let: {
+                            vars: {
+                                category: {
+                                    $arrayElemAt: ['$category', 0]
+                                }
+                            },
+                            in: {
+                                _id: '$$category._id',
+                                name: '$$category.name'
+                            }
+                        }
+                    }
+                }
+            },
+
+            // Stage 6
+            {
+                $lookup: {
+                    "from": "variants",
+                    "localField": "variant",
+                    "foreignField": "_id",
+                    "as": "variant"
+                }
+            },
+
+            // Stage 7
+            {
+                $addFields: {
+                    "variant": {
+                        $let: {
+                            vars: {
+                                variant: {
+                                    $arrayElemAt: ['$variant', 0]
+                                }
+                            },
+                            in: {
+                                _id: '$$variant._id',
+                                name: '$$variant.name'
+                            }
+                        }
+                    }
+                }
+            },
+
+            // Stage 8
+            {
+                $lookup: {
+                    "from": "branches",
+                    "localField": "branch",
+                    "foreignField": "_id",
+                    "as": "branch"
+                }
+            },
+
+            // Stage 9
+            {
+                $addFields: {
+                    "branch": {
+                        $let: {
+                            vars: {
+                                branch: {
+                                    $arrayElemAt: ['$branch', 0]
+                                }
+                            },
+                            in: {
+                                "_id": "$$branch._id",
+                                "name": "$$branch.name",
+                                "outlet": "$$branch.outlet",
+                                "retailSegment": "$$branch.retailSegment",
+                                "subRegion": "$$branch.subRegion"
+                            }
+                        }
+                    }
+                }
+            },
+
+            // Stage 10
+            {
+                $lookup: {
+                    "from": "domains",
+                    "localField": "branch.subRegion",
+                    "foreignField": "_id",
+                    "as": "branch.subRegion"
+                }
+            },
+
+            // Stage 11
+            {
+                $addFields: {
+                    "branch.subRegion": {
+                        $let: {
+                            vars: {
+                                subRegion: {
+                                    $arrayElemAt: ['$branch.subRegion', 0]
+                                }
+                            },
+                            in: {
+                                "_id": "$$subRegion._id",
+                                "name": "$$subRegion.name",
+                                "parent": "$$subRegion.parent"
+                            }
+                        }
+                    }
+                }
+            }, {
+                $lookup: {
+                    "from": "outlets",
+                    "localField": "outlet",
+                    "foreignField": "_id",
+                    "as": "outlet"
+                }
+            },
+
+            // Stage 13
+            {
+                $addFields: {
+                    "outlet": {
+                        $let: {
+                            vars: {
+                                outlet: {
+                                    $arrayElemAt: ['$outlet', 0]
+                                }
+                            },
+                            in: {
+                                "_id": "$$outlet._id",
+                                "name": "$$outlet.name",
+                                "retailSegments": "$$outlet.retailSegments"
+                            }
+                        }
+                    }
+                }
+            }]);
 
         if (queryObject.outlet) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     'branch.outlet': queryObject.outlet
                 }
@@ -698,7 +876,7 @@ const getAll = (req, res, next) => {
         }
 
         if (queryObject.subRegion) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -712,21 +890,8 @@ const getAll = (req, res, next) => {
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key: 'branch.subRegion',
-            isArray: false,
-            addProjection: ['parent'],
-            includeSiblings: {
-                branch: {
-                    _id: 1,
-                    name: 1
-                }
-            }
-        }));
-
-        if (queryObject.subRegion) {
-            pipeLine.push({
+        if (queryObject.region) {
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -740,15 +905,8 @@ const getAll = (req, res, next) => {
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'outlets',
-            key: 'outlet',
-            isArray: false,
-            addProjection: ['retailSegments']
-        }));
-
         if (queryObject.retailSegment) {
-            pipeLine.push({
+            queryPipeline.push({
                 $match: {
                     $or: [
                         {
@@ -761,241 +919,395 @@ const getAll = (req, res, next) => {
             });
         }
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'domains',
-            key: 'country',
-            isArray: false,
-            addMainProjection: ['currency']
-        }));
+        queryPipeline.push(...[
 
-        pipeLine.push({
-            $unwind: '$items'
-        });
 
-        pipeLine.push({
-            $project: {
-                category: 1,
-                variant: 1,
-                branch: 1,
-                currency: 1,
-                brand: '$items.brand',
-                size: '$items.size',
-                price: '$items.price'
-            }
-        });
+            // Stage 14
+            {
+                $lookup: {
+                    "from": "domains",
+                    "localField": "country",
+                    "foreignField": "_id",
+                    "as": "country"
+                }
+            },
 
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from: 'brands',
-            key: 'brand',
-            addProjection: 'ourCompany',
-            isArray: false
-        }));
+            // Stage 15
+            {
+                $addFields: {
+                    "country": {
+                        $let: {
+                            vars: {
+                                country: {
+                                    $arrayElemAt: ['$country', 0]
+                                }
+                            },
+                            in: {
+                                "_id": "$$country._id",
+                                "name": "$$country.name"
+                            }
+                        }
+                    }
+                }
+            },
 
-        pipeLine.push({
+            // Stage 16
+            {
+                $project: {
+                    "category": 1,
+                    "variant": 1,
+                    "branch": 1,
+                    "currency": 1,
+                    "items" :1,
+                }
+            },
+
+            // Stage 17
+            {
+                $unwind: "$items"
+            },
+
+            // Stage 18
+            {
+                $project: {
+                    "category": 1,
+                    "variant": 1,
+                    "branch": 1,
+                    "currency": 1,
+                    "brand": "$items.brand",
+                    "size": "$items.size",
+                    "price": "$items.price"
+                }
+            },
+
+            // Stage 19
+            {
+                $lookup: {
+                    "from": "brands",
+                    "localField": "brand",
+                    "foreignField": "_id",
+                    "as": "brand"
+                }
+            },
+
+            // Stage 20
+            {
+                $addFields: {
+                    "brand": {
+                        $let: {
+                            vars: {
+                                brand: {
+                                    $arrayElemAt: ['$brand', 0]
+                                }
+                            },
+                            in: {
+                                "_id": "$$brand._id",
+                                "name": "$$brand.name",
+                                "ourCompany": "$$brand.ourCompany"
+                            }
+                        }
+                    }
+                }
+            }]);
+
+        queryPipeline.push({
             $match: aggregateHelper.getSearchMatch(searchFieldsArray, filterSearch)
         });
-
-        pipeLine.push({
-            $group: {
-                _id: {
-                    brandId: '$brand._id',
-                    categoryId: '$category._id',
-                    variantId: '$variant._id',
-                    branchId: '$branch._id',
-                    size: '$size',
-                    price: '$price',
-                },
-
-                currency: { $first: '$currency' },
-
-                category: { $first: '$category' },
-                brand: { $first: '$brand' },
-                variant: { $first: '$variant' },
-                branch: { $first: '$branch' },
-                size: { $first: '$size' },
-                totalPrice: { $push: '$price' },
-                minPrice: { $min: '$price' },
-                maxPrice: { $max: '$price' },
-                avgPrice: { $avg: '$price' }
-            }
-        });
-
-        pipeLine.push({
-            $project: {
-                _id: 0,
-                brand: 1,
-                category: 1,
-                variant: 1,
-                branch: 1,
-                size: 1,
-                price: '$_id.price',
-                totalPrice: 1,
-                minPrice: 1,
-                maxPrice: 1,
-                avgPrice: 1,
-                currency: 1
-            }
-        });
-
-        pipeLine.push({
-            $group: {
-                _id: null,
-                data: { $push: '$$ROOT' },
-                branches: { $addToSet: '$branch' }
-            }
-        });
-
-        pipeLine.push({
-            $unwind: '$data'
-        });
-
-        pipeLine.push({
-            $project: {
-                brand: '$data.brand',
-                category: '$data.category',
-                variant: '$data.variant',
-                branch: '$data.branch',
-                size: '$data.size',
-                price: '$data.price',
-                totalPrice: '$data.totalPrice',
-                minPrice: '$data.minPrice',
-                maxPrice: '$data.maxPrice',
-                avgPrice: '$data.avgPrice',
-                currency: '$data.currency',
-                branchesAll: '$branches'
-            }
-        });
-
-        pipeLine.push({
-            $group: {
-                _id: {
-                    categoryId: '$category._id',
-                    brandId: '$brand._id',
-                    variantId: '$variant._id',
-                    size: '$size'
-                },
-
-                category: { $first: '$category' },
-                brand: { $first: '$brand' },
-                variant: { $first: '$variant' },
-                size: { $first: '$size' },
-
-                branches: {
-                    $addToSet: {
-                        branch: '$branch',
-                        minPrice: '$minPrice',
-                        maxPrice: '$maxPrice',
-                        avgPrice: '$avgPrice',
-                        price: '$totalPrice',
-                        currency: '$currency'
+            // Stage 22
+        mainPipeline.push(...queryPipeline);
+        mainPipeline.push(...[
+            {
+                $group: {
+                    "_id": {
+                        "brandId": "$brand._id",
+                        "categoryId": "$category._id",
+                        "variantId": "$variant._id",
+                        "branchId": "$branch._id",
+                        "size": "$size",
+                        "price": "$price"
+                    },
+                    "currency": {
+                        "$first": "$currency"
+                    },
+                    "category": {
+                        "$first": "$category"
+                    },
+                    "brand": {
+                        "$first": "$brand"
+                    },
+                    "variant": {
+                        "$first": "$variant"
+                    },
+                    "branch": {
+                        "$first": "$branch"
+                    },
+                    "size": {
+                        "$first": "$size"
+                    },
+                    "totalPrice": {
+                        "$push": "$price"
+                    },
+                    "minPrice": {
+                        "$min": "$price"
+                    },
+                    "maxPrice": {
+                        "$max": "$price"
+                    },
+                    "avgPrice": {
+                        "$avg": "$price"
                     }
-                },
-                branchCount: { $sum: 1 },
-                totalMinPrice: { $min: '$minPrice' },
-                arrayOfPrice: { $push: '$price' },
-                totalMaxPrice: { $max: '$maxPrice' },
-                totalAvgPrice: { $avg: '$avgPrice' },
-                currency: { $first: '$currency' },
-                branchesAll: { $first: '$branchesAll' }
-            }
-        });
+                }
+            },
 
-        pipeLine.push({
-            $project: {
-                _id: 0,
-                category: 1,
-                brand: 1,
-                variant: 1,
-                branches: 1,
-                size: 1,
-                arrayOfPrice: 1,
-                totalMinPrice: 1,
-                totalMaxPrice: 1,
-                totalAvgPrice: 1,
-                currency: 1,
-                branchCount: 1,
-                branchesAll: 1
-            }
-        });
+            // Stage 23
+            {
+                $project: {
+                    "_id": 0,
+                    "brand": 1,
+                    "category": 1,
+                    "variant": 1,
+                    "branch": 1,
+                    "size": 1,
+                    "price": "$_id.price",
+                    "totalPrice": 1,
+                    "minPrice": 1,
+                    "maxPrice": 1,
+                    "avgPrice": 1,
+                    "currency": 1
+                }
+            },
 
-        pipeLine.push({
-            $group: {
-                _id: {
-                    categoryId: '$category._id',
-                    brandId: '$brand._id'
-                },
+            // Stage 27
+            {
+                $group: {
+                    "_id": {
+                        "categoryId": "$category._id",
+                        "brandId": "$brand._id",
+                        "variantId": "$variant._id",
+                        "size": "$size"
+                    },
+                    "category": {
+                        "$first": "$category"
+                    },
+                    "brand": {
+                        "$first": "$brand"
+                    },
+                    "variant": {
+                        "$first": "$variant"
+                    },
+                    "size": {
+                        "$first": "$size"
+                    },
+                    "branches": {
+                        "$addToSet": {
+                            "branch": "$branch",
+                            "minPrice": "$minPrice",
+                            "maxPrice": "$maxPrice",
+                            "avgPrice": "$avgPrice",
+                            "price": "$totalPrice",
+                            "currency": "$currency"
+                        }
+                    },
+                    "branchCount": {
+                        "$sum": 1
+                    },
+                    "totalMinPrice": {
+                        "$min": "$minPrice"
+                    },
+                    "arrayOfPrice": {
+                        "$push": "$price"
+                    },
+                    "totalMaxPrice": {
+                        "$max": "$maxPrice"
+                    },
+                    "totalAvgPrice": {
+                        "$avg": "$avgPrice"
+                    },
+                    "currency": {
+                        "$first": "$currency"
+                    },
+                }
+            },
 
-                category: { $first: '$category' },
-                brand: { $first: '$brand' },
-                variants: {
-                    $push: {
-                        variant: '$variant',
-                        branches: '$branches',
-                        size: '$size',
-                        arrayOfPrice: '$arrayOfPrice',
-                        totalMinPrice: '$totalMinPrice',
-                        totalMaxPrice: '$totalMaxPrice',
-                        totalAvgPrice: '$totalAvgPrice',
-                        currency: '$currency'
+            // Stage 28
+            {
+                $project: {
+                    "_id": 0,
+                    "category": 1,
+                    "brand": 1,
+                    "variant": 1,
+                    "branches": 1,
+                    "size": 1,
+                    "arrayOfPrice": 1,
+                    "totalMinPrice": 1,
+                    "totalMaxPrice": 1,
+                    "totalAvgPrice": 1,
+                    "currency": 1,
+                    "branchCount": 1,
+                }
+            },
+
+            // Stage 29
+            {
+                $group: {
+                    "_id": {
+                        "categoryId": "$category._id",
+                        "brandId": "$brand._id"
+                    },
+                    "category": {
+                        "$first": "$category"
+                    },
+                    "brand": {
+                        "$first": "$brand"
+                    },
+                    "variants": {
+                        "$push": {
+                            "variant": "$variant",
+                            "branches": "$branches",
+                            "size": "$size",
+                            "arrayOfPrice": "$arrayOfPrice",
+                            "totalMinPrice": "$totalMinPrice",
+                            "totalMaxPrice": "$totalMaxPrice",
+                            "totalAvgPrice": "$totalAvgPrice",
+                            "currency": "$currency"
+                        }
+                    },
+                    "maxBranchCount": {
+                        "$max": "$branchCount"
+                    },
+                    "currency": {
+                        "$last": "$currency"
                     }
-                },
+                }
+            },
 
-                maxBranchCount: { $max: '$branchCount' },
-                branchesAll: { $first: '$branchesAll' },
-                currency: { $last: '$currency' }
-            }
-        });
+            // Stage 30
+            {
+                $sort: {
+                    "brand.ourCompany": -1,
+                    "brand.name": 1
+                }
+            },
 
-        pipeLine.push({
-            $sort: {
-                'brand.ourCompany': -1,
-                'brand.name': 1
-            }
-        });
-
-        pipeLine.push({
-            $group: {
-                _id: '$category._id',
-                category: {
-                    $first: '$category'
-                },
-
-                brands: {
-                    $push: {
-                        variants: '$variants',
-                        brand: '$brand'
+            // Stage 31
+            {
+                $group: {
+                    "_id": "$category._id",
+                    "category": {
+                        "$first": "$category"
+                    },
+                    "brands": {
+                        "$push": {
+                            "variants": "$variants",
+                            "brand": "$brand"
+                        }
+                    },
+                    "maxBranchCount": {
+                        "$max": "$maxBranchCount"
+                    },
+                    "currency": {
+                        "$last": "$currency"
                     }
-                },
+                }
+            },
 
-                maxBranchCount: { $max: '$maxBranchCount' },
-                branchesAll: { $first: '$branchesAll' },
-                currency: { $last: '$currency' }
+            // Stage 32
+            {
+                $sort: {
+                    "category.name": 1
+                }
+            },
+
+            // Stage 33
+            {
+                $group: {
+                    "_id": null,
+                    "total": {
+                        "$sum": 1
+                    },
+                    "data": {
+                        "$push": "$$ROOT"
+                    }
+                }
+            },
+
+            // Stage 34
+            {
+                $unwind: {
+                    "path": "$data",
+                    "preserveNullAndEmptyArrays": true
+                }
+            },
+
+            // Stage 35
+            {
+                $project: {
+                    "category": "$data.category",
+                    "_id": "$data._id",
+                    "maxBranchCount": "$data.maxBranchCount",
+                    "brands": "$data.brands",
+                    "items": "$data.items",
+                    "variant": "$data.variant",
+                    "country": "$data.country",
+                    "branch": "$data.branch",
+                    "region": "$data.region",
+                    "subRegion": "$data.subRegion",
+                    "retailSegment": "$data.retailSegment",
+                    "outlet": "$data.outlet",
+                    "createdBy": "$data.createdBy",
+                    "size": "$data.size",
+                    "price": "$data.price",
+                    "currency": "$data.currency",
+                    "total": 1
+                }
+            },
+
+            // Stage 36
+            {
+                $skip: skip
+            },
+
+            // Stage 37
+            {
+                $limit: limit
+            },
+
+            // Stage 38
+            {
+                $group: {
+                    "_id": "$total",
+                    "data": {
+                        "$push": "$$ROOT"
+                    }
+                }
+            },
+
+            // Stage 39
+            {
+                $project: {
+                    "_id": 0,
+                    "total": "$_id",
+                    "data": 1
+                }
+            },
+        ]);
+
+        pipeLine.push({
+            $facet: {
+                branches: [
+                    ...queryPipeline, {
+                        $group: {
+                            "_id": null,
+                            "branches": {
+                                "$addToSet": "$branch"
+                            }
+
+                        }
+                    }
+                ],
+                result: mainPipeline,
             }
         });
-
-        /*pipeLine = _.union(pipeLine, aggregateHelper.setTotal());
-
-         pipeLine.push({
-         $sort: sort
-         });
-
-         pipeLine.push({
-         $skip: skip
-         });
-
-         pipeLine.push({
-         $limit: limit
-         });
-
-         pipeLine = _.union(pipeLine, aggregateHelper.groupForUi());*/
-
-        pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            searchFieldsArray: searchFieldsArray,
-            filterSearch: filterSearch,
-            skip: skip,
-            limit: limit,
-            sort: sort
-        }));
 
         aggregation = PriceSurveyModel.aggregate(pipeLine);
 
@@ -1004,11 +1316,21 @@ const getAll = (req, res, next) => {
         };
 
         aggregation.exec(function(err, response) {
+
             if (err) {
                 console.log(err);
                 return next(err);
             }
             console.log(response);
+            var branches;
+            if (response.length) {
+                branches = response[0].branches[0].branches;
+                response[0] = response[0].result[0];
+            }
+
+            if (response[0] && response[0].data && response[0].data[0]){
+                response[0].data[0].branchesAll = branches;
+            }
             if (response.length) {
                 response[0].data = _.map(response[0].data, function(model) {
 
