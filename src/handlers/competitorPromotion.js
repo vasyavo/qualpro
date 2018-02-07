@@ -36,6 +36,7 @@ var CompetitorBranding = function() {
         branch : 1,
         origin : 1,
         promotion : 1,
+        promoType : 1,
         price : 1,
         packing : 1,
         packingType : 1,
@@ -74,6 +75,9 @@ var CompetitorBranding = function() {
                     if (body.promotion) {
                         body.promotion = _.escape(body.promotion);
                     }
+                    if (body.promoType) {
+                        body.promoType = _.escape(body.promoType);
+                    }
                     if (body.price) {
                         body.price = _.escape(body.price);
                     }
@@ -92,6 +96,7 @@ var CompetitorBranding = function() {
                         branch : body.branch,
                         origin : body.origin,
                         promotion : body.promotion,
+                        promoType : body.promoType,
                         price : body.price,
                         packing : body.packing,
                         packingType : body.packingType,
@@ -424,6 +429,10 @@ var CompetitorBranding = function() {
 
                     if (model.promotion) {
                         model.promotion = _.unescape(model.promotion);
+                    }
+
+                    if (model.promoType) {
+                        model.promoType = _.unescape(model.promoType);
                     }
 
                     if (model.price) {
@@ -839,6 +848,10 @@ var CompetitorBranding = function() {
 
             if (body.promotion) {
                 body.promotion = _.unescape(body.promotion);
+            }
+
+            if (body.promoType) {
+                body.promoType = _.unescape(body.promoType);
             }
 
             if (body.price) {

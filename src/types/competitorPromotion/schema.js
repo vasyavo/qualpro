@@ -67,6 +67,9 @@ const schema = new Schema({
         type: String,
         default: '',
     },
+    promoType: {
+        type: String,
+    },
     price: {
         type: String,
         default: '',

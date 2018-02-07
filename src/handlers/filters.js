@@ -10677,7 +10677,7 @@ const Filters = function () {
             filter: queryFilter,
             personnel: req.personnelModel,
         });
-        const beforeFilter = _.pick(filter, 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or');
+        const beforeFilter = _.pick(filter, 'category', 'brand', 'promoType', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or');
         const employeeFilter = filter.personnel ? { 'createdBy.user': _.pick(filter, 'personnel').personnel } : {};
         const afterFilter = _.pick(filter, 'position');
         let aggregation;
@@ -10770,6 +10770,7 @@ const Filters = function () {
             $project: {
                 category: { $arrayElemAt: ['$category', 0] },
                 brand: { $arrayElemAt: ['$brand', 0] },
+                promoType: 1,
                 country: { $arrayElemAt: ['$country', 0] },
                 region: { $arrayElemAt: ['$region', 0] },
                 subRegion: { $arrayElemAt: ['$subRegion', 0] },
@@ -10788,6 +10789,7 @@ const Filters = function () {
             $project: {
                 category: 1,
                 brand: 1,
+                promoType: 1,
                 country: 1,
                 region: 1,
                 subRegion: 1,
@@ -10813,6 +10815,7 @@ const Filters = function () {
             $project: {
                 category: 1,
                 brand: 1,
+                promoType: 1,
                 country: 1,
                 region: 1,
                 subRegion: 1,
@@ -10825,6 +10828,7 @@ const Filters = function () {
         });
         pipeLine.push({
             $project: {
+                promoType: 1,
                 category: {
                     _id: 1,
                     name: 1,
@@ -10874,6 +10878,7 @@ const Filters = function () {
             $group: {
                 _id: null,
                 category: { $addToSet: '$category' },
+                promoType: { $addToSet: '$promoType' },
                 brand: { $addToSet: '$brand' },
                 country: { $addToSet: '$country' },
                 region: { $addToSet: '$region' },
@@ -10903,6 +10908,7 @@ const Filters = function () {
             result = {
                 category: result.category || [],
                 brand: result.brand || [],
+                promoType: result.promoType || [],
                 country: result.country || [],
                 region: result.region || [],
                 subRegion: result.subRegion || [],

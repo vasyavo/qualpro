@@ -7,6 +7,7 @@ const analyzeByMethods = {
     category: require('./analyzeByCategory'),
     position: require('./analyzeByPosition'),
     employee: require('./analyzeByEmployee'),
+    promoType: require('./analyzeByPromoType'),
 };
 
 module.exports = (pipeline, analyzeBy) => {

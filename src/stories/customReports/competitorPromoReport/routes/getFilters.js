@@ -69,6 +69,7 @@ module.exports = (req, res, next) => {
         const $generalMatch = generalFiler([
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRAND,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, CONTENT_TYPES.ORIGIN,
+            'promoType'
         ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -162,6 +163,7 @@ module.exports = (req, res, next) => {
                 outlets: { $addToSet: '$outlet' },
                 branches: { $addToSet: '$branch' },
                 brands: { $addToSet: '$brand' },
+                promoType: { $addToSet: '$promoType' },
                 categories: { $push: '$category' },
                 displayTypes: { $push: '$displayType' },
                 origins: { $push: '$origin' },
@@ -180,6 +182,7 @@ module.exports = (req, res, next) => {
                 branches: 1,
                 brands: 1,
                 positions: 1,
+                promoType: 1,
                 personnels: 1,
                 categories: {
                     $reduce: {
@@ -338,6 +341,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 0,
                 personnels: 1,
+                promoType: 1,
                 countries: {
                     $map: {
                         input: '$countries',
@@ -481,6 +485,7 @@ module.exports = (req, res, next) => {
             displayTypes: [],
             origins: [],
             personnels: [],
+            promoType: [],
         };
 
         response.analyzeBy = [
@@ -539,6 +544,13 @@ module.exports = (req, res, next) => {
                     ar: 'منصب',
                 },
                 value: 'position',
+            },
+            {
+                name: {
+                    en: 'Promo Type',
+                    ar: 'منصب',
+                },
+                value: 'promoType',
             },
         ];
 
