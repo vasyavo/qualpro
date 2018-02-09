@@ -35,7 +35,8 @@ var AchievementForm = function () {
         editedBy         : 1,
         attachments      : 1,
         startDate        : 1,
-        endDate          : 1
+        endDate          : 1,
+        comments         : 1,
     };
 
     this.create = (req, res, next) => {

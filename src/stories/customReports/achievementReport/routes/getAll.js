@@ -418,6 +418,7 @@ module.exports = (req, res, next) => {
                     location: 1,
                     branch: 1,
                     description: 1,
+                    comments: 1,
                     additionalComment: 1,
                     attachments: 1,
                     createdBy: 1,
@@ -447,6 +448,7 @@ module.exports = (req, res, next) => {
                 additionalComment: '$records.additionalComment',
                 attachments: '$records.attachments',
                 createdBy: '$records.createdBy',
+                comments: '$records.comments',
                 total: 1,
             },
         });
@@ -457,6 +459,15 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $limit: limit,
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'comments',
+                localField: 'comments',
+                foreignField: '_id',
+                as: 'comments',
+            },
         });
 
         pipeline.push({
@@ -482,8 +493,122 @@ module.exports = (req, res, next) => {
                         },
                     },
                 },
+                commentAttachments: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $cond: {
+                                if: {
+                                    $ne: ['$$this.attachments', []],
+                                },
+                                then: {
+                                    $setUnion: ['$$this.attachments', '$$value'],
+                                },
+                                else: '$$value',
+                            },
+                        },
+                    },
+                },
+                commentsUser: {
+                    $reduce: {
+                        input: '$comments',
+                        initialValue: [],
+                        in: {
+                            $setUnion: [
+                                ['$$this.createdBy.user'],
+                                '$$value',
+                            ],
+                        },
+                    },
+                },
             },
         });
+
+        pipeline.push({
+            $lookup: {
+                from: 'personnels',
+                localField: 'commentsUser',
+                foreignField: '_id',
+                as: 'commentsUser',
+            },
+        });
+
+        pipeline.push({
+            $lookup: {
+                from: 'files',
+                localField: 'commentAttachments',
+                foreignField: '_id',
+                as: 'commentAttachments',
+            },
+        });
+
+        pipeline.push({
+            $addFields: {
+                comments: {
+                    $map: {
+                        input: '$comments',
+                        as: 'comment',
+                        in: {
+                            _id: '$$comment._id',
+                            body: '$$comment.body',
+                            createdBy: {
+                                $arrayElemAt: [
+                                    {
+                                        $map: {
+                                            input: {
+                                                $filter: {
+                                                    input: '$commentsUser',
+                                                    as: 'user',
+                                                    cond: {
+                                                        $setIsSubset: [
+                                                            [
+                                                                '$$user._id',
+                                                            ],
+                                                            ['$$comment.createdBy.user'],
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            as: 'user',
+                                            in: {
+                                                _id: '$$user._id',
+                                                firstName: '$$user.firstName',
+                                                lastName: '$$user.lastName',
+                                                imageSrc: '$$user.imageSrc',
+                                            },
+
+                                        },
+                                    },
+                                    0,
+                                ],
+                            },
+                            attachments: {
+                                $map: {
+                                    input: {
+                                        $filter: {
+                                            input: '$commentAttachments',
+                                            as: 'attachment',
+                                            cond: {
+                                                $setIsSubset: [['$$attachment._id'], '$$comment.attachments'],
+                                            },
+                                        },
+                                    },
+                                    as: 'attachment',
+                                    in: {
+                                        _id: '$$attachment._id',
+                                        originalName: '$$attachment.originalName',
+                                        contentType: '$$attachment.contentType',
+                                        preview: '$$attachment.preview',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            }
+        });
+
 
         pipeline.push({
             $group: {

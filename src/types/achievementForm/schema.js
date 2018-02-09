@@ -68,6 +68,13 @@ const schema = new Schema({
         }],
         default: [],
     },
+    comments: {
+        type: [{
+            type: ObjectId,
+            ref: CONTENT_TYPES.COMMENT,
+        }],
+        default: [],
+    },
     archived: {
         type: Boolean,
         default: false,

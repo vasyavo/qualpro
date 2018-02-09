@@ -1,6 +1,7 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 const CommentModel = require('./../types/comment/model');
 const ObjectiveModel = require('./../types/objective/model');
+const AchievementFormModel = require('./../types/achievementForm/model');
 const CompetitorBrandingModel = require('./../types/competitorBranding/model');
 const PromotionModel = require('./../types/promotion/model');
 const PromotionItemModel = require('./../types/promotionItem/model');
@@ -120,6 +121,10 @@ var Comment = function () {
                 case CONTENT_TYPES.MARKETING_CAMPAIGN:
                     ContextModel = MarketingCampaignModel;
                     mid = ACL_MODULES.AL_ALALI_BRANDING_ACTIVITY;
+                    break;
+                case CONTENT_TYPES.ACHIEVEMENTFORM:
+                    ContextModel = AchievementFormModel;
+                    mid = ACL_MODULES.ACHIEVEMENT_FORM;
                     break;
                 case CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY:
                     ContextModel = BrandingAndMonthlyDisplayModel;
@@ -969,8 +974,8 @@ var Comment = function () {
                 case CONTENT_TYPES.COMPETITORPROMOTION:
                     ContextModel = CompetitorPromotionModel;
                     break;
-                case CONTENT_TYPES.MARKETING_CAMPAIGN_ITEM:
-                    ContextModel = MarketingCampaignItemModel;
+                case CONTENT_TYPES.ACHIEVEMENTFORM:
+                    ContextModel = AchievementFormModel;
                     break;
                 case CONTENT_TYPES.PROMOTIONSITEMS:
                     ContextModel = PromotionItemModel;
