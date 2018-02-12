@@ -172,6 +172,16 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter.metric && queryFilter.metric.length) {
+            pipeline.push({
+                $match: {
+                    'items.metric': {
+                        $in: queryFilter.metric,
+                    },
+                },
+            });
+        }
+
         if (queryFilter.size && queryFilter.size.length) {
             pipeline.push({
                 $match: {
@@ -189,6 +199,7 @@ module.exports = (req, res, next) => {
                     branch: '$branch',
                     brand: '$items.brand',
                     size: '$items.size',
+                    metric: '$items.metric',
                     variant: '$variant',
                     category: '$category',
                 },
@@ -229,6 +240,7 @@ module.exports = (req, res, next) => {
                 branch: '$setData._id.branch',
                 brand: '$setData._id.brand',
                 size: '$setData._id.size',
+                metric: '$setData._id.metric',
                 variant: '$setData._id.variant',
                 category: '$setData._id.category',
                 min: '$setData.min',
@@ -333,6 +345,7 @@ module.exports = (req, res, next) => {
                 arrayOfPrice: 1,
                 total: 1,
                 size: '$size',
+                metric: '$metric',
                 country: { $arrayElemAt: ['$country', 0] },
                 branch: {
                     $let: {

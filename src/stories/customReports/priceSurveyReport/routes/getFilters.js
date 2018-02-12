@@ -164,6 +164,16 @@ module.exports = (req, res, next) => {
             });
         }
 
+        if (queryFilter.metric && queryFilter.metric.length) {
+            pipeline.push({
+                $match: {
+                    'items.metric': {
+                        $in: queryFilter.metric,
+                    },
+                },
+            });
+        }
+
         if (queryFilter.size && queryFilter.size.length) {
             pipeline.push({
                 $match: {
@@ -185,6 +195,7 @@ module.exports = (req, res, next) => {
                 branches: { $addToSet: '$branch' },
                 categories: { $addToSet: '$category' },
                 sizes: { $addToSet: '$items.size' },
+                metrics: { $addToSet: '$items.metric' },
                 variants: { $addToSet: '$variant' },
                 brands: { $addToSet: '$items.brand' },
                 positions: { $addToSet: '$createdBy.user.position' },
@@ -286,6 +297,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 0,
                 sizes: 1,
+                metrics: 1,
                 personnels: 1,
                 countries: {
                     _id: 1,
@@ -349,6 +361,7 @@ module.exports = (req, res, next) => {
 
         const response = result && result[0] ? result[0] : {
             sizes: [],
+            metrics: [],
             personnels: [],
             countries: [],
             regions: [],
@@ -363,6 +376,16 @@ module.exports = (req, res, next) => {
         };
 
         response.sizes = response.sizes.map((item) => {
+            return {
+                _id: item,
+                name: {
+                    en: item,
+                    ar: item,
+                },
+            };
+        });
+
+        response.metrics = response.metrics.map((item) => {
             return {
                 _id: item,
                 name: {

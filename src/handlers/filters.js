@@ -2006,6 +2006,8 @@ const Filters = function () {
             CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.POSITION,
             CONTENT_TYPES.PERSONNEL,
+            'metric',
+            'size',
         ].forEach(filterName => {
             if (filter[filterName]) {
                 queryFilter[filterName] = filter[filterName].$in;
@@ -2089,6 +2091,7 @@ const Filters = function () {
                                 branch: '$$priceSurvey.branch',
                                 product: '$$priceSurvey.category',
                                 publisher: '$$priceSurvey.createdBy.user',
+                                items: '$$priceSurvey.items',
                             },
                         },
                     },
@@ -2117,6 +2120,7 @@ const Filters = function () {
                     branch: '$priceSurvey.branch',
                     product: '$priceSurvey.product',
                     publisher: '$priceSurvey.publisher',
+                    items: '$priceSurvey.items',
                 },
             },
             {
@@ -2642,8 +2646,12 @@ const Filters = function () {
                     retailSegment: { $arrayElemAt: ['$retailSegment', 0] },
                     outlet: { $arrayElemAt: ['$outlet', 0] },
                     product: 1,
+                    items: 1,
                     publisher: 1,
                 },
+            },
+            {
+                $unwind: '$items',
             },
             {
                 $group: {
@@ -2655,6 +2663,8 @@ const Filters = function () {
                     retailSegment: { $addToSet: '$retailSegment' },
                     outlet: { $addToSet: '$outlet' },
                     products: { $addToSet: '$product' },
+                    sizes: { $addToSet: '$sizes' },
+                    metrics: { $addToSet: '$metrics' },
                     publishers: { $addToSet: '$publisher' },
                 },
             },
@@ -2915,6 +2925,8 @@ const Filters = function () {
                     _id: false,
                     country: 1,
                     region: 1,
+                    sizes: 1,
+                    metrics: 1,
                     subRegion: 1,
                     branch: 1,
                     outlet: 1,

@@ -53,6 +53,7 @@ const aggregateById = (options, callback) => {
             branch: 1,
             brand: '$items.brand',
             size: '$items.size',
+            metric: '$items.metric',
             price: '$items.price'
         }
     });
@@ -66,6 +67,7 @@ const aggregateById = (options, callback) => {
                 branch: '$branch'
             },
             size: { $first: '$size' },
+            metric: { $first: '$metric' },
             minPrice: { $min: '$price' },
             maxPrice: { $max: '$price' },
             avgPrice: { $avg: '$price' }
@@ -89,6 +91,7 @@ const aggregateById = (options, callback) => {
             variant: '$_id.variant',
             branch: { $arrayElemAt: ['$branch', 0] },
             size: 1,
+            metric: 1,
             minPrice: 1,
             maxPrice: 1,
             avgPrice: 1
@@ -100,6 +103,7 @@ const aggregateById = (options, callback) => {
             brand: 1,
             category: 1,
             variant: 1,
+            metric: 1,
             branch: {
                 _id: 1,
                 name: 1
@@ -130,6 +134,7 @@ const aggregateById = (options, callback) => {
             variant: '$data.variant',
             branch: '$data.branch',
             size: '$data.size',
+            metric: '$data.metric',
             minPrice: '$data.minPrice',
             maxPrice: '$data.maxPrice',
             avgPrice: '$data.avgPrice',
@@ -154,6 +159,7 @@ const aggregateById = (options, callback) => {
             },
             branchCount: { $sum: 1 },
             size: { $first: '$size' },
+            metric: { $first: '$metric' },
             totalMinPrice: { $min: '$minPrice' },
             totalMaxPrice: { $max: '$maxPrice' },
             totalAvgPrice: { $avg: '$avgPrice' },
@@ -178,7 +184,7 @@ const aggregateById = (options, callback) => {
             variant: { $arrayElemAt: ['$variant', 0] },
             branches: 1,
             size: 1,
-            totalMinPrice: 1,
+            metric: 1,
             totalMaxPrice: 1,
             totalAvgPrice: 1,
             branchCount: 1,
@@ -196,6 +202,7 @@ const aggregateById = (options, callback) => {
             },
             branches: 1,
             size: 1,
+            metric: 1,
             totalMinPrice: 1,
             totalMaxPrice: 1,
             totalAvgPrice: 1,
@@ -215,6 +222,7 @@ const aggregateById = (options, callback) => {
                     variant: '$variant',
                     branches: '$branches',
                     size: '$size',
+                    metric: '$metric',
                     totalMinPrice: '$totalMinPrice',
                     totalMaxPrice: '$totalMaxPrice',
                     totalAvgPrice: '$totalAvgPrice'
@@ -577,6 +585,7 @@ const getAll = (req, res, next) => {
             'variant.name.ar',
             'size',
             'price',
+            'metric',
             'brand.name.en',
             'brand.name.ar'
         ];
@@ -1401,6 +1410,7 @@ const getBrands = (req, res, next) => {
         var aggregation;
         var brandFilter;
         var sizeFilter;
+        var metricFilter;
         var positionFilter;
         var personnelFilter;
         var searchFieldsArray = [
@@ -1422,6 +1432,10 @@ const getBrands = (req, res, next) => {
         if (queryObject.size) {
             sizeFilter = queryObject.size;
             delete queryObject.size;
+        }
+        if (queryObject.metric) {
+            metricFilter = queryObject.metric;
+            delete queryObject.metric;
         }
         if (queryObject.position) {
             positionFilter = queryObject.position;
@@ -1452,7 +1466,8 @@ const getBrands = (req, res, next) => {
             pipeLine.push({
                 $match: {
                     'items.brand': brandFilter,
-                    'items.size': sizeFilter
+                    'items.size': sizeFilter,
+                    'items.metric': metricFilter,
                 }
             });
         }
@@ -1478,6 +1493,7 @@ const getBrands = (req, res, next) => {
                     _id: 1,
                     brand: 1,
                     price: 1,
+                    metric: 1,
                     size: 1
                 }
             }
