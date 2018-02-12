@@ -43,7 +43,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, 'displaySeason'
         ];
         const pipeline = [];
 
@@ -58,6 +58,7 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 category: '$categories',
                 displayType: 1,
+                displaySeason: 1,
                 dateStart: 1,
                 dateEnd: 1,
                 description: 1,
@@ -111,7 +112,7 @@ module.exports = (req, res, next) => {
 
         const $generalMatch = generalFiler([
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET,
-            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE, 'displaySeason'
         ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -201,6 +202,7 @@ module.exports = (req, res, next) => {
                 branch: '$setBranding.branch',
                 category: '$setBranding.category',
                 displayType: '$setBranding.displayType',
+                displaySeason: '$setBranding.displaySeason',
                 dateStart: '$setBranding.dateStart',
                 dateEnd: '$setBranding.dateEnd',
                 description: '$setBranding.description',
@@ -294,6 +296,7 @@ module.exports = (req, res, next) => {
             $project: {
                 _id: 1,
                 branch: 1,
+                displaySeason: 1,
                 location: {
                     $let: {
                         vars: {
@@ -384,6 +387,7 @@ module.exports = (req, res, next) => {
                 _id: 1,
                 total: 1,
                 location: 1,
+                displaySeason: 1,
                 attachments: 1,
                 dateStart: { $dateToString: { format: '%m/%d/%Y', date: '$dateStart' } },
                 dateEnd: { $dateToString: { format: '%m/%d/%Y', date: '$dateEnd' } },

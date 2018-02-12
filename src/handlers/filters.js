@@ -13060,6 +13060,14 @@ const Filters = function () {
             });
         }
 
+        if (queryFilter.displaySeason && queryFilter.displaySeason.values) {
+            $matchPersonnel.$and.push({
+                'displaySeason': {
+                    $in: queryFilter.displaySeason.values,
+                },
+            });
+        }
+
         if (filter.setPersonnel) {
             $matchPersonnel.$and.push({
                 'createdBy._id': {
@@ -13234,6 +13242,9 @@ const Filters = function () {
                     category: {
                         $push: '$category',
                     },
+                    displaySeason: {
+                        $push: '$displaySeason',
+                    },
                     country: {
                         $push: '$country',
                     },
@@ -13279,6 +13290,9 @@ const Filters = function () {
                     country: {
                         $setUnion: '$country',
                     },
+                    displaySeason: {
+                        $setUnion: '$displaySeason',
+                    },
                     region: {
                         $setUnion: '$region',
                     },
@@ -13310,6 +13324,7 @@ const Filters = function () {
             {
                 $project: {
                     category: 1,
+                    displaySeason: 1,
                     country: 1,
                     region: 1,
                     subRegion: 1,
@@ -13351,6 +13366,7 @@ const Filters = function () {
                         name: 1,
                     },
                     category: 1,
+                    displaySeason: 1,
                     country: 1,
                     region: 1,
                     subRegion: 1,
@@ -13372,6 +13388,7 @@ const Filters = function () {
                 $project: {
                     position: 1,
                     country: 1,
+                    displaySeason: 1,
                     region: 1,
                     subRegion: 1,
                     outlet: 1,
@@ -13396,6 +13413,7 @@ const Filters = function () {
                 $project: {
                     position: 1,
                     country: 1,
+                    displaySeason: 1,
                     region: 1,
                     subRegion: 1,
                     outlet: 1,
@@ -13419,6 +13437,7 @@ const Filters = function () {
             {
                 $project: {
                     position: 1,
+                    displaySeason: 1,
                     country: 1,
                     region: 1,
                     subRegion: 1,
@@ -13443,6 +13462,7 @@ const Filters = function () {
             {
                 $project: {
                     position: 1,
+                    displaySeason: 1,
                     region: 1,
                     subRegion: 1,
                     outlet: 1,
@@ -13467,6 +13487,7 @@ const Filters = function () {
             {
                 $project: {
                     position: 1,
+                    displaySeason: 1,
                     country: 1,
                     subRegion: 1,
                     outlet: 1,
@@ -13541,6 +13562,7 @@ const Filters = function () {
                 $project: {
                     position: 1,
                     country: 1,
+                    displaySeason: 1,
                     outlet: 1,
                     retailSegment: 1,
                     branch: 1,
@@ -13618,6 +13640,7 @@ const Filters = function () {
                     position: 1,
                     country: 1,
                     subRegion: 1,
+                    displaySeason: 1,
                     outlet: 1,
                     retailSegment: 1,
                     personnel: 1,
@@ -13680,6 +13703,7 @@ const Filters = function () {
             },
             {
                 $project: {
+                    displaySeason: 1,
                     category: {
                         _id: 1,
                         name: 1,
@@ -13735,6 +13759,7 @@ const Filters = function () {
                 result.slice().pop() : {
                     category: [],
                     country: [],
+                    displaySeason: [],
                     region: [],
                     subRegion: [],
                     outlet: [],

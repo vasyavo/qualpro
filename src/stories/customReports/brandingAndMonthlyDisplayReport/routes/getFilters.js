@@ -39,7 +39,7 @@ module.exports = (req, res, next) => {
             CONTENT_TYPES.COUNTRY, CONTENT_TYPES.REGION, CONTENT_TYPES.SUBREGION,
             CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.BRANCH,
             CONTENT_TYPES.CATEGORY, CONTENT_TYPES.DISPLAY_TYPE,
-            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL,
+            CONTENT_TYPES.POSITION, CONTENT_TYPES.PERSONNEL, 'displaySeason'
         ];
         const pipeline = [];
 
@@ -54,6 +54,7 @@ module.exports = (req, res, next) => {
                 branch: 1,
                 category: '$categories',
                 displayType: 1,
+                displaySeason: 1,
                 createdBy: {
                     user: '$createdBy',
                     date: '$createdAt',
@@ -85,7 +86,7 @@ module.exports = (req, res, next) => {
         locationFilter(pipeline, personnel, queryFilter, true);
 
         const $generalMatch = generalFiler([
-            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.DISPLAY_TYPE,
+            CONTENT_TYPES.RETAILSEGMENT, CONTENT_TYPES.OUTLET, CONTENT_TYPES.DISPLAY_TYPE, 'displaySeason'
         ], queryFilter, personnel);
 
         if (queryFilter[CONTENT_TYPES.PERSONNEL] && queryFilter[CONTENT_TYPES.PERSONNEL].length) {
@@ -188,6 +189,7 @@ module.exports = (req, res, next) => {
                 retailSegments: { $addToSet: '$retailSegment' },
                 outlets: { $addToSet: '$outlet' },
                 branches: { $addToSet: '$branch' },
+                displaySeason: { $addToSet: '$displaySeason' },
                 categories: { $push: '$category' },
                 displayTypes: { $push: '$displayType' },
                 positions: { $addToSet: '$createdBy.user.position' },
@@ -203,6 +205,7 @@ module.exports = (req, res, next) => {
                 retailSegments: 1,
                 outlets: 1,
                 branches: 1,
+                displaySeason: 1,
                 categories: {
                     $reduce: {
                         input: '$categories',
@@ -339,6 +342,7 @@ module.exports = (req, res, next) => {
 
         pipeline.push({
             $project: {
+                displaySeason: 1,
                 countries: {
                     _id: 1,
                     name: 1,
@@ -405,6 +409,7 @@ module.exports = (req, res, next) => {
             branches: [],
             categories: [],
             displayTypes: [],
+            displaySeason: [],
             positions: [],
             personnels: [],
         };

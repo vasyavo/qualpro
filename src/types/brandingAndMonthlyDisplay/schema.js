@@ -49,6 +49,16 @@ const schema = new Schema({
         }],
         default: [],
     },
+    displaySeason: {
+        type: String,
+        enum: [
+            'Ramadan Display',
+            'Non-Ramadan Display'
+        ]
+    },
+    displaySize: {
+        type: String,
+    },
     dateStart: {
         type: Date,
         required: true,

@@ -53,6 +53,9 @@ const schema = new Schema({
             size: {
                 type: String,
             },
+            metric: {
+                type: String,
+            },
             price: {
                 type: Number,
                 min: 0,

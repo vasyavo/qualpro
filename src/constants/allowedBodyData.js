@@ -1683,11 +1683,11 @@ allowedParams[CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY] = {
     },
     1: {
         create: [],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'displaySeason', 'displaySize', 'dateStart', 'dateEnd', 'description']
     },
     2: {
         create: [],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'displaySeason', 'displaySize', 'dateStart', 'dateEnd', 'description']
     },
     3: {
         create: [],
@@ -1711,11 +1711,11 @@ allowedParams[CONTENT_TYPES.BRANDING_AND_MONTHLY_DISPLAY] = {
     },
     8: {
         create: [],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'displaySeason', 'displaySize', 'dateStart', 'dateEnd', 'description']
     },
     9: {
         create: [],
-        update: ['displayType', 'dateStart', 'dateEnd', 'description']
+        update: ['displayType', 'displaySeason', 'displaySize', 'dateStart', 'dateEnd', 'description']
     },
     10 : {
         create: [],
