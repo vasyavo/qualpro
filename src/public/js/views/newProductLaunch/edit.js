@@ -45,7 +45,9 @@ module.exports = Backbone.View.extend({
         var dateEnd = moment(model.shelfLifeEnd, 'DD.MM.YYYY');
         var currentLanguage = App.currentUser.currentLanguage || 'en';
         var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-
+        var anotherLanguageForCamelCase = currentLanguage === 'en' ? 'Ar' : 'En';
+        var additionalCommentIdToHide = 'additionalComment' + anotherLanguageForCamelCase + 'Container';
+        var distributorIdToHide = 'distributor' + anotherLanguageForCamelCase + 'Container';
         var layout = this.template({
             translation: this.translation,
             model: model,
@@ -183,6 +185,9 @@ module.exports = Backbone.View.extend({
 
         $startDate.datepicker(startDateObj);
         $dueDate.datepicker(endDateObj);
+
+        this.$el.find('#' + distributorIdToHide).hide();
+        this.$el.find('#' + additionalCommentIdToHide).hide();
 
         this.displayTypeCollection = new DisplayTypeCollection();
         this.displayTypeCollection.on('reset', function () {
