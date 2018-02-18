@@ -1,6 +1,6 @@
 const ActivityLog = require('./../stories/push-notifications/activityLog');
 
-var NewProductLaunch = function() {
+var NewProductLaunch = function () {
     const logger = require('../utils/logger');
     var async = require('async');
     var _ = require('lodash');
@@ -19,34 +19,34 @@ var NewProductLaunch = function() {
     var self = this;
 
     var $defProjection = {
-        _id : 1,
-        additionalComment : 1,
-        category_name : 1,
-        category : 1,
-        variant : 1,
-        brand : 1,
-        packingType : 1,
-        country : 1,
-        region : 1,
-        subRegion : 1,
-        retailSegment : 1,
-        outlet : 1,
-        branch : 1,
-        origin : 1,
-        price : 1,
-        packing : 1,
-        location : 1,
-        displayType : 1,
-        distributor : 1,
-        shelfLifeStart : 1,
-        shelfLifeEnd : 1,
-        archived : 1,
-        createdBy : 1,
-        editedBy : 1,
-        attachments : 1
+        _id: 1,
+        additionalComment: 1,
+        category_name: 1,
+        category: 1,
+        variant: 1,
+        brand: 1,
+        packingType: 1,
+        country: 1,
+        region: 1,
+        subRegion: 1,
+        retailSegment: 1,
+        outlet: 1,
+        branch: 1,
+        origin: 1,
+        price: 1,
+        packing: 1,
+        location: 1,
+        displayType: 1,
+        distributor: 1,
+        shelfLifeStart: 1,
+        shelfLifeEnd: 1,
+        archived: 1,
+        createdBy: 1,
+        editedBy: 1,
+        attachments: 1
     };
 
-    this.create = function(req, res, next) {
+    this.create = function (req, res, next) {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
@@ -58,33 +58,33 @@ var NewProductLaunch = function() {
             var newProductLaunch;
 
             async.waterfall([
-                function(cb) {
+                function (cb) {
                     var createdBy = {
-                        user : userId,
-                        date : new Date()
+                        user: userId,
+                        date: new Date()
                     };
                     if (body.additionalComment) {
                         body.additionalComment = {
-                            en : _.escape(body.additionalComment.en),
-                            ar : _.escape(body.additionalComment.ar)
+                            en: _.escape(body.additionalComment.en),
+                            ar: _.escape(body.additionalComment.ar)
                         };
                     }
                     if (body.category_name) {
                         body.category_name = {
-                            en : _.escape(body.category_name.en),
-                            ar : _.escape(body.category_name.ar)
+                            en: _.escape(body.category_name.en),
+                            ar: _.escape(body.category_name.ar)
                         };
                     }
                     if (body.location) {
                         body.location = {
-                            en : _.escape(body.location.en),
-                            ar : _.escape(body.location.ar)
+                            en: _.escape(body.location.en),
+                            ar: _.escape(body.location.ar)
                         };
                     }
                     if (body.distributor) {
                         body.distributor = {
-                            en : _.escape(body.distributor.en),
-                            ar : _.escape(body.distributor.ar)
+                            en: _.escape(body.distributor.en),
+                            ar: _.escape(body.distributor.ar)
                         };
                     }
                     if (body.brand && body.brand.name) {
@@ -114,28 +114,28 @@ var NewProductLaunch = function() {
                     }
 
                     newProductLaunch = {
-                        additionalComment : body.additionalComment,
-                        category : body.category,
-                        category_name : body.category_name,
-                        brand : body.brand,
-                        variant : body.variant,
-                        country : body.country,
-                        region : body.region,
-                        subRegion : body.subRegion,
-                        retailSegment : body.retailSegment,
-                        outlet : body.outlet,
-                        branch : body.branch,
-                        origin : body.origin,
-                        price : body.price,
-                        packing : body.packing,
-                        packingType : body.packingType,
-                        location : body.location,
-                        displayType : body.displayType,
-                        distributor : body.distributor,
-                        shelfLifeStart : body.shelfLifeStart,
-                        shelfLifeEnd : body.shelfLifeEnd,
-                        createdBy : createdBy,
-                        editedBy : createdBy,
+                        additionalComment: body.additionalComment,
+                        category: body.category,
+                        category_name: body.category_name,
+                        brand: body.brand,
+                        variant: body.variant,
+                        country: body.country,
+                        region: body.region,
+                        subRegion: body.subRegion,
+                        retailSegment: body.retailSegment,
+                        outlet: body.outlet,
+                        branch: body.branch,
+                        origin: body.origin,
+                        price: body.price,
+                        packing: body.packing,
+                        packingType: body.packingType,
+                        location: body.location,
+                        displayType: body.displayType,
+                        distributor: body.distributor,
+                        shelfLifeStart: body.shelfLifeStart,
+                        shelfLifeEnd: body.shelfLifeEnd,
+                        createdBy: createdBy,
+                        editedBy: createdBy,
                     };
 
                     NewProductLaunchModel.create(newProductLaunch, function (err, model) {
@@ -148,7 +148,7 @@ var NewProductLaunch = function() {
                         ActivityLog.emit('reporting:new-product-launch:published', {
                             actionOriginator: userId,
                             accessRoleLevel,
-                            body : model.toJSON()
+                            body: model.toJSON()
                         });
 
                         cb(null, model);
@@ -170,11 +170,11 @@ var NewProductLaunch = function() {
                     });
                 },
 
-                function(model, filesIds, cb) {
+                function (model, filesIds, cb) {
                     model.set('attachments', filesIds);
                     model.save(cb);
                 }
-            ], function(err) {
+            ], function (err) {
                 if (err) {
                     if (!res.headersSent) {
                         next(err);
@@ -198,7 +198,7 @@ var NewProductLaunch = function() {
             return next(err);
         }
 
-        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'create', function(err, saveData) {
+        bodyValidator.validateBody(body, req.session.level, CONTENT_TYPES.NEWPRODUCTLAUNCH, 'create', function (err, saveData) {
             if (err) {
                 return next(err);
             }
@@ -206,26 +206,26 @@ var NewProductLaunch = function() {
             queryRun(saveData);
         });
     };
-    
+
     this.removeItem = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
         const accessRoleLevel = session.level;
         const id = req.params.id;
-        
+
         const queryRun = (callback) => {
             async.waterfall([
-                
+
                 (cb) => {
-                    NewProductLaunchModel.findOne({ _id : id }).lean().exec(cb);
+                    NewProductLaunchModel.findOne({_id: id}).lean().exec(cb);
                 },
                 (removeItem, cb) => {
                     const eventModel = new EventModel();
                     const options = {
                         headers: {
                             contentType: "NewProductLaunch",
-                            actionType : "remove",
-                            user       : userId,
+                            actionType: "remove",
+                            user: userId,
                         },
                         payload: removeItem
                     };
@@ -239,21 +239,21 @@ var NewProductLaunch = function() {
                         if (!res.headersSent) {
                             next(err);
                         }
-                        
+
                         return logger.error(err);
                     }
-    
+
                     NewProductLaunchModel.findOneAndRemove({_id: id}, callback)
                 },
             ], (err, body) => {
                 if (err) {
                     return next(err);
                 }
-                
+
                 res.status(200).send(body);
             });
         };
-        
+
         async.waterfall([
             (cb) => {
                 queryRun(cb);
@@ -262,11 +262,11 @@ var NewProductLaunch = function() {
             if (err) {
                 return next(err);
             }
-            
+
             res.status(200).send(body);
         });
     };
-    
+
     this.update = (req, res, next) => {
         const session = req.session;
         const userId = session.uId;
@@ -279,15 +279,22 @@ var NewProductLaunch = function() {
                 user: userId,
                 date: Date.now(),
             };
-            body.brand = {
-                _id: body.brand,
-            };
-            NewProductLaunchModel
-                .findByIdAndUpdate(id, body, { new: true })
+            if (body.brand) {
+                body.brand = {
+                    _id: body.brand,
+                };
+            }
+            var cursor = NewProductLaunchModel
+                .findByIdAndUpdate(id, body, {new: true})
                 .populate('displayType')
                 .populate('category')
-                .populate('origin')
-                .populate('brand._id')
+                .populate('origin');
+
+            if (body.brand) {
+                cursor = cursor.populate('brand._id');
+            }
+
+            cursor
                 .lean()
                 .exec(callback);
         };
@@ -302,7 +309,9 @@ var NewProductLaunch = function() {
             },
 
             (body, cb) => {
-                body.brand = body.brand._id;
+                if (requestBody.brand) {
+                    body.brand = body.brand._id;
+                }
 
                 cb(null, body);
             },
@@ -316,7 +325,7 @@ var NewProductLaunch = function() {
         });
     };
 
-    this.getAll = function(req, res, next) {
+    this.getAll = function (req, res, next) {
         function queryRun(personnel) {
             var query = req.query;
             var isMobile = req.isMobile;
@@ -363,36 +372,36 @@ var NewProductLaunch = function() {
             delete filter.globalSearch;
 
             queryObject = filterMapper.mapFilter({
-                contentType : CONTENT_TYPES.NEWPRODUCTLAUNCH,
-                filter : filter,
-                personnel : personnel
+                contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
+                filter: filter,
+                personnel: personnel
             });
 
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 
             if (queryObject.position && queryObject.position.$in) {
                 positionFilter = {
-                    'createdBy.user.position' : queryObject.position
+                    'createdBy.user.position': queryObject.position
                 };
 
                 delete queryObject.position;
             }
 
             pipeLine = getAllPipeline({
-                aggregateHelper : aggregateHelper,
-                queryObject : queryObject,
-                positionFilter : positionFilter,
-                searchFieldsArray : searchFieldsArray,
-                filterSearch : filterSearch,
-                skip : skip,
-                limit : limit,
-                isMobile : isMobile
+                aggregateHelper: aggregateHelper,
+                queryObject: queryObject,
+                positionFilter: positionFilter,
+                searchFieldsArray: searchFieldsArray,
+                filterSearch: filterSearch,
+                skip: skip,
+                limit: limit,
+                isMobile: isMobile
             });
 
             aggregation = NewProductLaunchModel.aggregate(pipeLine);
 
             aggregation.options = {
-                allowDiskUse : true
+                allowDiskUse: true
             };
 
             aggregation.exec((err, result) => {
@@ -400,7 +409,7 @@ var NewProductLaunch = function() {
                     return next(err);
                 }
 
-                const body = result.length ? result[0] : { data: [], total: 0 };
+                const body = result.length ? result[0] : {data: [], total: 0};
 
                 body.data.forEach(element => {
                     if (element.additionalComment) {
@@ -423,14 +432,11 @@ var NewProductLaunch = function() {
                     }
 
                     if (element.brand && element.brand.name) {
-                        if (typeof element.brand.name === 'string') {
-                            element.brand.name = _.unescape(element.brand.name);
-                        } else {
-                            element.brand.name = {
-                                en: _.unescape(element.brand.name.en),
-                                ar: _.unescape(element.brand.name.ar),
-                            };
-                        }
+                        element.brand.name = {
+                            ...element.brand.name,
+                            en: _.unescape(element.brand.name.en),
+                            ar: _.unescape(element.brand.name.ar),
+                        };
                     }
 
                     if (element.variant && element.variant.name) {
@@ -477,121 +483,177 @@ var NewProductLaunch = function() {
         var limit = options.limit;
         var isMobile = options.isMobile;
         var forSync = options.forSync;
-        var employeeFilter = queryObject.personnel ? {'createdBy.user' : _.pick(queryObject, 'personnel').personnel} : {};
+        var employeeFilter = queryObject.personnel ? {'createdBy.user': _.pick(queryObject, 'personnel').personnel} : {};
         var pipeLine = [];
 
         delete queryObject.personnel;
 
         pipeLine.push({
-            $match : queryObject
+            $match: queryObject
         });
 
         pipeLine.push({
-            $match : employeeFilter
+            $match: employeeFilter
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'attachments',
-            addProjection : ['contentType', 'originalName', 'extension', 'createdBy', 'imageSrc']
+            from: 'files',
+            key: 'attachments',
+            addProjection: ['contentType', 'originalName', 'extension', 'createdBy', 'imageSrc']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            isArray : false,
-            addProjection : ['currency']
+            from: 'domains',
+            key: 'country',
+            isArray: false,
+            addProjection: ['currency']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'region',
-            isArray : false
+            from: 'domains',
+            key: 'region',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'subRegion',
-            isArray : false
+            from: 'domains',
+            key: 'subRegion',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment',
-            isArray : false
+            from: 'retailSegments',
+            key: 'retailSegment',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'outlets',
-            key : 'outlet',
-            isArray : false
+            from: 'outlets',
+            key: 'outlet',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'branches',
-            key : 'branch',
-            isArray : false
+            from: 'branches',
+            key: 'branch',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'categories',
-            key : 'category',
-            isArray : false
+            from: 'categories',
+            key: 'category',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'displayTypes',
-            key : 'displayType',
-            isArray : true
+            from: 'displayTypes',
+            key: 'displayType',
+            isArray: true
+        }));
+
+        pipeLine.push({
+            $addFields: {
+                brand: '$brand._id',
+                customBrand: {
+                    en: '$brand.name',
+                    ar: '$brand.name',
+                },
+            },
+        });
+
+        pipeLine.push({
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brands',
+            },
+        });
+
+        pipeLine.push({
+            $addFields: {
+                brand: {
+                    $cond: {
+                        if: {
+                            $gt: [{
+                                $size: '$brands',
+                            }, 0],
+                        },
+                        then: {
+                            $let: {
+                                vars: {
+                                    brand: {$arrayElemAt: ['$brands', 0]},
+                                },
+                                in: {
+                                    _id: '$$brand._id',
+                                    name: {
+                                        en: {
+                                            $toUpper: '$$brand.name.en',
+                                        },
+                                        ar: {
+                                            $toUpper: '$$brand.name.ar',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                        else: {
+                            _id: '$brand',
+                            name: {
+                                en: {
+                                    $toUpper: '$customBrand.en',
+                                },
+                                ar: {
+                                    $toUpper: '$customBrand.ar',
+                                },
+                                custom: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
+            from: 'variants',
+            key: 'variant._id',
+            isArray: false,
+            includeSiblings: {variant: {name: 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'brands',
-            key : 'brand._id',
-            isArray : false,
-            includeSiblings : {brand : {name : 1}}
+            from: 'origins',
+            key: 'origin',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'variants',
-            key : 'variant._id',
-            isArray : false,
-            includeSiblings : {variant : {name : 1}}
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'origins',
-            key : 'origin',
-            isArray : false
-        }));
-
-        pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-            includeSiblings : {createdBy : {date : 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+            includeSiblings: {createdBy: {date: 1}}
         }));
 
         if (positionFilter) {
             pipeLine.push({
-                $match : positionFilter
+                $match: positionFilter
             });
         }
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'accessRoles',
-            key : 'createdBy.user.accessRole',
-            isArray : false,
-            addProjection : ['_id', 'name', 'level'],
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        position : 1,
-                        firstName : 1,
-                        lastName : 1,
+            from: 'accessRoles',
+            key: 'createdBy.user.accessRole',
+            isArray: false,
+            addProjection: ['_id', 'name', 'level'],
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        position: 1,
+                        firstName: 1,
+                        lastName: 1,
                         imageSrc: 1,
                     }
                 }
@@ -599,17 +661,17 @@ var NewProductLaunch = function() {
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'positions',
-            key : 'createdBy.user.position',
-            isArray : false,
-            includeSiblings : {
-                createdBy : {
-                    date : 1,
-                    user : {
-                        _id : 1,
-                        accessRole : 1,
-                        firstName : 1,
-                        lastName : 1,
+            from: 'positions',
+            key: 'createdBy.user.position',
+            isArray: false,
+            includeSiblings: {
+                createdBy: {
+                    date: 1,
+                    user: {
+                        _id: 1,
+                        accessRole: 1,
+                        firstName: 1,
+                        lastName: 1,
                         imageSrc: 1,
                     }
                 }
@@ -618,26 +680,26 @@ var NewProductLaunch = function() {
 
         if (isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'personnels',
-                key : 'editedBy.user',
-                isArray : false,
-                addProjection : ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
-                includeSiblings : {editedBy : {date : 1}}
+                from: 'personnels',
+                key: 'editedBy.user',
+                isArray: false,
+                addProjection: ['_id', 'firstName', 'lastName', 'position', 'accessRole', 'imageSrc'],
+                includeSiblings: {editedBy: {date: 1}}
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'accessRoles',
-                key : 'editedBy.user.accessRole',
-                isArray : false,
-                addProjection : ['_id', 'name', 'level'],
-                includeSiblings : {
-                    editedBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            position : 1,
-                            firstName : 1,
-                            lastName : 1,
+                from: 'accessRoles',
+                key: 'editedBy.user.accessRole',
+                isArray: false,
+                addProjection: ['_id', 'name', 'level'],
+                includeSiblings: {
+                    editedBy: {
+                        date: 1,
+                        user: {
+                            _id: 1,
+                            position: 1,
+                            firstName: 1,
+                            lastName: 1,
                             imageSrc: 1,
                         }
                     }
@@ -645,17 +707,17 @@ var NewProductLaunch = function() {
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'positions',
-                key : 'editedBy.user.position',
-                isArray : false,
-                includeSiblings : {
-                    editedBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            accessRole : 1,
-                            firstName : 1,
-                            lastName : 1,
+                from: 'positions',
+                key: 'editedBy.user.position',
+                isArray: false,
+                includeSiblings: {
+                    editedBy: {
+                        date: 1,
+                        user: {
+                            _id: 1,
+                            accessRole: 1,
+                            firstName: 1,
+                            lastName: 1,
                             imageSrc: 1,
                         }
                     }
@@ -664,47 +726,39 @@ var NewProductLaunch = function() {
         }
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                brand : {
-                    _id : '$brand._id._id',
-                    name : {$ifNull : ['$brand._id.name', '$brand.name']}
-                },
-                variant : {
-                    _id : '$variant._id._id',
-                    name : {$ifNull : ['$variant._id.name', '$variant.name']}
+            $project: aggregateHelper.getProjection({
+                variant: {
+                    _id: '$variant._id._id',
+                    name: {$ifNull: ['$variant._id.name', '$variant.name']}
                 }
             })
         });
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                brand : {
-                    _id : {$ifNull : ['$brand._id', '$brand.name']},
-                    name : 1
-                },
-                variant : {
-                    _id : {$ifNull : ['$variant._id', '$variant.name']},
-                    name : 1
+            $project: aggregateHelper.getProjection({
+                variant: {
+                    _id: {$ifNull: ['$variant._id', '$variant.name']},
+                    name: 1
                 },
             })
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.endOfPipeLine({
-            isMobile : isMobile,
-            searchFieldsArray : searchFieldsArray,
-            filterSearch : filterSearch,
-            skip : skip,
-            limit : limit
+            isMobile: isMobile,
+            searchFieldsArray: searchFieldsArray,
+            filterSearch: filterSearch,
+            skip: skip,
+            limit: limit
         }));
 
         return pipeLine;
     }
 
-    this.getById = function(req, res, next) {
+    this.getById = function (req, res, next) {
         function queryRun() {
             var id = ObjectId(req.params.id);
 
-            self.getByIdAggr({id : id}, function(err, result) {
+            self.getByIdAggr({id: id}, function (err, result) {
                 if (err) {
                     return next(err);
                 }
@@ -716,7 +770,7 @@ var NewProductLaunch = function() {
         queryRun();
     };
 
-    this.getByIdAggr = function(options, callback) {
+    this.getByIdAggr = function (options, callback) {
         var aggregateHelper;
         var pipeLine = [];
         var aggregation;
@@ -726,123 +780,123 @@ var NewProductLaunch = function() {
         aggregateHelper = new AggregationHelper($defProjection);
 
         pipeLine.push({
-            $match : {_id : id}
+            $match: {_id: id}
         });
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'files',
-            key : 'attachments',
-            addProjection : ['contentType', 'originalName', 'extension', 'createdBy']
+            from: 'files',
+            key: 'attachments',
+            addProjection: ['contentType', 'originalName', 'extension', 'createdBy']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'country',
-            isArray : false,
-            addProjection : ['currency']
+            from: 'domains',
+            key: 'country',
+            isArray: false,
+            addProjection: ['currency']
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'region',
-            isArray : false
+            from: 'domains',
+            key: 'region',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'domains',
-            key : 'subRegion',
-            isArray : false
+            from: 'domains',
+            key: 'subRegion',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'retailSegments',
-            key : 'retailSegment',
-            isArray : false
+            from: 'retailSegments',
+            key: 'retailSegment',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'outlets',
-            key : 'outlet',
-            isArray : false
+            from: 'outlets',
+            key: 'outlet',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'branches',
-            key : 'branch',
-            isArray : false
+            from: 'branches',
+            key: 'branch',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'displayTypes',
-            key : 'displayType',
-            isArray : true
+            from: 'displayTypes',
+            key: 'displayType',
+            isArray: true
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'categories',
-            key : 'category',
-            isArray : false
+            from: 'categories',
+            key: 'category',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'brands',
-            key : 'brand._id',
-            isArray : false,
-            includeSiblings : {brand : {name : 1}}
+            from: 'brands',
+            key: 'brand._id',
+            isArray: false,
+            includeSiblings: {brand: {name: 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'competitorVariants',
-            key : 'variant._id',
-            isArray : false,
-            includeSiblings : {variant : {name : 1}}
+            from: 'competitorVariants',
+            key: 'variant._id',
+            isArray: false,
+            includeSiblings: {variant: {name: 1}}
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'origins',
-            key : 'origin',
-            isArray : false
+            from: 'origins',
+            key: 'origin',
+            isArray: false
         }));
 
         pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-            from : 'personnels',
-            key : 'createdBy.user',
-            isArray : false,
-            addProjection : ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
-            includeSiblings : {createdBy : {date : 1}}
+            from: 'personnels',
+            key: 'createdBy.user',
+            isArray: false,
+            addProjection: ['_id', 'firstName', 'lastName'].concat(isMobile ? [] : ['position', 'accessRole']),
+            includeSiblings: {createdBy: {date: 1}}
         }));
 
         if (!isMobile) {
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'accessRoles',
-                key : 'createdBy.user.accessRole',
-                isArray : false,
-                addProjection : ['_id', 'name', 'level'],
-                includeSiblings : {
-                    createdBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            position : 1,
-                            firstName : 1,
-                            lastName : 1
+                from: 'accessRoles',
+                key: 'createdBy.user.accessRole',
+                isArray: false,
+                addProjection: ['_id', 'name', 'level'],
+                includeSiblings: {
+                    createdBy: {
+                        date: 1,
+                        user: {
+                            _id: 1,
+                            position: 1,
+                            firstName: 1,
+                            lastName: 1
                         }
                     }
                 }
             }));
 
             pipeLine = _.union(pipeLine, aggregateHelper.aggregationPartMaker({
-                from : 'positions',
-                key : 'createdBy.user.position',
-                isArray : false,
-                includeSiblings : {
-                    createdBy : {
-                        date : 1,
-                        user : {
-                            _id : 1,
-                            accessRole : 1,
-                            firstName : 1,
-                            lastName : 1
+                from: 'positions',
+                key: 'createdBy.user.position',
+                isArray: false,
+                includeSiblings: {
+                    createdBy: {
+                        date: 1,
+                        user: {
+                            _id: 1,
+                            accessRole: 1,
+                            firstName: 1,
+                            lastName: 1
                         }
                     }
                 }
@@ -850,30 +904,30 @@ var NewProductLaunch = function() {
         }
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                brand : {
-                    _id : '$brand._id._id',
-                    name : {$ifNull : ['$brand._id.name', '$brand.name']}
+            $project: aggregateHelper.getProjection({
+                brand: {
+                    _id: '$brand._id._id',
+                    name: {$ifNull: ['$brand._id.name', '$brand.name']}
                 },
-                variant : {
-                    _id : '$variant._id._id',
-                    name : {$ifNull : ['$variant._id.name', '$variant.name']}
+                variant: {
+                    _id: '$variant._id._id',
+                    name: {$ifNull: ['$variant._id.name', '$variant.name']}
                 }
             })
         });
 
         pipeLine.push({
-            $project : aggregateHelper.getProjection({
-                brand : {
-                    _id : {$ifNull : ['$brand._id', '$brand.name']},
-                    name : 1
+            $project: aggregateHelper.getProjection({
+                brand: {
+                    _id: {$ifNull: ['$brand._id', '$brand.name']},
+                    name: 1
                 },
-                variant : {
-                    _id : {$ifNull : ['$variant._id', '$variant.name']},
-                    name : 1
+                variant: {
+                    _id: {$ifNull: ['$variant._id', '$variant.name']},
+                    name: 1
                 },
-                lastDate : {
-                    $ifNull : [
+                lastDate: {
+                    $ifNull: [
                         '$editedBy.date',
                         '$createdBy.date'
                     ]
@@ -884,7 +938,7 @@ var NewProductLaunch = function() {
         aggregation = NewProductLaunchModel.aggregate(pipeLine);
 
         aggregation.options = {
-            allowDiskUse : true
+            allowDiskUse: true
         };
 
         aggregation.exec((err, result) => {

@@ -9,22 +9,22 @@ var FILTERSCONSTANTS = require('../../constants/filters');
 var App = require('../../appState');
 
 module.exports = Backbone.View.extend({
-    template       : _.template(dropDownTemplate),
+    template: _.template(dropDownTemplate),
     contentTemplate: _.template(dropDownContentTemplate),
 
     events: {
-        'click .dropDownInput>input'                 : 'inputClick',
-        'input .dropDownInput>input:not(.createOwn)' : 'inputChange',
-        'blur .dropDownInput>input'                  : 'inputBlur',
-        'click .downArrow'                           : 'toggleDropDownContent',
-        'click .dropDownItem'                        : 'itemClick',
-        'click .dropDownPagination a'                : 'paginationChange',
-        'click .counter'                             : 'stopPropagation',
-        'click #select-all'                          : 'selectAllValues'
+        'click .dropDownInput>input': 'inputClick',
+        'input .dropDownInput>input:not(.createOwn)': 'inputChange',
+        'blur .dropDownInput>input': 'inputBlur',
+        'click .downArrow': 'toggleDropDownContent',
+        'click .dropDownItem': 'itemClick',
+        'click .dropDownPagination a': 'paginationChange',
+        'click .counter': 'stopPropagation',
+        'click #select-all': 'selectAllValues'
     },
 
-    searchText       : '',
-    selectedValues   : [],
+    searchText: '',
+    selectedValues: [],
     selectedValuesIds: [],
 
     initialize: function (options) {
@@ -66,10 +66,11 @@ module.exports = Backbone.View.extend({
             } else {
                 self.selectedValuesIds.forEach(function (value, index) {
                     var model = self.collection.get(value);
+                    var customBrand = self.contentType === 'brand' && self.selectedValues[index] && self.selectedValues[index].custom;
 
                     if (model) {
                         model.set({selected: true});
-                    } else {
+                    } else if (!customBrand) {
                         delete self.selectedValuesIds[index];
                         delete self.selectedValues[index];
                         self.setSelected();
@@ -89,7 +90,7 @@ module.exports = Backbone.View.extend({
 
             if (self.filteredCollectionLength === 1 && !self.noAutoSelectOne) {
                 self.setSelectedByIds({
-                    ids : [self.filteredCollection.at(0).get('_id')],
+                    ids: [self.filteredCollection.at(0).get('_id')],
                     auto: true
                 });
 
@@ -98,11 +99,11 @@ module.exports = Backbone.View.extend({
                     $selector = self.$el.find('.grayDropdownInput');
 
                     self.trigger('changeItem', {
-                        contentType      : self.contentType,
-                        $item            : self.$el,
-                        model            : model.toJSON(),
+                        contentType: self.contentType,
+                        $item: self.$el,
+                        model: model.toJSON(),
                         selectedValuesIds: self.selectedValuesIds,
-                        $selector        : $selector
+                        $selector: $selector
                     });
                 }
             } else {
@@ -120,7 +121,7 @@ module.exports = Backbone.View.extend({
         this.render();
     },
 
-    selectAllValues : function (event) {
+    selectAllValues: function (event) {
         var selectAllLi = $(event.target).parent();
         var isSelectedSelectAll = selectAllLi.hasClass('checkedValue');
 
@@ -130,7 +131,7 @@ module.exports = Backbone.View.extend({
             $('.dropDownItem.selected').removeClass('selected');
             selectAllLi.removeClass('checkedValue');
         } else {
-            var arrayOfIds = this.collection.toJSON().map(function(model) {
+            var arrayOfIds = this.collection.toJSON().map(function (model) {
                 return model._id;
             });
 
@@ -186,7 +187,7 @@ module.exports = Backbone.View.extend({
             $input.attr('data-auto', true);
         }
         $input.attr('data-id', selectedValuesIds.join(','));
-        if (selectedValuesIds[0] === 'other' && this.contentType === 'displayType'){
+        if (selectedValuesIds[0] === 'other' && this.contentType === 'displayType') {
             $input.addClass('createOwn');
         }
     },
@@ -343,10 +344,10 @@ module.exports = Backbone.View.extend({
             }
 
             this.trigger('changeItem', {
-                contentType      : this.contentType,
-                $item            : $el,
+                contentType: this.contentType,
+                $item: $el,
                 selectedValuesIds: this.selectedValuesIds,
-                $selector        : $selector
+                $selector: $selector
             });
 
         } else {
@@ -382,9 +383,9 @@ module.exports = Backbone.View.extend({
 
             this.trigger('changeItem', {
                 contentType: this.contentType,
-                $item      : $el,
-                model      : model.toJSON(),
-                $selector  : $selector
+                $item: $el,
+                model: model.toJSON(),
+                $selector: $selector
             });
         }
 
@@ -500,11 +501,11 @@ module.exports = Backbone.View.extend({
         };
 
         $curEl.html(this.template({
-            displayText : this.displayText,
-            forPosition : this.forPosition,
-            contentType : this.contentType,
+            displayText: this.displayText,
+            forPosition: this.forPosition,
+            contentType: this.contentType,
             dataProperty: this.dataProperty,
-            showSelectAll : this.showSelectAll,
+            showSelectAll: this.showSelectAll,
             translation: {
                 selectAll: selectAllText[currentLanguage],
                 next: next[currentLanguage],

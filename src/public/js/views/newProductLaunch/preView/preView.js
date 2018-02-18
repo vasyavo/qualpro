@@ -17,15 +17,15 @@ var requireContent = require('../../../helpers/requireContent');
 module.exports = BaseView.extend({
     contentType: CONTENT_TYPES.NEWPRODUCTLAUNCH,
 
-    template           : _.template(PreviewTemplate),
+    template: _.template(PreviewTemplate),
     filePreviewTemplate: _.template(FilePreviewTemplate),
 
     events: {
         'click .masonryThumbnail': 'showFilePreviewDialog',
-        'click #downloadFile'    : 'stopPropagation',
-        'click #goToBtn'         : 'goTo',
-        'click #edit' : 'showEditView',
-        'click #delete' : 'deleteNewProductLaunch',
+        'click #downloadFile': 'stopPropagation',
+        'click #goToBtn': 'goTo',
+        'click #edit': 'showEditView',
+        'click #delete': 'deleteNewProductLaunch',
     },
 
     initialize: function (options) {
@@ -60,6 +60,18 @@ module.exports = BaseView.extend({
 
                 response.shelfLifeStart = moment.utc(response.shelfLifeStart).format('DD.MM.YYYY');
                 response.shelfLifeEnd = moment.utc(response.shelfLifeEnd).format('DD.MM.YYYY');
+
+                const name = response.brand.name;
+                if (typeof name === 'string') {
+                    response.brand = {
+                        name: {
+                            en: name,
+                            ar: name,
+                            custom: true,
+                        },
+                        _id: response.brand._id,
+                    }
+                }
                 that.model.set(response, {merge: true});
 
                 if (data.shelfLifeStart && data.shelfLifeEnd) {
@@ -108,8 +120,8 @@ module.exports = BaseView.extend({
         var fileModel = this.previewFiles.get(fileModelId);
 
         this.fileDialogView = new FileDialogPreviewView({
-            fileModel  : fileModel,
-            bucket     : this.contentType,
+            fileModel: fileModel,
+            bucket: this.contentType,
             translation: this.translation
         });
         this.fileDialogView.on('download', function (options) {
@@ -161,7 +173,7 @@ module.exports = BaseView.extend({
 
         var newLabelClass = currentLanguage === 'en' ? 'newBrand' : 'newBrandAr';
         formString = this.$el.html(this.template({
-            model      : jsonModel,
+            model: jsonModel,
             translation: this.translation,
             brandNewLabelClass: jsonModel.brand.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
             variantNewLabelClass: jsonModel.variant.name.currentLanguage ? '' : 'class="' + newLabelClass + '"',
@@ -172,13 +184,13 @@ module.exports = BaseView.extend({
         }));
 
         this.$el = formString.dialog({
-            dialogClass  : 'create-dialog competitorBranding-dialog',
-            title        : this.translation.all,
-            width        : '1000',
+            dialogClass: 'create-dialog competitorBranding-dialog',
+            title: this.translation.all,
+            width: '1000',
             showCancelBtn: false,
-            buttons      : {
+            buttons: {
                 save: {
-                    text : this.translation.saveBtn,
+                    text: this.translation.saveBtn,
                     class: 'btn saveBtn',
                     click: function () {
                         self.undelegateEvents();
@@ -213,7 +225,7 @@ module.exports = BaseView.extend({
 
                 if (!container.find('#' + config.elementId).length) {
                     container[config.insertType](template({
-                        elementId  : config.elementId,
+                        elementId: config.elementId,
                         translation: self.translation
                     }));
                 }
