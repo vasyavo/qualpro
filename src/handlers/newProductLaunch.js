@@ -432,11 +432,8 @@ var NewProductLaunch = function () {
                     }
 
                     if (element.brand && element.brand.name) {
-                        element.brand.name = {
-                            ...element.brand.name,
-                            en: _.unescape(element.brand.name.en),
-                            ar: _.unescape(element.brand.name.ar),
-                        };
+                        element.brand.name.en = _.unescape(element.brand.name.en);
+                        element.brand.name.ar = _.unescape(element.brand.name.ar);
                     }
 
                     if (element.variant && element.variant.name) {
