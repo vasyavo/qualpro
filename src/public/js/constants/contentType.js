@@ -8,6 +8,7 @@ module.exports = {
     EVENT : 'event',
     PRODUCT : 'product',
     PROMOTIONS : 'promotions',
+    PROMO_TYPE : 'promoType',
     PROMOTIONSITEMS : 'promotionsItems',
     COMMENT : 'comment',
     //CONTRACT               : 'contract',

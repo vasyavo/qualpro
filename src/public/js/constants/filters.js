@@ -1328,6 +1328,10 @@ function getConstants(CONSTANTS) {
         displayName: {en: 'Position', ar: 'المركز الوظيفي'},
         filterType : 'multiSelect'
     });
+    competitorPromotionFilter[CONSTANTS.PROMO_TYPE] = getFilterConstant({
+        displayName: {en: 'Promo Type', ar: ''},
+        filterType : 'multiSelect'
+    });
     competitorPromotionFilter.time = getFilterConstant({
         displayName: {en: 'Time', ar: 'الوقت'},
         type       : 'date',
