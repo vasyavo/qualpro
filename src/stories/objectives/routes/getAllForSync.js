@@ -546,7 +546,7 @@ module.exports = (req, res, next) => {
             }
 
             const body = result.length ?
-                result[0] : { data: [], total: 0 };
+                result[0] : {data: [], total: 0};
 
             body.data.forEach(model => {
                 if (model.title) {
@@ -612,6 +612,20 @@ module.exports = (req, res, next) => {
                 const pipeLine = [
                     {
                         $match: queryObject,
+                    },
+                    {
+                        $match: {
+                            $or: [
+                                {
+                                    'createdBy.user': ObjectId(userId)
+                                },
+                                {
+                                    status: {
+                                        $nin: ['draft']
+                                    }
+                                }
+                            ]
+                        }
                     },
                     {
                         $match: {
@@ -2912,7 +2926,7 @@ module.exports = (req, res, next) => {
             }
 
             const body = result.length ?
-                result[0] : { data: [], total: 0 };
+                result[0] : {data: [], total: 0};
 
             body.data.forEach(model => {
                 if (model.title) {
