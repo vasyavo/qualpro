@@ -76,7 +76,10 @@ var CompetitorBranding = function() {
                         body.promotion = _.escape(body.promotion);
                     }
                     if (body.promoType) {
-                        body.promoType = _.escape(body.promoType);
+                        body.promoType = {
+                            en : _.escape(body.promoType.en),
+                            ar : _.escape(body.promoType.ar)
+                        };
                     }
                     if (body.price) {
                         body.price = _.escape(body.price);
