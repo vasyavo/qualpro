@@ -68,7 +68,14 @@ const schema = new Schema({
         default: '',
     },
     promoType: {
-        type: String,
+        en: {
+            type: String,
+            default: '',
+        },
+        ar: {
+            type: String,
+            default: '',
+        },
     },
     price: {
         type: String,
