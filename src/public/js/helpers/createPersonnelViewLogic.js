@@ -262,6 +262,15 @@ var createPersonnelViewLogic = function (context) {
                     success: function (model, response) {
                         var message;
                         var status = model.get('status');
+                        const vacation = model.get('vacation');
+                        const cover = vacation && vacation.cover;
+
+                        if (Array.isArray(cover) && cover.length) {
+                            model.set('vacation', {
+                                onLeave: vacation.onLeave,
+                                cover: cover[0],
+                            });
+                        }
 
                         if (status === 'login') {
                             message = STATUSES[status.toUpperCase()].name[currentLanguage] + ' ' + model.get('lastAccess');

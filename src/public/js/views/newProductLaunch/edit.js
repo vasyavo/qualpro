@@ -22,7 +22,7 @@ module.exports = Backbone.View.extend({
         this.defineUiElements();
     },
 
-    defineUiElements : function () {
+    defineUiElements: function () {
         var view = this.$el;
         this.ui = {
             dateStart: view.find('#date-start'),
@@ -45,7 +45,9 @@ module.exports = Backbone.View.extend({
         var dateEnd = moment(model.shelfLifeEnd, 'DD.MM.YYYY');
         var currentLanguage = App.currentUser.currentLanguage || 'en';
         var anotherLanguage = currentLanguage === 'en' ? 'ar' : 'en';
-
+        var anotherLanguageForCamelCase = currentLanguage === 'en' ? 'Ar' : 'En';
+        var additionalCommentIdToHide = 'additionalComment' + anotherLanguageForCamelCase + 'Container';
+        var distributorIdToHide = 'distributor' + anotherLanguageForCamelCase + 'Container';
         var layout = this.template({
             translation: this.translation,
             model: model,
@@ -54,12 +56,12 @@ module.exports = Backbone.View.extend({
         });
 
         this.$el = $(layout).dialog({
-            width : 'auto',
-            dialogClass : 'create-dialog',
-            buttons : {
-                save : {
-                    text : that.translation.saveBtn,
-                    click : function () {
+            width: 'auto',
+            dialogClass: 'create-dialog',
+            buttons: {
+                save: {
+                    text: that.translation.saveBtn,
+                    click: function () {
                         var ui = that.ui;
                         var valid = true;
                         var startDate = that.$el.find('#dateStart').val();
@@ -144,6 +146,10 @@ module.exports = Backbone.View.extend({
                             valid = false;
                         }
 
+                        if (that.$el.find('#brandDd').attr('data-id') === model.brand._id && model.brand.name.custom) {
+                            delete data.brand;
+                        }
+
                         if (valid) {
                             that.trigger('edit-new-product-lunch', data, model._id);
                         }
@@ -157,22 +163,22 @@ module.exports = Backbone.View.extend({
 
         var startDateObj = {
             changeMonth: true,
-            changeYear : true,
-            maxDate : new Date(dateEnd),
-            yearRange  : '-20y:c+10y',
+            changeYear: true,
+            maxDate: new Date(dateEnd),
+            yearRange: '-20y:c+10y',
             defaultDate: new Date(dateStart),
-            onClose    : function (selectedDate) {
+            onClose: function (selectedDate) {
                 $dueDate.datepicker('option', 'minDate', selectedDate);
             }
         };
 
         var endDateObj = {
             changeMonth: true,
-            changeYear : true,
-            minDate : new Date(dateStart),
-            yearRange  : '-20y:c+10y',
+            changeYear: true,
+            minDate: new Date(dateStart),
+            yearRange: '-20y:c+10y',
             defaultDate: new Date(dateEnd),
-            onClose    : function (selectedDate) {
+            onClose: function (selectedDate) {
                 $startDate.datepicker('option', 'maxDate', selectedDate);
             }
         };
@@ -180,21 +186,24 @@ module.exports = Backbone.View.extend({
         $startDate.datepicker(startDateObj);
         $dueDate.datepicker(endDateObj);
 
+        this.$el.find('#' + distributorIdToHide).hide();
+        this.$el.find('#' + additionalCommentIdToHide).hide();
+
         this.displayTypeCollection = new DisplayTypeCollection();
         this.displayTypeCollection.on('reset', function () {
             const defaultDisplayTypes = model.displayType.map(function (item) {
-                return that.displayTypeCollection.findWhere({_id : item._id}).toJSON();
+                return that.displayTypeCollection.findWhere({_id: item._id}).toJSON();
             });
 
             Populate.inputDropDown({
-                selector    : '#displayTypeDd',
-                context     : that,
-                contentType : 'displayType',
-                displayText : 'display type',
+                selector: '#displayTypeDd',
+                context: that,
+                contentType: 'displayType',
+                displayText: 'display type',
                 displayModel: defaultDisplayTypes,
-                collection  : that.displayTypeCollection.toJSON(),
+                collection: that.displayTypeCollection.toJSON(),
                 multiSelect: true,
-                forPosition : true
+                forPosition: true
             });
         }, this);
 
@@ -205,13 +214,13 @@ module.exports = Backbone.View.extend({
             const defaultOrigin = [model.origin];
 
             Populate.inputDropDown({
-                selector    : '#originDd',
-                context     : that,
-                contentType : 'origin',
-                displayText : 'Origin',
+                selector: '#originDd',
+                context: that,
+                contentType: 'origin',
+                displayText: 'Origin',
                 displayModel: defaultOrigin,
-                collection  : that.originCollection.toJSON(),
-                forPosition : true,
+                collection: that.originCollection.toJSON(),
+                forPosition: true,
             });
         }, this);
 
@@ -220,13 +229,13 @@ module.exports = Backbone.View.extend({
             const defaultCategories = model.category ? [model.category] : [];
 
             Populate.inputDropDown({
-                selector    : '#categoryDd',
-                context     : that,
-                contentType : 'category',
-                displayText : 'category',
+                selector: '#categoryDd',
+                context: that,
+                contentType: 'category',
+                displayText: 'category',
                 displayModel: defaultCategories,
-                collection  : that.categoryCollection.toJSON(),
-                forPosition : true,
+                collection: that.categoryCollection.toJSON(),
+                forPosition: true,
             });
         }, this);
 
@@ -237,13 +246,13 @@ module.exports = Backbone.View.extend({
             const defaultBrands = [model.brand];
 
             Populate.inputDropDown({
-                selector    : '#brandDd',
-                context     : that,
-                contentType : 'brand',
-                displayText : 'brand',
+                selector: '#brandDd',
+                context: that,
+                contentType: 'brand',
+                displayText: 'brand',
                 displayModel: defaultBrands,
-                collection  : that.brandCollection.toJSON(),
-                forPosition : true,
+                collection: that.brandCollection.toJSON(),
+                forPosition: true,
             });
         }, this);
 
