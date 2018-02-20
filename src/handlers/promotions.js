@@ -783,7 +783,7 @@ var Promotions = function () {
                     ];
 
 
-                delete queryObject.position;
+                delete queryObject.promotionItem;
             }
 
             if (!isMobile) {
@@ -804,7 +804,6 @@ var Promotions = function () {
                     $nin: ['draft', 'expired'],
                 };
                 pipeLine = [
-
                     {
                         $match: queryObject,
                     },
