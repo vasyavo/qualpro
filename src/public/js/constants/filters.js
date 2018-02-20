@@ -1330,6 +1330,7 @@ function getConstants(CONSTANTS) {
     });
     competitorPromotionFilter[CONSTANTS.PROMO_TYPE] = getFilterConstant({
         displayName: {en: 'Promo Type', ar: 'تفاصيل الترويج'},
+        filterType : 'singleSelect',
         singleSelect: true,
     });
     competitorPromotionFilter.time = getFilterConstant({
