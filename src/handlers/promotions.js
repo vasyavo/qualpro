@@ -716,6 +716,76 @@ var Promotions = function () {
                 delete queryObject.position;
             }
 
+            var promoItemFilter = [];
+
+            if (filter.promotionItem && filter.promotionItem.length) {
+                promoItemFilter =
+                    [
+                        // Stage 1
+                        {
+                            $limit: 1
+                        },
+
+                        // Stage 2
+                        {
+                            $replaceRoot: {
+                                newRoot: {_id: ObjectId(filter.promotionItem)}
+                            }
+                        },
+
+                        // Stage 3
+                        {
+                            $lookup: {
+                                "from" : "promotionsItems",
+                                "localField" : "_id",
+                                "foreignField" : "_id",
+                                "as" : "promotionItem"
+                            }
+                        },
+
+                        // Stage 4
+                        {
+                            $addFields: {
+                                promotion: {
+                                    $let: {
+                                        vars: {
+                                            item: {$arrayElemAt: ['$promotionItem', 0]}
+                                        },
+                                        in: '$$item.promotion'
+                                    },
+
+                                }
+                            }
+                        },
+
+                        // Stage 5
+                        {
+                            $lookup: {
+                                "from" : "promotions",
+                                "localField" : "promotion",
+                                "foreignField" : "_id",
+                                "as" : "promotion"
+                            }
+                        },
+
+                        // Stage 6
+                        {
+                            $unwind: '$promotion'
+                        },
+
+                        // Stage 7
+                        {
+                            $replaceRoot: {
+                                newRoot: '$promotion'
+                            }
+                        },
+
+                    ];
+
+
+                delete queryObject.position;
+            }
+
             if (!isMobile) {
                 pipeLine = getAllPipeline({
                     personnel        : personnel,
@@ -734,6 +804,7 @@ var Promotions = function () {
                     $nin: ['draft', 'expired'],
                 };
                 pipeLine = [
+
                     {
                         $match: queryObject,
                     },
@@ -867,6 +938,7 @@ var Promotions = function () {
                         },
                     },
                 ];
+                pipeLine = promoItemFilter.concat(pipeLine);
             }
 
             aggregation = PromotionModel.aggregate(pipeLine);
