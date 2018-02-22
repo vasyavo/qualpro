@@ -23,6 +23,8 @@ module.exports = {
     ANDROID_VERSION : 'androidVersion',
     DISPLAY_TYPE : 'displayType',
     DISPLAY_SEASON : 'displaySeason',
+    METRIC_TYPE : 'metrics',
+    SIZE : 'sizes',
     ITEM : 'item',
     INSTORETASKS : 'inStoreTasks',
     NOTES : 'notes',

@@ -386,6 +386,14 @@ function getConstants(CONSTANTS) {
         displayName: {en: 'Employee', ar: 'الموظف'},
         filterType : 'multiSelect'
     });
+    priceSurveyFilter[CONSTANTS.METRIC_TYPE] = getFilterConstant({
+        displayName: {en: 'Metric Type', ar: 'Arabic Metric Type'},
+        filterType : 'multiSelect'
+    });
+    priceSurveyFilter[CONSTANTS.SIZE] = getFilterConstant({
+        displayName: {en: 'Size', ar: 'Arabic Size'},
+        filterType : 'multiSelect'
+    });
     priceSurveyFilter.time = getFilterConstant({
         displayName: {en: 'Time', ar: 'الوقت'},
         type       : 'date',
@@ -407,6 +415,8 @@ function getConstants(CONSTANTS) {
         CONSTANTS.BRANCH,
         CONSTANTS.POSITION,
         CONSTANTS.PERSONNEL,
+        CONSTANTS.METRIC_TYPE,
+        CONSTANTS.SIZE,
         'time'
     ];
 
