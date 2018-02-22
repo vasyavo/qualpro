@@ -22,6 +22,7 @@ module.exports = {
     DOMAIN : 'domain',
     ANDROID_VERSION : 'androidVersion',
     DISPLAY_TYPE : 'displayType',
+    DISPLAY_SEASON : 'displaySeason',
     ITEM : 'item',
     INSTORETASKS : 'inStoreTasks',
     NOTES : 'notes',

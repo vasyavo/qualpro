@@ -1013,8 +1013,8 @@ function getConstants(CONSTANTS) {
         displayName: {en: 'Position', ar: 'المركز الوظيفي'},
         filterType : 'multiSelect'
     });
-    brandingAndMonthlyDisplayFilter[CONSTANTS.DISPLAY_TYPE] = getFilterConstant({
-        displayName: {en: 'Display Type', ar: 'نوع العرض'},
+    brandingAndMonthlyDisplayFilter[CONSTANTS.DISPLAY_SEASON] = getFilterConstant({
+        displayName: {en: 'Display Season', ar:'موسم المواد الدعائية والعرض'},
         filterType : 'multiSelect'
     });
     brandingAndMonthlyDisplayFilter.time = getFilterConstant({
@@ -1042,7 +1042,7 @@ function getConstants(CONSTANTS) {
         CONSTANTS.BRANCH,
         CONSTANTS.POSITION,
         CONSTANTS.PERSONNEL,
-        CONSTANTS.DISPLAY_TYPE,
+        CONSTANTS.DISPLAY_SEASON,
         'time'
     ];
 
@@ -1089,8 +1089,8 @@ function getConstants(CONSTANTS) {
         displayName: {en: 'Position', ar: 'المركز الوظيفي'},
         filterType : 'multiSelect'
     });
-    competitorBrandingFilter[CONSTANTS.DISPLAY_TYPE] = getFilterConstant({
-        displayName: {en: 'Display Type', ar: 'نوع العرض'},
+    competitorBrandingFilter[CONSTANTS.DISPLAY_SEASON] = getFilterConstant({
+        displayName: {en: 'Display Season', ar:'موسم المواد الدعائية والعرض'},
         filterType : 'multiSelect'
     });
     competitorBrandingFilter.time = getFilterConstant({
@@ -1128,7 +1128,7 @@ function getConstants(CONSTANTS) {
         CONSTANTS.BRANCH,
         CONSTANTS.POSITION,
         CONSTANTS.PERSONNEL,
-        CONSTANTS.DISPLAY_TYPE,
+        CONSTANTS.DISPLAY_SEASON,
         'time'
     ];
 
