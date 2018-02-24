@@ -29,6 +29,10 @@ var achievementFormTranslation = {
     delete: 'حذف',
     additionalComment: 'تعليق إضافي',
     achievementFormEditTitle: 'تعديل نموذج الانجازات',
+    dialogTitle : ' التعليقات والمرفقات',
+    attach      : 'ارفاق',
+    send        : 'ارسال',
+    okBtn       : 'موافق',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);

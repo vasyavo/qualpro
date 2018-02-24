@@ -111,11 +111,34 @@
                                 <div id="objectiveFileThumbnail" class="fileThumbnail"></div>
                             </div>
                         </div>
+                        <div class="objectivesPaddingBlock innerScroll">
+                            <div class="absoluteContent">
+                                <div class="scrollable">
+                                    <div class="commentWrapper" id="commentWrapper"></div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
             </div>
         </div>
-
+        <% if (App.currentUser.workAccess) {%>
+        <div class="blockBottom objectivesPaddingBlock">
+            <div class="objectivesBtnBlock">
+                <span class="greyBtn" id="attachFiles"><%= translation.attach %></span>
+                <span class="greyBtn" id="sendComment"><%= translation.send %></span>
+                <div class="fileBottom">
+                    <span class="attachment"></span>
+                    <span id="newCommentAttachments"></span>
+                    <div id="fileThumbnail"></div>
+                </div>
+            </div>
+            <div class="objectivesTextareaWrap">
+                <textarea class="objectivesTextarea" id="commentInput"></textarea>
+            </div>
+            <form action="" method="post" id="commentForm" style="display: none;"></form>
+        </div>
+        <%}%>
     </div>
 </div>

@@ -28,7 +28,11 @@ var achievementFormTranslation = {
     edit : 'Edit',
     delete: 'Delete',
     additionalComment: 'Additional Comment',
-    achievementFormEditTitle: 'Edit Achievement Form'
+    achievementFormEditTitle: 'Edit Achievement Form',
+    dialogTitle : 'Comment attachments',
+    attach      : 'Attach',
+    send        : 'Send',
+    okBtn       : 'Ok',
 };
 
 module.exports = _.extend({}, paginationTranslation, filtersTranslation, achievementFormTranslation);
