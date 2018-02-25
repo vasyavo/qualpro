@@ -387,11 +387,11 @@ function getConstants(CONSTANTS) {
         filterType : 'multiSelect'
     });
     priceSurveyFilter[CONSTANTS.METRIC_TYPE] = getFilterConstant({
-        displayName: {en: 'Metric Type', ar: 'Arabic Metric Type'},
+        displayName: {en: 'Metric Type', ar: 'نوع وحده القياس'},
         filterType : 'multiSelect'
     });
     priceSurveyFilter[CONSTANTS.SIZE] = getFilterConstant({
-        displayName: {en: 'Size', ar: 'Arabic Size'},
+        displayName: {en: 'Size', ar: 'الحجم'},
         filterType : 'multiSelect'
     });
     priceSurveyFilter.time = getFilterConstant({
