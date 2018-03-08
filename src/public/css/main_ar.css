@@ -11394,3 +11394,6 @@ a.lSNext {
 .edit-question button {
     display: block;
 }
+#additionalComment div div .mCSB_container {
+    left: 0 !important;
+}
