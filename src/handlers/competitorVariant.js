@@ -265,6 +265,8 @@ var Variant = function () {
     this.archive = function (req, res, next) {
         function queryRun() {
             var idsToArchive = req.body.ids.objectID();
+            var brand = ObjectId(req.body.brandId);
+            var category = ObjectId(req.body.category);
             var archived = req.body.archived === 'false' ? false : !!req.body.archived;
             var uId = req.session.uId;
             var editedBy = {
@@ -283,6 +285,10 @@ var Variant = function () {
                 },
                 {
                     keyForCondition: 'variant',
+                    filter         : {
+                        key        : 'brand',
+                        value      : brand
+                    },
                     archived       : archived,
                     topArchived    : false,
                     model          : CompetitorItemModel
