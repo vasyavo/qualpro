@@ -14,35 +14,35 @@ var requireContent = require('../../helpers/requireContent');
 
 var defaultTypes = {
     category: {
-        index      : 0,
-        editable   : true,
+        index: 0,
+        editable: true,
         templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     variant: {
-        index      : 1,
-        editable   : true,
+        index: 1,
+        editable: true,
         templateDir: 'itemsPrices.templates.create.categoryAndVariant'
     },
 
     item: {
-        index      : 2,
-        editable   : false,
+        index: 2,
+        editable: false,
         templateDir: 'itemsPrices.templates.create.item'
     }
 };
 
 module.exports = BaseView.extend({
     contentType: 'itemsPrices',
-    template   : _.template(template),
-    events     : {
-        'click .addBtn'                                                                                                          : 'addNewRow',
-        'click .flowSaveBtn'                                                                                                     : 'saveItem',
-        'click .flowCancelBtn'                                                                                                   : 'cancelItem',
-        'click .checkboxLabel'                                                                                                   : 'checked',
-        "click .listBody input[type='checkbox']"                                                                                 : 'inputClick',
-        'click .listBody tr'                                                                                                     : 'rowClick',
-        'click .editBtn, .deleteBtn'                                                                                             : 'editDeleteChecked',
+    template: _.template(template),
+    events: {
+        'click .addBtn': 'addNewRow',
+        'click .flowSaveBtn': 'saveItem',
+        'click .flowCancelBtn': 'cancelItem',
+        'click .checkboxLabel': 'checked',
+        "click .listBody input[type='checkbox']": 'inputClick',
+        'click .listBody tr': 'rowClick',
+        'click .editBtn, .deleteBtn': 'editDeleteChecked',
         'click #check_all_category, #check_all_competitorVariant, #check_all_variant, #check_all_item, #check_all_competitorItem': 'checkAll'
     },
 
@@ -141,18 +141,18 @@ module.exports = BaseView.extend({
         self.templates = {};
         self.templates[keys[0]] = {
             header: _.template(templateFiles.categoryHeaderTemplate),
-            list  : _.template(templateFiles.categoryListTemplate),
-            row   : _.template(templateFiles.categoryRowTemplate)
+            list: _.template(templateFiles.categoryListTemplate),
+            row: _.template(templateFiles.categoryRowTemplate)
         };
         self.templates[keys[1]] = {
             header: _.template(templateFiles.variantHeaderTemplate),
-            list  : _.template(templateFiles.variantListTemplate),
-            row   : _.template(templateFiles.variantRowTemplate)
+            list: _.template(templateFiles.variantListTemplate),
+            row: _.template(templateFiles.variantRowTemplate)
         };
         self.templates[keys[2]] = {
             header: _.template(templateFiles.itemHeaderTemplate),
-            list  : _.template(templateFiles.itemListTemplate),
-            row   : _.template(templateFiles.itemRowTemplate)
+            list: _.template(templateFiles.itemListTemplate),
+            row: _.template(templateFiles.itemRowTemplate)
         };
 
         cb(null);
@@ -252,7 +252,7 @@ module.exports = BaseView.extend({
         var $newRow = $(template({
             currentLanguage: this.currentLanguage,
             anotherLanguage: this.anotherLanguage,
-            translation    : this.translation
+            translation: this.translation
         }));
         var classToFindForWrap;
         var $wrapHolder;
@@ -267,10 +267,10 @@ module.exports = BaseView.extend({
                 count: -1
             });
             this.originDropDownView = new DropDownView({
-                forPosition : true,
+                forPosition: true,
                 dropDownList: this.originCollection,
-                displayText : this.translation.origin,
-                multiSelect : true
+                displayText: this.translation.origin,
+                multiSelect: true
             });
 
             $newRow.find('.originDropDown').append(this.originDropDownView.el);
@@ -327,7 +327,7 @@ module.exports = BaseView.extend({
         dataObject.country = this.selectedCountry;
         if ([CONTENT_TYPES.ITEM, CONTENT_TYPES.COMPETITORITEM].indexOf(content) !== -1 && !dataObject.country) {
             return App.render({
-                type   : 'error',
+                type: 'error',
                 message: ERROR_MESSAGES.selectCountryDD[this.currentLanguage]
             });
         }
@@ -357,8 +357,8 @@ module.exports = BaseView.extend({
         model.setFieldsNames(this.translation);
 
         model.save(dataObject, {
-            patch  : true,
-            wait   : true,
+            patch: true,
+            wait: true,
             success: function (model, response) {
                 var id = model.id;
                 var $checkbox = $row.find('input:checkbox');
@@ -408,7 +408,7 @@ module.exports = BaseView.extend({
 
                 $row.click();
             },
-            error  : function (model, xhr) {
+            error: function (model, xhr) {
                 App.render({type: 'error', message: xhr.responseText});
             }
         });
@@ -512,14 +512,14 @@ module.exports = BaseView.extend({
         var nextContent = this.getNextContent(content);
         var searchObject = {
             archived: 'false',
-            count   : 10
+            count: 10
         };
         var currentLanguage = App.currentUser.currentLanguage;
         var contentCollection;
         var collection;
         var model;
 
-        if(content === 'competitorVariant'){
+        if (content === 'competitorVariant') {
             searchObject.forTable = true;
         }
 
@@ -581,7 +581,7 @@ module.exports = BaseView.extend({
 
         contentCollection.on('errorPagination', function () {
             App.render({
-                type   : 'error',
+                type: 'error',
                 message: ERROR_MESSAGES.canNotGet[currentLanguage] + content.capitalizer('firstCaps')
             });
         });
@@ -632,10 +632,10 @@ module.exports = BaseView.extend({
                     count: -1
                 });
                 this.originDropDownView = new DropDownView({
-                    forPosition   : true,
-                    dropDownList  : this.originCollection,
-                    displayText   : 'Origin',
-                    multiSelect   : true,
+                    forPosition: true,
+                    dropDownList: this.originCollection,
+                    displayText: 'Origin',
+                    multiSelect: true,
                     selectedValues: model.origin
                 });
 
@@ -660,7 +660,9 @@ module.exports = BaseView.extend({
             });
 
             data = {
-                ids     : ids,
+                ids: ids,
+                categoryId: this.category,
+                brandId: this.brandId,
                 archived: true
             };
 
@@ -680,7 +682,7 @@ module.exports = BaseView.extend({
                 }
 
                 return App.render({
-                    type   : 'notification',
+                    type: 'notification',
                     message: self.translation.all + ' ' + ERROR_MESSAGES.elementsWasDeleted[self.currentLanguage]
                 });
             });
@@ -700,8 +702,8 @@ module.exports = BaseView.extend({
                 .html('')
                 .addClass('tableBlocked')
                 .append(template({
-                        title      : this.translation[name],
-                        editable   : this.types[name].editable,
+                        title: this.translation[name],
+                        editable: this.types[name].editable,
                         translation: this.translation
                     })
                 );
@@ -720,10 +722,10 @@ module.exports = BaseView.extend({
             .find('.listBody')
             .html('')
             .append(template({
-                    items          : data,
+                    items: data,
                     currentLanguage: this.currentLanguage,
                     anotherLanguage: this.anotherLanguage,
-                    translation    : this.translation
+                    translation: this.translation
                 })
             );
 
@@ -797,13 +799,13 @@ module.exports = BaseView.extend({
     render: function () {
         var self = this;
         var $formString = $(this.template({
-            contents   : this.tablesArray,
+            contents: this.tablesArray,
             translation: this.translation
         }));
         this.tablesArray.forEach(function (type) {
             self.renderTable({
-                name       : type,
-                element    : $formString,
+                name: type,
+                element: $formString,
                 translation: self.translation
             });
         });
