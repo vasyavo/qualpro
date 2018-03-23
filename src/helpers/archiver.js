@@ -58,6 +58,10 @@ function Archiver() {
         var query = option.query || {};
 
         query[option.keyForCondition] = {$in: option.idsToArchive};
+        query[option.keyForCondition] = {$in: option.idsToArchive};
+        if (option.filter) {
+            query[option.filter.key] = {$in: [option.filter.value]}
+        }
 
         async.parallel({
             data: function (parallelCb) {
