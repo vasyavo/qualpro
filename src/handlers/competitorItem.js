@@ -960,6 +960,7 @@ var CompetitorItem = function () {
             $group: {
                 _id: '$brand._id',
                 total: {$first: '$total'},
+                brandId: {$first: '$brand._id'},
                 brandName: {$first: '$brand.name'},
                 topArchived: {$first: '$brand.topArchived'},
                 archived: {$first: '$brand.archived'},
