@@ -134,9 +134,11 @@ module.exports = paginator.extend({
         checkboxes.each(function (i) {
             var id = $(checkboxes[i]).val();
             var archiveContentType = $(checkboxes[i]).attr('data-contenttype');
+            var archiveBrandId = $(checkboxes[i]).attr('data-brandId');
             var data = {
-                id         : id,
-                contentType: archiveContentType
+                id: id,
+                contentType: archiveContentType,
+                archiveBrandId,
             };
 
             if (data.contentType) {
@@ -148,9 +150,12 @@ module.exports = paginator.extend({
 
         archiveData.forEach(function (item, key) {
             if (!newArchiveData[item.contentType]) {
-                newArchiveData[item.contentType] = [];
+                newArchiveData[item.contentType] = {
+                    ids: [],
+                    brandId: item.archiveBrandId,
+                };
             }
-            newArchiveData[item.contentType].push(item.id);
+            newArchiveData[item.contentType].ids.push(item.id);
         });
 
         function getParallelFunction(url, data) {
@@ -164,12 +169,16 @@ module.exports = paginator.extend({
             };
         }
 
+
         for (var prop in newArchiveData) {
             sendUrl = '/' + prop + '/remove';
+
             sendData = {
-                ids    : newArchiveData[prop],
+                ids: newArchiveData[prop].ids,
                 archive: value
             };
+
+            sendData.brandId = newArchiveData[prop].brandId;
 
             data[prop] = getParallelFunction(sendUrl, sendData);
         }

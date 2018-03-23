@@ -20,7 +20,7 @@
     <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && category.topArchived) { %>
     <td class="checkboxArea alignCenter">
-        <input type="checkbox" id="<%=category._id%>" value="<%=category._id%>" class="customCheckbox" data-contentType="category"/>
+        <input type="checkbox" id="<%=category._id%>" value="<%=category._id%>" data-brandId="<%=group._id%>" class="customCheckbox" data-contentType="category"/>
         <label for="<%=category._id%>" class="checkboxLabel"></label>
     </td>
     <% } else if (archived) { %>
@@ -36,7 +36,7 @@
     <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && variant.topArchived) { %>
     <td class="checkboxArea alignCenter">
-        <input type="checkbox" id="<%=variant._id%>" value="<%=variant._id%>" class="customCheckbox" data-contentType="competitorVariant"/>
+        <input type="checkbox" id="<%=variant._id%>" value="<%=variant._id%>" class="customCheckbox" data-contentType="competitorVariant" data-brandId="<%=group._id%>"/>
         <label for="<%=variant._id%>" class="checkboxLabel"></label>
     </td>
     <% } else if (archived) { %>
@@ -52,7 +52,7 @@
     <% if (App.currentUser.workAccess && ((level <=2) || (level >= 8))) { %>
     <% if (archived && item.topArchived) { %>
         <td class="checkboxArea alignCenter">
-            <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox" data-contentType="competitorItem"/>
+            <input type="checkbox" id="<%=item._id%>" value="<%=item._id%>" class="customCheckbox" data-contentType="competitorItem" data-brandId="<%=group._id%>"/>
             <label for="<%=item._id%>" class="checkboxLabel"></label>
         </td>
     <% } else if (archived) { %>
