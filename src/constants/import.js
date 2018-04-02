@@ -220,14 +220,16 @@ module.exports = {
                 'id',
                 'enName',
                 'arName',
-                'category'
+                'category',
+                'brand',
             ],
 
             headerRow: {
                 id      : 'ID',
                 enName  : 'Name (EN)',
                 arName  : 'Name (AR)',
-                category: 'Category'
+                category: 'Category',
+                brand: 'Brand'
             }
         },
 

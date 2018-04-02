@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const trimObjectValues = require('../../utils/trimObjectValues');
 const CategoryModel = require('../../../../../types/category/model');
+const BrandModel = require('../../../../../types/brand/model');
 const CompetitorVariantModel = require('../../../../../types/competitorVariant/model');
 const logger = require('../../../../../utils/logger');
 
@@ -29,6 +30,30 @@ function* getCategoryId(name) {
 
     return data;
 }
+function* getBrandId(name) {
+    const search = {
+        archived : false,
+        'name.en': {
+            $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
+            $options: 'i'
+        }
+    };
+
+    let data;
+    try {
+        data = yield BrandModel.findOne(search, {_id: 1})
+            .lean()
+            .then(data => data && data._id);
+    } catch (ex) {
+        throw ex;
+    }
+
+    if (!data) {
+        throw new Error(`Can not found brand: ${name}`);
+    }
+
+    return data;
+}
 
 function* createOrUpdate(payload) {
     const options = trimObjectValues(payload, {includeValidation: true});
@@ -36,6 +61,7 @@ function* createOrUpdate(payload) {
         enName,
         arName,
         category,
+        brand,
     } = options;
 
     if (!enName) {
@@ -48,6 +74,12 @@ function* createOrUpdate(payload) {
     } catch (ex) {
         throw ex;
     }
+    let brandId;
+    try {
+        brandId = yield* getBrandId(category);
+    } catch (ex) {
+        throw ex;
+    }
 
     const query = {
         'name.en': enName
@@ -56,6 +88,7 @@ function* createOrUpdate(payload) {
     const modify = {
         $set: {
             category: categoryId,
+            brand: brandId,
             name    : {
                 en: enName,
                 ar: arName,
