@@ -530,44 +530,44 @@ allowedParams[CONTENT_TYPES.COMMENT] = {
 
 allowedParams[CONTENT_TYPES.COMPETITORVARIANT] = {
     0: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand',],
+        update: ['name', 'category', 'archived', 'brand',]
     },
     1: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     2: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     3: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     4: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     5: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     6: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     7: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     8: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     },
     9: {
-        create: ['name', 'category', 'archived'],
-        update: ['name', 'category', 'archived']
+        create: ['name', 'category', 'archived', 'brand'],
+        update: ['name', 'category', 'archived', 'brand']
     }
 };
 

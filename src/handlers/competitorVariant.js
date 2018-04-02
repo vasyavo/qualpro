@@ -22,6 +22,7 @@ var Variant = function () {
         _id      : 1,
         name     : 1,
         category : 1,
+        brand    : 1,
         archived : 1,
         createdBy: 1,
         editedBy : 1

@@ -1,4 +1,4 @@
-const Schema = require('mongoose').Schema
+const Schema = require('mongoose').Schema;
 const CONTENT_TYPES = require('./../../public/js/constants/contentType');
 
 const ObjectId = Schema.Types.ObjectId;
@@ -17,6 +17,11 @@ const schema = new Schema({
     category: {
         type: ObjectId,
         ref: CONTENT_TYPES.CATEGORY,
+        required: true,
+    },
+    brand: {
+        type: ObjectId,
+        ref: CONTENT_TYPES.BRAND,
         required: true,
     },
     archived: {
