@@ -337,6 +337,10 @@ module.exports = BaseView.extend({
             dataObject.brand = this.brandId;
         }
 
+        if (this.brandId && content === 'competitorVariant') {
+            dataObject.brand = this.brandId;
+        }
+
         if (rowId === 'false') {
             delete dataObject._id;
         }
@@ -784,7 +788,12 @@ module.exports = BaseView.extend({
 
     getAndDisplayCategories: function () {
         var self = this;
-        var categoryCollection = new this.collections.category({archived: false});
+
+        var options = {archived: false};
+        if (self.brandId){
+            options.brand = self.brandId;
+        }
+        var categoryCollection = new this.collections.category(options);
         var currentLanguage = App.currentUser.currentLanguage;
 
         categoryCollection.on('showMore', function (categories) {
