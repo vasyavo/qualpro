@@ -790,9 +790,7 @@ module.exports = BaseView.extend({
         var self = this;
 
         var options = {archived: false};
-        if (self.brandId){
-            options.brand = self.brandId;
-        }
+
         var categoryCollection = new this.collections.category(options);
         var currentLanguage = App.currentUser.currentLanguage;
 
