@@ -569,7 +569,7 @@ module.exports = BaseView.extend({
             _.extend(searchObject, defaultFilter);
         }
 
-        if (this.brandId && content === 'competitorVariant') {
+        if (this.brandId && (content === 'competitorVariant' || content === 'category')) {
             searchObject.brand = this.brandId;
         }
 
