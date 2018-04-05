@@ -76,13 +76,14 @@ function* createOrUpdate(payload) {
     }
     let brandId;
     try {
-        brandId = yield* getBrandId(category);
+        brandId = yield* getBrandId(brand);
     } catch (ex) {
         throw ex;
     }
 
     const query = {
-        'name.en': enName
+        'name.en': enName,
+        brand: brandId,
     };
 
     const modify = {
