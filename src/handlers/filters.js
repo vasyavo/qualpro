@@ -10412,6 +10412,7 @@ const Filters = function () {
             firstName: 1,
             lastName: 1,
             personnel: 1,
+            displaySeason: 1,
         });
         aggregationHelper = new AggregationHelper($defProjectionExtended, filter);
 
@@ -10473,6 +10474,14 @@ const Filters = function () {
                         ar: { $concat: ['$createdBy.user.firstName.ar', ' ', '$createdBy.user.lastName.ar'] },
                     },
                 },
+
+                displaySeason: {
+                    _id : '$displaySeason',
+                    name: {
+                        ar: '$displaySeason',
+                        en: '$displaySeason'
+                    }
+                }
             }),
         });
 
@@ -10613,6 +10622,7 @@ const Filters = function () {
                 _id: null,
                 category: { $addToSet: '$category' },
                 brand: { $addToSet: '$brand' },
+                displaySeason: { $addToSet: '$displaySeason' },
                 country: { $addToSet: '$country' },
                 region: { $addToSet: '$region' },
                 subRegion: { $addToSet: '$subRegion' },
@@ -10644,6 +10654,7 @@ const Filters = function () {
                 region: result.region || [],
                 subRegion: result.subRegion || [],
                 retailSegment: result.retailSegment || [],
+                displaySeason: result.displaySeason || [],
                 outlet: result.outlet || [],
                 branch: result.branch || [],
                 position: result.position || [],
