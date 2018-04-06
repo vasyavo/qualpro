@@ -1025,7 +1025,9 @@ function getConstants(CONSTANTS) {
     });
     brandingAndMonthlyDisplayFilter[CONSTANTS.DISPLAY_SEASON] = getFilterConstant({
         displayName: {en: 'Display Season', ar:'موسم المواد الدعائية والعرض'},
-        filterType : 'multiSelect'
+        filterType : 'singleSelect',
+        type       : 'string',
+        singleSelect: true
     });
     brandingAndMonthlyDisplayFilter.time = getFilterConstant({
         displayName: {en: 'Time', ar: 'الوقت'},

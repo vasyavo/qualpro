@@ -13083,14 +13083,6 @@ const Filters = function () {
             });
         }
 
-        if (queryFilter.displaySeason && queryFilter.displaySeason.values) {
-            $matchPersonnel.$and.push({
-                'displaySeason': {
-                    $in: queryFilter.displaySeason.values,
-                },
-            });
-        }
-
         if (filter.setPersonnel) {
             $matchPersonnel.$and.push({
                 'createdBy._id': {
@@ -13202,6 +13194,14 @@ const Filters = function () {
             $matchGeneral.$and.push({
                 categories: {
                     $in: filter.setCategory,
+                },
+            });
+        }
+
+        if (queryFilter.displaySeason && queryFilter.displaySeason.values) {
+            $matchGeneral.$and.push({
+                'displaySeason': {
+                    $in: queryFilter.displaySeason.values,
                 },
             });
         }
@@ -13726,7 +13726,13 @@ const Filters = function () {
             },
             {
                 $project: {
-                    displaySeason: 1,
+                    displaySeason: {
+                        _id: '$displaySeason',
+                        name: {
+                            en: '$displaySeason',
+                            ar: '$displaySeason'
+                        }
+                    },
                     category: {
                         _id: 1,
                         name: 1,

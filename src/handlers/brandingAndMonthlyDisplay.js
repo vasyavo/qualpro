@@ -523,6 +523,7 @@ const getAll = (req, res, next) => {
             'createdBy',
             'category',
             'displayType',
+            'displaySeason',
             'displaySize',
             'retailSegment',
         ];
