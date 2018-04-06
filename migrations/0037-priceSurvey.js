@@ -26,7 +26,10 @@ exports.up = function(db, next) {
             async.eachLimit(priceSurveys, 10, (priceSurvey, eachCb) => {
                 const priceSurveyItems = priceSurvey.items.map((item) => {
                     return Object.assign({}, item, {
-                        metric: 'Without metric'
+                        metric: {
+                            en: 'Without metric',
+                            ar: 'نوع وحده القياس'
+                        }
                     });
                 });
                 return db.collection('priceSurveys')
