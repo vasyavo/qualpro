@@ -395,6 +395,13 @@ var CompetitorBranding = function() {
 
                 delete queryObject.position;
             }
+            if (queryObject.promoType && queryObject.promoType.$in) {
+                positionFilter = {
+                    'promoType.en' : queryObject.promoType
+                };
+
+                delete queryObject.promoType;
+            }
 
             aggregateHelper = new AggregationHelper($defProjection, queryObject);
 

@@ -10689,9 +10689,14 @@ const Filters = function () {
             filter: queryFilter,
             personnel: req.personnelModel,
         });
-        const beforeFilter = _.pick(filter, 'category', 'brand', 'promoType', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or');
+        const beforeFilter = _.pick(filter, 'category', 'brand', 'country', 'region', 'subRegion', 'retailSegment', 'outlet', 'branch', '$and', '$or');
         const employeeFilter = filter.personnel ? { 'createdBy.user': _.pick(filter, 'personnel').personnel } : {};
         const afterFilter = _.pick(filter, 'position');
+
+        if(filter.promoType){
+            afterFilter['promoType.en'] = filter.promoType;
+        }
+
         let aggregation;
         let pipeLine = [];
         pipeLine.push({
@@ -10828,6 +10833,7 @@ const Filters = function () {
                 category: 1,
                 brand: 1,
                 promoType: 1,
+                promoTypeExist: {$ifNull: ['$promoType', null]},
                 country: 1,
                 region: 1,
                 subRegion: 1,
@@ -10840,7 +10846,12 @@ const Filters = function () {
         });
         pipeLine.push({
             $project: {
-                promoType: 1,
+                promoType: {$cond: [
+                        {$ne: ['$promoTypeExist', null]},
+                    {
+                    _id: '$promoType.en',
+                    name: '$promoType'
+                }, null]},
                 category: {
                     _id: 1,
                     name: 1,
