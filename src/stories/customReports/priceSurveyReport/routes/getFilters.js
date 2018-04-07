@@ -387,8 +387,11 @@ module.exports = (req, res, next) => {
 
         response.metrics = response.metrics.map((item) => {
             return {
-                _id: item.en,
-                name: item,
+                _id: item,
+                name: {
+                    en: item,
+                    ar: item,
+                },
             };
         });
 

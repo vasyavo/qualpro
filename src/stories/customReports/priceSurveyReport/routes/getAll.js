@@ -175,7 +175,7 @@ module.exports = (req, res, next) => {
         if (queryFilter.metric && queryFilter.metric.length) {
             pipeline.push({
                 $match: {
-                    'items.metric.en': {
+                    'items.metric': {
                         $in: queryFilter.metric,
                     },
                 },
