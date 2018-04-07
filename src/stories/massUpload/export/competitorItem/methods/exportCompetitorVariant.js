@@ -15,7 +15,7 @@ function*  getCompetitorVariantForExport() {
         }
     },  {
         $lookup: {
-            from        : 'brand',
+            from        : 'brands',
             foreignField: '_id',
             localField  : 'brand',
             as          : 'brand'
@@ -23,6 +23,11 @@ function*  getCompetitorVariantForExport() {
     }, {
         $unwind: {
             path                      : '$brand',
+            preserveNullAndEmptyArrays: true
+        }
+    }, {
+        $unwind: {
+            path                      : '$category',
             preserveNullAndEmptyArrays: true
         }
     }, {

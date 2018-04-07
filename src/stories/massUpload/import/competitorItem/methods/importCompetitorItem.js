@@ -58,13 +58,14 @@ function* getBrandId(name) {
     return data;
 }
 
-function* getVariantId(name) {
+function* getVariantByBrandAndNameId(name, brandId) {
     const search = {
         archived : false,
         'name.en': {
             $regex  : `^${_.trim(_.escapeRegExp(name))}$`,
             $options: 'i'
-        }
+        },
+        brand: brandId
     };
 
     let data;
@@ -147,7 +148,7 @@ function* createOrUpdate(payload) {
 
     let variantId;
     try {
-        variantId = yield* getVariantId(variant);
+        variantId = yield* getVariantByBrandAndNameId(variant, brandId);
     } catch (ex) {
         throw ex;
     }
